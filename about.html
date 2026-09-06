@@ -1,0 +1,426 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Gauransh Bansal — Philosophy, Explorations & Experience</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+            cinzel: ['Cinzel', 'serif'],
+            mono: ['Space Mono', 'monospace']
+          },
+          colors: {
+            brand: {
+              black: '#030305',
+              dark: '#080c16',
+              gray: '#141a29',
+              light: '#e5e5e5'
+            },
+            accent: {
+              cyan: '#00f0ff',
+              violet: '#a855f7',
+              gold: '#ffc837',
+              emerald: '#00ff88',
+              rose: '#f43f5e',
+              amber: '#f59e0b'
+            }
+          },
+          boxShadow: {
+            'glass-edge': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 8px 32px -8px rgba(0, 0, 0, 0.6)',
+            'glass-edge-subtle': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.06)',
+            'button-physical': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.8), 0 8px 16px -4px rgba(255, 255, 255, 0.1), 0 4px 8px -4px rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up { animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #030305; }
+    ::-webkit-scrollbar-thumb { background: #262626; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #404040; }
+    ::selection { background: rgba(0, 240, 255, 0.25); color: white; }
+
+    .bg-grain {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999;
+    }
+
+    .hero-title {
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .glass-panel {
+      background: rgba(8, 14, 28, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 240, 255, 0.03);
+    }
+
+    .glass-panel:hover {
+      border-color: rgba(0, 240, 255, 0.25);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6), inset 0 0 25px rgba(0, 240, 255, 0.06);
+    }
+
+    .quote-box {
+      border-left: 2px solid #00f0ff;
+      background: linear-gradient(90deg, rgba(0, 240, 255, 0.05) 0%, transparent 100%);
+    }
+  </style>
+  <!-- Gauransh Bansal Security & IP Protection Layer -->
+  <style>
+    /* Protection & Anti-Scraping */
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    img, canvas {
+      -webkit-user-drag: none;
+      user-drag: none;
+      pointer-events: auto;
+    }
+  </style>
+  <script>
+    (function() {
+      'use strict';
+      // 1. Anti-Framing / Framebusting
+      try {
+        if (window.top !== window.self) {
+          window.top.location = window.self.location;
+        }
+      } catch(e) {
+        document.documentElement.innerHTML = '<div style="display:flex;height:100vh;align-items:center;justify-content:center;background:#030305;color:#fff;font-family:sans-serif;text-align:center;padding:20px;"><h2>Direct access only. Embedding is prohibited.<br><br>Copyright &copy; 2026 Gauransh Bansal. All rights reserved.</h2></div>';
+      }
+
+      // 2. Domain Lock & Local Environment Safety
+      const isLocal = window.location.protocol === 'file:' || 
+                      ['localhost', '127.0.0.1', '0.0.0.0', ''].includes(window.location.hostname) ||
+                      window.location.hostname.endsWith('.local');
+      
+      const ALLOWED_DOMAINS = [
+        'gauranshbansal.com',
+        'www.gauranshbansal.com',
+        'gauranshbansal.github.io'
+      ];
+
+      if (!isLocal && !ALLOWED_DOMAINS.some(d => window.location.hostname === d || window.location.hostname.endsWith('.' + d))) {
+        console.warn('Unauthorized domain detected.');
+      }
+
+      // 3. Disable Context Menu & Key Combos (DevTools, View Source, Save)
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+      }, false);
+
+      document.addEventListener('keydown', function(e) {
+        if (e.keyCode === 123) { // F12
+          e.preventDefault();
+          return false;
+        }
+        if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
+          e.preventDefault();
+          return false;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+          e.preventDefault();
+          return false;
+        }
+      }, false);
+
+      // 4. Console Security Notice
+      const noticeStyle = 'font-size: 13px; font-weight: bold; color: #00f0ff; background: #080c16; padding: 6px 10px; border-radius: 4px;';
+      const subStyle = 'font-size: 11px; color: #94a3b8; line-height: 1.5;';
+      console.log('%câš  PROPRIETARY INTELLECTUAL PROPERTY', noticeStyle);
+      console.log('%cAll source code, simulations, design assets, and architecture are strictly owned by Gauransh Bansal.\nUnauthorized copying, distribution, decompilation, or hosting is prohibited.\nCopyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
+    })();
+  </script>
+  <!-- End Security Layer -->
+</head>
+<body class="bg-brand-black text-white font-sans antialiased selection:bg-cyan-500/30">
+
+  <!-- Grain & Volumetric Light Blobs -->
+  <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[55vw] h-[55vw] rounded-full mix-blend-screen opacity-50" style="background: radial-gradient(circle, rgba(30, 58, 138, 0.35) 0%, transparent 70%);"></div>
+    <div class="absolute bottom-[-15%] right-[-10%] w-[60vw] h-[60vw] rounded-full mix-blend-screen opacity-40" style="background: radial-gradient(circle, rgba(88, 28, 135, 0.3) 0%, transparent 70%);"></div>
+    <div class="absolute top-[45%] right-[20%] w-[45vw] h-[45vw] rounded-full mix-blend-screen opacity-30" style="background: radial-gradient(circle, rgba(14, 116, 144, 0.25) 0%, transparent 70%);"></div>
+    <div class="bg-grain"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 h-16 flex items-center px-6 bg-brand-black/70 backdrop-blur-2xl border-b border-white/5 shadow-glass-edge-subtle">
+    <div class="max-w-6xl w-full mx-auto flex items-center justify-between">
+      <a href="./index.html" class="flex items-center gap-3 group">
+        <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center transition-transform group-hover:scale-105">
+          <span class="text-black font-semibold text-xs font-mono">GB</span>
+        </div>
+        <span class="font-medium text-sm tracking-tight hidden md:block text-neutral-200 group-hover:text-white transition-colors">Gauransh Bansal</span>
+      </a>
+
+      <div class="flex items-center gap-6 sm:gap-8">
+        <a href="./index.html" class="text-xs font-medium tracking-wider uppercase text-neutral-400 hover:text-white transition-colors">← Back to Portfolio</a>
+        <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400/50 hover:bg-cyan-500/10 text-xs font-medium text-neutral-300 hover:text-cyan-300 transition-all">
+          <iconify-icon icon="lucide:linkedin" width="13"></iconify-icon>
+          <span>LinkedIn</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Layout -->
+  <main class="relative z-10 max-w-4xl mx-auto px-6 pt-32 pb-24">
+
+    <!-- Header / Manifesto Title -->
+    <header class="mb-16 opacity-0 animate-fade-in-up">
+      <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.03] border border-white/10 mb-6">
+        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+        <span class="text-[10px] font-mono tracking-[0.25em] uppercase text-cyan-300">Gauransh Bansal</span>
+      </div>
+      
+      <h1 class="font-serif hero-title text-4xl sm:text-6xl font-medium tracking-tight leading-[1.15] mb-6">
+        "I love figuring out how things are built to make us <em>feel</em> something."
+      </h1>
+
+      <p class="font-serif italic text-neutral-300 text-xl sm:text-2xl font-light leading-relaxed">
+        I don't box myself into neat titles. I write, design, immerse myself in virtual worlds and cinema, practice yoga, read voraciously, and explore first principles. Life is not about choosing a narrow lane—it is all about <span class="text-white font-normal underline decoration-cyan-400/60 underline-offset-8">Experience</span>.
+      </p>
+    </header>
+
+    <!-- Section 1: The Origin Story — The Father, The Screen & Virtual Worlds -->
+    <section class="glass-panel rounded-3xl p-8 sm:p-12 mb-12 opacity-0 animate-fade-in-up" style="animation-delay: 150ms;">
+      <h2 class="font-mono text-xs font-bold tracking-[0.25em] uppercase text-rose-400 mb-5 flex items-center gap-3">
+        <iconify-icon icon="lucide:sparkles" width="16"></iconify-icon>
+        The Origin: The Father, The Screen & The Genesis of Wonder
+      </h2>
+      <div class="space-y-5 text-neutral-300 font-light text-base sm:text-lg leading-relaxed">
+        <p>
+          Before I ever penned a manuscript or designed a brand, my world was shaped by a father who lived years ahead of his time. In an era when personal computers were a rare novelty in most households, my father set up a PC specifically for us.
+        </p>
+        <p>
+          He was an avid gamer and cinema enthusiast. Our home was filled with stacks of CDs, DVDs, and a Game Boy he brought into my hands. Together, we explored countless worlds—racing down neon streets in <em>Road Rash</em>, feeling the gritty cinematic slow-motion noir of <em>Max Payne</em>, and venturing through Kanto in <em>Pokémon FireRed</em>.
+        </p>
+        <p>
+          We watched thousands of movies together across every genre and era, paired with every legendary animated show on television—from the inventive wonders of <em>Doraemon</em> and the unfiltered humor of <em>Shinchan</em> to the expansive alien lore of <em>Ben 10</em>. That childhood was not passive entertainment; it was the bedrock of a boundless imagination, visual literacy, and an innate sense of narrative pacing.
+        </p>
+        <p>
+          That fire has only grown stronger. I am a gamer through and through—from retro pixel-art gems to conquering the uncompromising mechanical precision, environmental storytelling, and lore of masterworks like <em>Sekiro: Shadows Die Twice</em> and <em>Elden Ring</em>. Gaming taught me how atmosphere, challenge, sound design, and player agency converge to create genuine emotion.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 2: Stillness, Yoga & Voracious Reading -->
+    <section class="glass-panel rounded-3xl p-8 sm:p-12 mb-12 opacity-0 animate-fade-in-up" style="animation-delay: 200ms;">
+      <h2 class="font-mono text-xs font-bold tracking-[0.25em] uppercase text-yellow-400 mb-5 flex items-center gap-3">
+        <iconify-icon icon="lucide:sun" width="16"></iconify-icon>
+        Inner Stillness, Yoga & Voracious Reading
+      </h2>
+      <div class="space-y-5 text-neutral-300 font-light text-base sm:text-lg leading-relaxed">
+        <p>
+          While the external world is filled with noise and output, my anchor lies in the profound stillness of inner exploration. Guided by the practices of the <strong>Isha Foundation</strong>, classical yoga is the discipline through which I align body, mind, and energy.
+        </p>
+        <p>
+          To create art, write stories, or analyze complex systems without understanding the very instrument of perception is incomplete. Yoga provides the clarity to experience life without cognitive distortion, to sit in absolute stillness, and to experience consciousness as an immediate, vibrant reality.
+        </p>
+        <p>
+          Hand in hand with this is an insatiable appetite for books—diving voraciously across philosophy, human psychology, advertising, literature, neuroscience, and science. Reading is the ultimate form of mental teleportation: distilling a lifetime of someone else’s refined consciousness into hours of intense contemplation.
+        </p>
+        <div class="quote-box p-5 rounded-r-2xl my-6">
+          <p class="font-serif italic text-white text-lg">
+            "Understanding is not recognizing things. It is recognizing what survives when the things are gone — finding form that survives its embodiment."
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: The Canvas — What I Involve Myself In -->
+    <section class="mb-16 opacity-0 animate-fade-in-up" style="animation-delay: 250ms;">
+      <div class="mb-8">
+        <p class="text-xs font-mono font-bold tracking-[0.25em] uppercase text-purple-400 mb-2">Fascinations & Pursuits</p>
+        <h2 class="font-serif text-3xl sm:text-4xl font-medium tracking-tight">The Plethora of Stuff I Involve Myself In</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Card 1: Writing, Novels & Worldbuilding -->
+        <div class="glass-panel rounded-2xl p-7 transition-all flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-400/20 flex items-center justify-center text-purple-400 mb-5">
+              <iconify-icon icon="lucide:book-open" width="20"></iconify-icon>
+            </div>
+            <h3 class="font-serif text-xl font-medium text-white mb-2">Writing, Novels & Worldbuilding</h3>
+            <p class="text-sm text-neutral-400 font-light leading-relaxed mb-4">
+              Crafting immersive speculative fiction and dark atmospheric narratives like <em class="text-neutral-200">Reapers in Masak</em>. Building universes shaped by ancient barriers (<em class="text-neutral-300">The Sphere</em>), looming existential stakes, tactile prose, and the psychological vulnerability of memory.
+            </p>
+          </div>
+          <div class="pt-4 border-t border-white/5 flex items-center gap-2 text-[11px] font-mono text-purple-300/80">
+            <span>Manuscripts</span> &bull; <span>Dark Fantasy</span> &bull; <span>Worldbuilding</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Kathakaar & Visual Stories -->
+        <div class="glass-panel rounded-2xl p-7 transition-all flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400 mb-5">
+              <iconify-icon icon="lucide:feather" width="20"></iconify-icon>
+            </div>
+            <h3 class="font-serif text-xl font-medium text-white mb-2">Kathakaar & Narrative Art</h3>
+            <p class="text-sm text-neutral-400 font-light leading-relaxed mb-4">
+              Marrying literary prose with illustrated visual narrative under <em class="text-neutral-200">Kathakaar</em>. Creating conceptual stories like <em class="text-neutral-200">PhD Letters</em> and <em class="text-neutral-200">The Chocolate Jar</em>—where typography, pacing, and emotional cadence merge into tangible art.
+            </p>
+          </div>
+          <div class="pt-4 border-t border-white/5 flex items-center gap-2 text-[11px] font-mono text-cyan-300/80">
+            <span>Kathakaar</span> &bull; <span>Illustrated Stories</span> &bull; <span>Narrative Art</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Brand Architecture & Experience Design -->
+        <div class="glass-panel rounded-2xl p-7 transition-all flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-400/20 flex items-center justify-center text-rose-400 mb-5">
+              <iconify-icon icon="lucide:layers" width="20"></iconify-icon>
+            </div>
+            <h3 class="font-serif text-xl font-medium text-white mb-2">Brand Identity & Spatial Experience</h3>
+            <p class="text-sm text-neutral-400 font-light leading-relaxed mb-4">
+              Architecting full brand ecosystems from scratch—such as <em class="text-neutral-200">SCOOPERS</em>. Directing everything from packaging, visual tone, and advertising language to physical kiosk spatial UX, Zomato ordering touchpoints, and brand presence.
+            </p>
+          </div>
+          <div class="pt-4 border-t border-white/5 flex items-center gap-2 text-[11px] font-mono text-rose-300/80">
+            <span>Brand Strategy</span> &bull; <span>Physical Kiosks</span> &bull; <span>Packaging & UI</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Design Diaries & Graphic Art -->
+        <div class="glass-panel rounded-2xl p-7 transition-all flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/20 flex items-center justify-center text-amber-400 mb-5">
+              <iconify-icon icon="lucide:image" width="20"></iconify-icon>
+            </div>
+            <h3 class="font-serif text-xl font-medium text-white mb-2">Design Diaries & Graphic Art</h3>
+            <p class="text-sm text-neutral-400 font-light leading-relaxed mb-4">
+              Uncompromising visual exploration in Photoshop, Figma, and typography. Daily design diaries exploring surreal compositions, brutalist poster design, comic-inspired aesthetics, and bold conceptual artwork that pushes creative boundaries.
+            </p>
+          </div>
+          <div class="pt-4 border-t border-white/5 flex items-center gap-2 text-[11px] font-mono text-amber-300/80">
+            <span>Poster Design</span> &bull; <span>Brutalism & Surrealism</span> &bull; <span>Typography</span>
+          </div>
+        </div>
+
+        <!-- Card 5: Virtual Worlds, Gaming & Cinema -->
+        <div class="glass-panel rounded-2xl p-7 transition-all flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/20 flex items-center justify-center text-emerald-400 mb-5">
+              <iconify-icon icon="lucide:gamepad-2" width="20"></iconify-icon>
+            </div>
+            <h3 class="font-serif text-xl font-medium text-white mb-2">Virtual Worlds, Gaming & Cinema</h3>
+            <p class="text-sm text-neutral-400 font-light leading-relaxed mb-4">
+              A lifetime of immersion across thousands of cinematic films, iconic animation, and gaming eras from <em>Road Rash</em> to <em>Sekiro</em>. Developing an innate instinct for spatial tension, emotional pacing, lighting, and environmental world design.
+            </p>
+          </div>
+          <div class="pt-4 border-t border-white/5 flex items-center gap-2 text-[11px] font-mono text-emerald-300/80">
+            <span>Game Mechanics</span> &bull; <span>Cinematic Pacing</span> &bull; <span>World Design</span>
+          </div>
+        </div>
+
+        <!-- Card 6: First-Principles Rigor & Physics -->
+        <div class="glass-panel rounded-2xl p-7 transition-all flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-400/20 flex items-center justify-center text-blue-400 mb-5">
+              <iconify-icon icon="lucide:compass" width="20"></iconify-icon>
+            </div>
+            <h3 class="font-serif text-xl font-medium text-white mb-2">Physics & First-Principles Rigor</h3>
+            <p class="text-sm text-neutral-400 font-light leading-relaxed mb-4">
+              Academic foundation at the <strong class="text-neutral-200">Department of Physics and Astrophysics, University of Delhi</strong> & <strong class="text-neutral-200">Deen Dayal Upadhyaya College</strong>. Questioning every premise, finding the daily parallel, avoiding shortcuts, and treating first principles as the bedrock of thought.
+            </p>
+          </div>
+          <div class="pt-4 border-t border-white/5 flex items-center gap-2 text-[11px] font-mono text-blue-300/80">
+            <span>Univ. of Delhi</span> &bull; <span>First Principles</span> &bull; <span>Astrophysics</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 4: The Synthesis — Why It's All Experience -->
+    <section class="glass-panel rounded-3xl p-8 sm:p-12 mb-16 opacity-0 animate-fade-in-up" style="animation-delay: 350ms;">
+      <h2 class="font-mono text-xs font-bold tracking-[0.25em] uppercase text-cyan-400 mb-5 flex items-center gap-3">
+        <iconify-icon icon="lucide:heart-handshake" width="16"></iconify-icon>
+        The Synthesis
+      </h2>
+      <div class="space-y-5 text-neutral-300 font-light text-base sm:text-lg leading-relaxed">
+        <p>
+          Why move across storytelling, branding, cinema, gaming, yoga, design, and physics?
+        </p>
+        <p>
+          Because <strong>gaming and cinema</strong> show how virtual spaces evoke real emotion. <strong>Yoga and inner stillness</strong> teach how to perceive the world with clarity. <strong>Writing</strong> gives the language to explore human vulnerability. <strong>Design</strong> gives abstract ideas a tangible identity. And <strong>physics</strong> provides first-principles rigor.
+        </p>
+        <p class="text-white font-medium text-lg">
+          When all these streams converge, life ceases to be a checklist of tasks—it becomes an art of pure experience.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 5: Connect & Links -->
+    <section class="text-center py-10 opacity-0 animate-fade-in-up" style="animation-delay: 450ms;">
+      <h3 class="font-serif text-2xl sm:text-3xl font-medium mb-3">Let's Connect & Create</h3>
+      <p class="text-sm text-neutral-400 font-light max-w-md mx-auto mb-8">
+        Always open to discussing storytelling, novel crafting, brand identity design, gaming lore, cinema, yogic exploration, or creative ventures.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer" class="px-7 py-3.5 rounded-full bg-white text-black font-semibold text-xs tracking-wider uppercase shadow-button-physical hover:scale-105 transition-all inline-flex items-center gap-2">
+          <iconify-icon icon="lucide:linkedin" width="16"></iconify-icon>
+          LinkedIn Profile
+        </a>
+        <a href="https://github.com/gauranshbansal" target="_blank" rel="noopener noreferrer" class="px-7 py-3.5 rounded-full bg-white/5 border border-white/10 hover:border-white/20 text-white font-semibold text-xs tracking-wider uppercase hover:bg-white/10 transition-all inline-flex items-center gap-2">
+          <iconify-icon icon="lucide:github" width="16"></iconify-icon>
+          GitHub
+        </a>
+        <a href="mailto:gauranshbansal2205@gmail.com" class="px-7 py-3.5 rounded-full bg-white/5 border border-white/10 hover:border-white/20 text-white font-semibold text-xs tracking-wider uppercase hover:bg-white/10 transition-all inline-flex items-center gap-2">
+          <iconify-icon icon="lucide:mail" width="16"></iconify-icon>
+          Email Me
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="px-6 py-12 border-t border-white/5 relative z-10 bg-brand-black/90">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center font-mono text-xs text-white">
+          GB
+        </div>
+        <span class="text-xs text-neutral-400">Gauransh Bansal &copy; 2026. All rights reserved.</span>
+      </div>
+      <a href="./index.html" class="text-xs font-mono text-cyan-400 hover:text-cyan-300 transition">← Back to Portfolio</a>
+    </div>
+  </footer>
+
+</body>
+</html>

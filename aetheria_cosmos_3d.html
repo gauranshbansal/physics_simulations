@@ -1,0 +1,1246 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHERIA 3D — The Infinite Cosmos | Gauransh Bansal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Outfit:wght@200;300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --bg-deep: #010309;
+            --accent-cyan: #00f0ff;
+            --accent-violet: #a855f7;
+            --accent-gold: #ffc837;
+            --glass-bg: rgba(6, 12, 24, 0.68);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-glow: rgba(0, 240, 255, 0.15);
+            --text-main: #f0f6fc;
+            --text-dim: #8b9bb4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-deep);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+        }
+
+        #webgl-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: grab;
+        }
+
+        #webgl-container:active {
+            cursor: grabbing;
+        }
+
+        /* Glassmorphic Minimal UI Layer */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px;
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s ease;
+        }
+
+        .ui-layer.hidden {
+            opacity: 0;
+            transform: scale(0.99);
+            pointer-events: none !important;
+        }
+
+        .interactive {
+            pointer-events: auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .brand {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 0 20px var(--glass-glow);
+        }
+
+        .brand h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 20px;
+            letter-spacing: 4px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, var(--accent-cyan) 60%, var(--accent-violet) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .brand-author {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .brand-author a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .brand-author a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .stats-badge {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-dim);
+        }
+
+        .stat-val {
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        /* Camera & Audio Actions */
+        .top-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .glass-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            text-decoration: none;
+        }
+
+        .glass-btn:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+
+        .glass-btn.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(168, 85, 247, 0.25));
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+            color: #fff;
+        }
+
+        .glass-btn svg {
+            width: 15px;
+            height: 15px;
+            fill: currentColor;
+        }
+
+        .audio-hud {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            height: 16px;
+            padding: 0 4px;
+        }
+
+        .bar {
+            width: 2.5px;
+            background: var(--accent-cyan);
+            border-radius: 2px;
+            height: 4px;
+            transition: height 0.1s ease;
+        }
+
+        /* Bottom Center: Thought Capsule */
+        .bottom-bar {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .thought-capsule {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 480px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            transition: border-color 0.3s;
+        }
+
+        .thought-capsule:focus-within {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+        }
+
+        .thought-capsule input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .thought-capsule input::placeholder {
+            color: rgba(255,255,255,0.35);
+        }
+
+        .send-thought-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+            border: none;
+            color: #000;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .send-thought-btn:hover {
+            transform: scale(1.04);
+            filter: brightness(1.15);
+        }
+
+        /* Camera Mode Selector */
+        .camera-selector {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 6px 8px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .cam-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cam-btn:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .cam-btn.active {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Audio Intro Overlay */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(6, 12, 28, 0.94) 0%, rgba(1, 3, 9, 0.98) 100%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(16px);
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        .overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .overlay-card {
+            text-align: center;
+            max-width: 520px;
+            padding: 44px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(0, 240, 255, 0.1);
+        }
+
+        .overlay-card h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            letter-spacing: 8px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #ffffff, var(--accent-cyan), var(--accent-violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .overlay-author {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            margin-bottom: 20px;
+        }
+
+        .overlay-card p {
+            color: var(--text-dim);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+            color: #010309;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 2px;
+            padding: 16px 40px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.5);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            text-transform: uppercase;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.06);
+            box-shadow: 0 0 50px rgba(0, 240, 255, 0.8);
+        }
+
+        .hint-keys {
+            margin-top: 24px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            font-family: 'Space Mono', monospace;
+        }
+    </style>
+  <!-- Gauransh Bansal Security & IP Protection Layer -->
+  <style>
+    /* Protection & Anti-Scraping */
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    img, canvas {
+      -webkit-user-drag: none;
+      user-drag: none;
+      pointer-events: auto;
+    }
+  </style>
+  <script>
+    (function() {
+      'use strict';
+      // 1. Anti-Framing / Framebusting
+      try {
+        if (window.top !== window.self) {
+          window.top.location = window.self.location;
+        }
+      } catch(e) {
+        document.documentElement.innerHTML = '<div style="display:flex;height:100vh;align-items:center;justify-content:center;background:#030305;color:#fff;font-family:sans-serif;text-align:center;padding:20px;"><h2>Direct access only. Embedding is prohibited.<br><br>Copyright &copy; 2026 Gauransh Bansal. All rights reserved.</h2></div>';
+      }
+
+      // 2. Domain Lock & Local Environment Safety
+      const isLocal = window.location.protocol === 'file:' || 
+                      ['localhost', '127.0.0.1', '0.0.0.0', ''].includes(window.location.hostname) ||
+                      window.location.hostname.endsWith('.local');
+      
+      const ALLOWED_DOMAINS = [
+        'gauranshbansal.com',
+        'www.gauranshbansal.com',
+        'gauranshbansal.github.io'
+      ];
+
+      if (!isLocal && !ALLOWED_DOMAINS.some(d => window.location.hostname === d || window.location.hostname.endsWith('.' + d))) {
+        console.warn('Unauthorized domain detected.');
+      }
+
+      // 3. Disable Context Menu & Key Combos (DevTools, View Source, Save)
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+      }, false);
+
+      document.addEventListener('keydown', function(e) {
+        if (e.keyCode === 123) { // F12
+          e.preventDefault();
+          return false;
+        }
+        if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
+          e.preventDefault();
+          return false;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+          e.preventDefault();
+          return false;
+        }
+      }, false);
+
+      // 4. Console Security Notice
+      const noticeStyle = 'font-size: 13px; font-weight: bold; color: #00f0ff; background: #080c16; padding: 6px 10px; border-radius: 4px;';
+      const subStyle = 'font-size: 11px; color: #94a3b8; line-height: 1.5;';
+      console.log('%câš  PROPRIETARY INTELLECTUAL PROPERTY', noticeStyle);
+      console.log('%cAll source code, simulations, design assets, and architecture are strictly owned by Gauransh Bansal.\nUnauthorized copying, distribution, decompilation, or hosting is prohibited.\nCopyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
+    })();
+  </script>
+  <!-- End Security Layer -->
+</head>
+<body>
+
+    <div id="webgl-container"></div>
+
+    <!-- Overlay Intro for Audio Initiation -->
+    <div class="overlay" id="introOverlay">
+        <div class="overlay-card">
+            <h2>A E T H E R I A &nbsp;3 D</h2>
+            <div class="overlay-author">BY GAURANSH BANSAL</div>
+            <p>An immersive three-dimensional cosmos of volumetric stardust, undulating 3D leviathans, emergent flocking lightforms, and spatialized ambient soundscapes.</p>
+            <button class="start-btn" id="startExperienceBtn">Awaken 3D Cosmos</button>
+            <div class="hint-keys">
+                <span>[Click & Drag] Rotate Cosmos</span> • <span>[Scroll] Zoom</span> • <span>[H] Zen Mode</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Overlay Layer -->
+    <div class="ui-layer" id="uiLayer">
+        <!-- Header -->
+        <header class="header interactive">
+            <div class="brand">
+                <h1>A E T H E R I A &nbsp;3 D</h1>
+                <div class="brand-author">
+                    <span>BY GAURANSH BANSAL</span>
+                    <span>•</span>
+                    <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer">LINKEDIN ↗</a>
+                    <span>•</span>
+                    <a href="https://github.com/gauranshbansal" target="_blank" rel="noopener noreferrer">GITHUB ↗</a>
+                </div>
+                <div class="stats-badge">
+                    <div class="stat-item">ORGANISMS: <span class="stat-val" id="countEntities">0</span></div>
+                    <div class="stat-item">LEVIATHAN: <span class="stat-val">ASTRAIOS</span></div>
+                    <div class="stat-item">FPS: <span class="stat-val" id="fpsVal">60</span></div>
+                </div>
+            </div>
+
+            <div class="top-actions">
+                <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer" class="glass-btn">
+                    <svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+                    <span>LinkedIn</span>
+                </a>
+                <button class="glass-btn" id="btnAudioToggle">
+                    <div class="audio-hud" id="audioBars">
+                        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    </div>
+                    <span id="audioStatusText">Sound On</span>
+                </button>
+                <button class="glass-btn" id="btnSpawnBurst">
+                    <svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+                    <span>Release Light</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Bottom Controls -->
+        <footer class="bottom-bar interactive">
+            <!-- Thought / Memory Infusion Capsule -->
+            <div class="thought-capsule">
+                <input type="text" id="thoughtInput" placeholder="Infuse a thought into the 3D nebula..." maxlength="60">
+                <button class="send-thought-btn" id="btnSendThought">
+                    <span>Infuse</span>
+                    <svg style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+            </div>
+
+            <!-- Perspective / Camera Mode Selector -->
+            <div class="camera-selector">
+                <button class="cam-btn active" data-cam="orbit">Free Orbit</button>
+                <button class="cam-btn" data-cam="leviathan">Leviathan POV</button>
+                <button class="cam-btn" data-cam="swarm">Swarm Focus</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+    /**
+     * AETHERIA 3D — Volumetric Cosmos & Generative Web Audio
+     * Copyright (c) 2026 Gauransh Bansal. All rights reserved.
+     * LinkedIn: https://www.linkedin.com/in/gauransh-bansal-a71223239/
+     */
+
+    class SoundscapeEngine3D {
+        constructor() {
+            this.ctx = null;
+            this.masterGain = null;
+            this.reverbNode = null;
+            this.filterNode = null;
+            this.isMuted = false;
+            this.scale = [130.81, 146.83, 164.81, 196.00, 220.00, 261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99];
+            this.droneOscs = [];
+            this.lastTriggerTime = 0;
+        }
+
+        init() {
+            if (this.ctx) {
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+                return;
+            }
+
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioContextClass();
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+
+                this.filterNode = this.ctx.createBiquadFilter();
+                this.filterNode.type = 'lowpass';
+                this.filterNode.frequency.setValueAtTime(2400, this.ctx.currentTime);
+                this.filterNode.Q.setValueAtTime(1.8, this.ctx.currentTime);
+
+                this.reverbNode = this.ctx.createConvolver();
+                this.reverbNode.buffer = this.generateImpulseResponse(4.0, 2.2);
+
+                this.filterNode.connect(this.masterGain);
+                this.reverbNode.connect(this.masterGain);
+                this.masterGain.connect(this.ctx.destination);
+
+                this.startDeep3DDrone();
+            } catch (err) {
+                console.warn("Audio init notice:", err);
+            }
+        }
+
+        generateImpulseResponse(duration, decay) {
+            const sampleRate = this.ctx.sampleRate;
+            const length = sampleRate * duration;
+            const impulse = this.ctx.createBuffer(2, length, sampleRate);
+            const left = impulse.getChannelData(0);
+            const right = impulse.getChannelData(1);
+
+            for (let i = 0; i < length; i++) {
+                const factor = Math.pow(1 - i / length, decay);
+                left[i] = ((Math.random() * 2) - 1) * factor;
+                right[i] = ((Math.random() * 2) - 1) * factor;
+            }
+            return impulse;
+        }
+
+        startDeep3DDrone() {
+            const baseFreqs = [55.00, 82.41, 110.00];
+            baseFreqs.forEach((freq, idx) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                const panner = this.ctx.createStereoPanner();
+
+                osc.type = idx === 0 ? 'sine' : 'triangle';
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+                const lfo = this.ctx.createOscillator();
+                const lfoGain = this.ctx.createGain();
+                lfo.frequency.setValueAtTime(0.06 + idx * 0.02, this.ctx.currentTime);
+                lfoGain.gain.setValueAtTime(1.8, this.ctx.currentTime);
+                lfo.connect(osc.frequency);
+                lfo.start();
+
+                gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+                panner.pan.setValueAtTime((idx - 1) * 0.4, this.ctx.currentTime);
+
+                osc.connect(gain);
+                gain.connect(panner);
+                panner.connect(this.filterNode);
+                panner.connect(this.reverbNode);
+                osc.start();
+                this.droneOscs.push({ osc, gain, lfo });
+            });
+        }
+
+        playChime(pitchIdx = null, volume = 0.08, panX = 0) {
+            if (!this.ctx || this.isMuted) return;
+            const now = this.ctx.currentTime;
+            if (now - this.lastTriggerTime < 0.04) return;
+            this.lastTriggerTime = now;
+
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const panner = this.ctx.createStereoPanner();
+
+            const noteFreq = pitchIdx !== null 
+                ? this.scale[pitchIdx % this.scale.length] 
+                : this.scale[Math.floor(Math.random() * this.scale.length)];
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(noteFreq, now);
+
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.exponentialRampToValueAtTime(volume, now + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.0);
+
+            panner.pan.setValueAtTime(Math.max(-1, Math.min(1, panX)), now);
+
+            osc.connect(gain);
+            gain.connect(panner);
+            panner.connect(this.filterNode);
+            panner.connect(this.reverbNode);
+
+            osc.start(now);
+            osc.stop(now + 2.2);
+        }
+
+        playLeviathanSong(panX = 0) {
+            if (!this.ctx || this.isMuted) return;
+            const now = this.ctx.currentTime;
+
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const panner = this.ctx.createStereoPanner();
+
+            osc.type = 'sawtooth';
+            const baseF = 43.65;
+            osc.frequency.setValueAtTime(baseF, now);
+            osc.frequency.exponentialRampToValueAtTime(baseF * 1.5, now + 1.8);
+            osc.frequency.exponentialRampToValueAtTime(baseF, now + 3.6);
+
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(200, now);
+            filter.frequency.exponentialRampToValueAtTime(450, now + 1.8);
+            filter.frequency.exponentialRampToValueAtTime(160, now + 3.6);
+            filter.Q.setValueAtTime(4.0, now);
+
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.exponentialRampToValueAtTime(0.12, now + 0.9);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 4.0);
+
+            panner.pan.setValueAtTime(panX, now);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(panner);
+            panner.connect(this.reverbNode);
+
+            osc.start(now);
+            osc.stop(now + 4.2);
+        }
+
+        toggleMute() {
+            if (!this.ctx) return false;
+            this.isMuted = !this.isMuted;
+            if (this.masterGain) {
+                this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.3, this.ctx.currentTime, 0.05);
+            }
+            return !this.isMuted;
+        }
+    }
+
+    const audio = new SoundscapeEngine3D();
+
+    class Boid3D {
+        constructor(x, y, z) {
+            this.pos = new THREE.Vector3(x, y, z);
+            this.vel = new THREE.Vector3(
+                (Math.random() - 0.5) * 1.5,
+                (Math.random() - 0.5) * 1.5,
+                (Math.random() - 0.5) * 1.5
+            );
+            this.acc = new THREE.Vector3();
+            this.maxSpeed = 2.4;
+            this.maxForce = 0.08;
+            this.pitchIdx = Math.floor(Math.random() * 14);
+
+            const geom = new THREE.ConeGeometry(0.8, 2.5, 4);
+            geom.rotateX(Math.PI / 2);
+            
+            const hues = [0x00f0ff, 0xa855f7, 0x00ff88, 0xff0077, 0xffffff];
+            const color = hues[Math.floor(Math.random() * hues.length)];
+
+            this.mat = new THREE.MeshBasicMaterial({
+                color: color,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.85
+            });
+
+            this.mesh = new THREE.Mesh(geom, this.mat);
+            this.mesh.position.copy(this.pos);
+        }
+
+        applyForce(f) {
+            this.acc.add(f);
+        }
+
+        flock(boids, leviathanPos, boundsRadius) {
+            const sep = this.separate(boids).multiplyScalar(1.5);
+            const ali = this.align(boids).multiplyScalar(1.0);
+            const coh = this.cohesion(boids).multiplyScalar(1.0);
+            const bound = this.boundWithinSphere(boundsRadius).multiplyScalar(1.8);
+            const avoidLevi = this.avoidPoint(leviathanPos, 35).multiplyScalar(2.0);
+
+            this.applyForce(sep);
+            this.applyForce(ali);
+            this.applyForce(coh);
+            this.applyForce(bound);
+            this.applyForce(avoidLevi);
+        }
+
+        boundWithinSphere(radius) {
+            const steer = new THREE.Vector3();
+            const d = this.pos.length();
+            if (d > radius) {
+                steer.copy(this.pos).negate().normalize().multiplyScalar(this.maxSpeed);
+                steer.sub(this.vel).clampLength(0, this.maxForce * 2.0);
+            }
+            return steer;
+        }
+
+        avoidPoint(target, distThreshold) {
+            const steer = new THREE.Vector3();
+            const d = this.pos.distanceTo(target);
+            if (d < distThreshold && d > 0) {
+                steer.subVectors(this.pos, target).normalize().divideScalar(d);
+                steer.clampLength(0, this.maxForce);
+            }
+            return steer;
+        }
+
+        separate(boids) {
+            const desiredSep = 8;
+            const steer = new THREE.Vector3();
+            let count = 0;
+            for (let other of boids) {
+                const d = this.pos.distanceTo(other.pos);
+                if (d > 0 && d < desiredSep) {
+                    const diff = new THREE.Vector3().subVectors(this.pos, other.pos).normalize().divideScalar(d);
+                    steer.add(diff);
+                    count++;
+                }
+            }
+            if (count > 0) {
+                steer.divideScalar(count);
+                steer.normalize().multiplyScalar(this.maxSpeed).sub(this.vel).clampLength(0, this.maxForce);
+            }
+            return steer;
+        }
+
+        align(boids) {
+            const neighborDist = 20;
+            const steer = new THREE.Vector3();
+            let count = 0;
+            for (let other of boids) {
+                const d = this.pos.distanceTo(other.pos);
+                if (d > 0 && d < neighborDist) {
+                    steer.add(other.vel);
+                    count++;
+                }
+            }
+            if (count > 0) {
+                steer.divideScalar(count);
+                steer.normalize().multiplyScalar(this.maxSpeed).sub(this.vel).clampLength(0, this.maxForce);
+            }
+            return steer;
+        }
+
+        cohesion(boids) {
+            const neighborDist = 25;
+            const center = new THREE.Vector3();
+            let count = 0;
+            for (let other of boids) {
+                const d = this.pos.distanceTo(other.pos);
+                if (d > 0 && d < neighborDist) {
+                    center.add(other.pos);
+                    count++;
+                }
+            }
+            if (count > 0) {
+                center.divideScalar(count);
+                const desired = new THREE.Vector3().subVectors(center, this.pos);
+                desired.normalize().multiplyScalar(this.maxSpeed);
+                return desired.sub(this.vel).clampLength(0, this.maxForce);
+            }
+            return new THREE.Vector3();
+        }
+
+        update() {
+            this.vel.add(this.acc);
+            this.vel.clampLength(0, this.maxSpeed);
+            this.pos.add(this.vel);
+            this.acc.set(0, 0, 0);
+
+            this.mesh.position.copy(this.pos);
+
+            if (this.vel.lengthSq() > 0.001) {
+                const lookTarget = new THREE.Vector3().addVectors(this.pos, this.vel);
+                this.mesh.lookAt(lookTarget);
+            }
+        }
+    }
+
+    class Leviathan3D {
+        constructor() {
+            this.numSegments = 24;
+            this.segDist = 4.5;
+            this.segments = [];
+            this.meshGroup = new THREE.Group();
+
+            this.headPos = new THREE.Vector3(0, 0, 0);
+            this.targetAngleH = 0;
+            this.targetAngleV = 0;
+            this.speed = 0.9;
+            this.songTimer = 300;
+
+            for (let i = 0; i < this.numSegments; i++) {
+                const segPos = new THREE.Vector3(0, 0, -i * this.segDist);
+                this.segments.push(segPos);
+
+                const size = Math.max(1.2, (this.numSegments - i) * 0.35);
+                const geom = new THREE.IcosahedronGeometry(size, 1);
+                const mat = new THREE.MeshBasicMaterial({
+                    color: i === 0 ? 0xffffff : 0x00f0ff,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: Math.max(0.25, 0.9 - i * 0.03)
+                });
+
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.copy(segPos);
+                this.meshGroup.add(mesh);
+            }
+
+            this.headLight = new THREE.PointLight(0x00f0ff, 2, 60);
+            this.meshGroup.add(this.headLight);
+        }
+
+        update(boundsRadius) {
+            if (Math.random() < 0.02) {
+                this.targetAngleH += (Math.random() - 0.5) * 0.8;
+                this.targetAngleV += (Math.random() - 0.5) * 0.4;
+            }
+
+            if (this.headPos.length() > boundsRadius * 0.8) {
+                const toCenter = new THREE.Vector3().sub(this.headPos).normalize();
+                this.targetAngleH = Math.atan2(toCenter.x, toCenter.z);
+                this.targetAngleV = Math.asin(toCenter.y);
+            }
+
+            const dir = new THREE.Vector3(
+                Math.sin(this.targetAngleH) * Math.cos(this.targetAngleV),
+                Math.sin(this.targetAngleV),
+                Math.cos(this.targetAngleH) * Math.cos(this.targetAngleV)
+            ).normalize();
+
+            this.headPos.addScaledVector(dir, this.speed);
+            this.segments[0].copy(this.headPos);
+
+            for (let i = 1; i < this.numSegments; i++) {
+                const prev = this.segments[i - 1];
+                const curr = this.segments[i];
+                const diff = new THREE.Vector3().subVectors(curr, prev);
+                diff.normalize().multiplyScalar(this.segDist);
+                curr.copy(prev).add(diff);
+            }
+
+            const time = performance.now() * 0.002;
+            for (let i = 0; i < this.numSegments; i++) {
+                const mesh = this.meshGroup.children[i];
+                mesh.position.copy(this.segments[i]);
+                mesh.position.y += Math.sin(time + i * 0.3) * 0.8;
+            }
+
+            this.headLight.position.copy(this.segments[0]);
+
+            this.songTimer--;
+            if (this.songTimer <= 0) {
+                audio.playLeviathanSong((this.headPos.x / boundsRadius));
+                this.songTimer = Math.floor(Math.random() * 400 + 350);
+            }
+        }
+    }
+
+    class Cosmos3D {
+        constructor() {
+            this.container = document.getElementById('webgl-container');
+            this.width = window.innerWidth;
+            this.height = window.innerHeight;
+
+            this.scene = new THREE.Scene();
+            this.scene.fog = new THREE.FogExp2(0x010309, 0.0035);
+
+            this.camera = new THREE.PerspectiveCamera(60, this.width / this.height, 0.1, 1000);
+            this.camera.position.set(0, 40, 160);
+
+            this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            this.renderer.setSize(this.width, this.height);
+            this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            this.renderer.setClearColor(0x010309, 1);
+            this.container.appendChild(this.renderer.domElement);
+
+            this.boundsRadius = 140;
+            this.boids = [];
+            this.cameraMode = 'orbit';
+
+            this.isDragging = false;
+            this.prevMouse = { x: 0, y: 0 };
+            this.spherical = { radius: 180, theta: 0, phi: Math.PI / 2.8 };
+
+            this.initCosmicDust();
+            this.initAncientMegalith();
+            this.initLeviathan();
+            this.initBoidSwarm();
+            this.bindEvents();
+        }
+
+        initCosmicDust() {
+            const particleCount = 2000;
+            const geom = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+
+            const c1 = new THREE.Color(0x00f0ff);
+            const c2 = new THREE.Color(0xa855f7);
+
+            for (let i = 0; i < particleCount; i++) {
+                const r = Math.random() * 260 + 20;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(Math.random() * 2 - 1);
+
+                positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = r * Math.cos(phi);
+
+                const mixed = c1.clone().lerp(c2, Math.random());
+                colors[i * 3] = mixed.r;
+                colors[i * 3 + 1] = mixed.g;
+                colors[i * 3 + 2] = mixed.b;
+            }
+
+            geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const mat = new THREE.PointsMaterial({
+                size: 1.8,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.75,
+                blending: THREE.AdditiveBlending
+            });
+
+            this.dustParticles = new THREE.Points(geom, mat);
+            this.scene.add(this.dustParticles);
+        }
+
+        initAncientMegalith() {
+            const geom = new THREE.OctahedronGeometry(12, 0);
+            const mat = new THREE.MeshBasicMaterial({
+                color: 0x00f0ff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.35
+            });
+            this.megalith = new THREE.Mesh(geom, mat);
+            this.scene.add(this.megalith);
+
+            const innerGeom = new THREE.OctahedronGeometry(6, 0);
+            const innerMat = new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                wireframe: false,
+                transparent: true,
+                opacity: 0.6
+            });
+            this.megalithCore = new THREE.Mesh(innerGeom, innerMat);
+            this.scene.add(this.megalithCore);
+        }
+
+        initLeviathan() {
+            this.leviathan = new Leviathan3D();
+            this.scene.add(this.leviathan.meshGroup);
+        }
+
+        initBoidSwarm() {
+            for (let i = 0; i < 90; i++) {
+                const boid = new Boid3D(
+                    (Math.random() - 0.5) * 80,
+                    (Math.random() - 0.5) * 80,
+                    (Math.random() - 0.5) * 80
+                );
+                this.boids.push(boid);
+                this.scene.add(boid.mesh);
+            }
+        }
+
+        spawnBurst(count = 20) {
+            for (let i = 0; i < count; i++) {
+                const boid = new Boid3D(
+                    (Math.random() - 0.5) * 20,
+                    (Math.random() - 0.5) * 20,
+                    (Math.random() - 0.5) * 20
+                );
+                this.boids.push(boid);
+                this.scene.add(boid.mesh);
+            }
+            audio.playChime(7, 0.14);
+        }
+
+        bindEvents() {
+            window.addEventListener('resize', () => {
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+                this.camera.aspect = this.width / this.height;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(this.width, this.height);
+            });
+
+            this.container.addEventListener('mousedown', (e) => {
+                this.isDragging = true;
+                this.prevMouse = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!this.isDragging || this.cameraMode !== 'orbit') return;
+                const dx = e.clientX - this.prevMouse.x;
+                const dy = e.clientY - this.prevMouse.y;
+                this.prevMouse = { x: e.clientX, y: e.clientY };
+
+                this.spherical.theta -= dx * 0.006;
+                this.spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.spherical.phi - dy * 0.006));
+            });
+
+            window.addEventListener('mouseup', () => {
+                this.isDragging = false;
+            });
+
+            this.container.addEventListener('wheel', (e) => {
+                if (this.cameraMode !== 'orbit') return;
+                this.spherical.radius = Math.max(40, Math.min(350, this.spherical.radius + e.deltaY * 0.15));
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT') return;
+                if (e.key.toLowerCase() === 'h') {
+                    document.getElementById('uiLayer').classList.toggle('hidden');
+                }
+            });
+        }
+
+        updateCamera() {
+            if (this.cameraMode === 'orbit') {
+                this.spherical.theta += 0.0008;
+                const x = this.spherical.radius * Math.sin(this.spherical.phi) * Math.sin(this.spherical.theta);
+                const y = this.spherical.radius * Math.cos(this.spherical.phi);
+                const z = this.spherical.radius * Math.sin(this.spherical.phi) * Math.cos(this.spherical.theta);
+
+                this.camera.position.lerp(new THREE.Vector3(x, y, z), 0.06);
+                this.camera.lookAt(0, 0, 0);
+            } else if (this.cameraMode === 'leviathan') {
+                const head = this.leviathan.segments[0];
+                const behind = new THREE.Vector3().subVectors(this.leviathan.segments[2], head).normalize().multiplyScalar(22);
+                const camPos = new THREE.Vector3().addVectors(head, behind).add(new THREE.Vector3(0, 8, 0));
+
+                this.camera.position.lerp(camPos, 0.05);
+                this.camera.lookAt(head);
+            } else if (this.cameraMode === 'swarm') {
+                const center = new THREE.Vector3();
+                this.boids.slice(0, 20).forEach(b => center.add(b.pos));
+                center.divideScalar(Math.min(20, this.boids.length));
+
+                const camPos = new THREE.Vector3().addVectors(center, new THREE.Vector3(0, 15, 45));
+                this.camera.position.lerp(camPos, 0.05);
+                this.camera.lookAt(center);
+            }
+        }
+
+        update() {
+            this.dustParticles.rotation.y += 0.0004;
+            this.dustParticles.rotation.x += 0.0002;
+
+            this.megalith.rotation.y += 0.006;
+            this.megalith.rotation.x += 0.003;
+            this.megalithCore.rotation.y -= 0.012;
+
+            this.leviathan.update(this.boundsRadius);
+
+            const leviathanHead = this.leviathan.segments[0];
+            for (let b of this.boids) {
+                b.flock(this.boids, leviathanHead, this.boundsRadius);
+                b.update();
+            }
+
+            if (Math.random() < 0.03 && this.boids.length > 0) {
+                const sample = this.boids[Math.floor(Math.random() * this.boids.length)];
+                if (sample.pos.length() < 35) {
+                    audio.playChime(sample.pitchIdx, 0.05, (sample.pos.x / this.boundsRadius));
+                }
+            }
+
+            this.updateCamera();
+        }
+
+        render() {
+            this.renderer.render(this.scene, this.camera);
+        }
+
+        loop() {
+            this.update();
+            this.render();
+
+            const countEl = document.getElementById('countEntities');
+            if (countEl) countEl.innerText = this.boids.length;
+
+            if (audio.ctx && !audio.isMuted) {
+                const bars = document.querySelectorAll('#audioBars .bar');
+                const now = performance.now();
+                bars.forEach((bar, idx) => {
+                    const h = Math.sin(now * 0.008 + idx) * 6 + 9;
+                    bar.style.height = `${h}px`;
+                });
+            }
+
+            requestAnimationFrame(() => this.loop());
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const cosmos = new Cosmos3D();
+        cosmos.loop();
+
+        const introOverlay = document.getElementById('introOverlay');
+        const startBtn = document.getElementById('startExperienceBtn');
+
+        if (window.location.search.includes('thumb=1')) {
+            if (introOverlay) introOverlay.style.display = 'none';
+        }
+
+        startBtn.addEventListener('click', () => {
+            audio.init();
+            introOverlay.classList.add('fade-out');
+        });
+
+        const camBtns = document.querySelectorAll('.cam-btn');
+        camBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                camBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                cosmos.cameraMode = btn.dataset.cam;
+            });
+        });
+
+        const btnAudioToggle = document.getElementById('btnAudioToggle');
+        const audioStatusText = document.getElementById('audioStatusText');
+        btnAudioToggle.addEventListener('click', () => {
+            if (!audio.ctx) audio.init();
+            const unmuted = audio.toggleMute();
+            audioStatusText.innerText = unmuted ? "Sound On" : "Muted";
+            btnAudioToggle.classList.toggle('active', !unmuted);
+        });
+
+        const btnSpawnBurst = document.getElementById('btnSpawnBurst');
+        btnSpawnBurst.addEventListener('click', () => {
+            cosmos.spawnBurst(25);
+        });
+
+        const thoughtInput = document.getElementById('thoughtInput');
+        const btnSendThought = document.getElementById('btnSendThought');
+
+        const infuseThought = () => {
+            const val = thoughtInput.value.trim();
+            if (!val) return;
+
+            cosmos.spawnBurst(30);
+            audio.playLeviathanSong(0);
+
+            thoughtInput.value = "";
+            thoughtInput.blur();
+        };
+
+        btnSendThought.addEventListener('click', infuseThought);
+        thoughtInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') infuseThought();
+        });
+    });
+    </script>
+</body>
+</html>

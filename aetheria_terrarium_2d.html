@@ -1,0 +1,1848 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHERIA — Living Digital Terrarium & Soundscape | Gauransh Bansal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Outfit:wght@200;300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #030611;
+            --accent-cyan: #00f0ff;
+            --accent-magenta: #ff0077;
+            --accent-gold: #ffc837;
+            --accent-emerald: #00ff88;
+            --accent-violet: #a855f7;
+            --glass-bg: rgba(8, 14, 28, 0.68);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-glow: rgba(0, 240, 255, 0.15);
+            --text-main: #f0f6fc;
+            --text-dim: #8b9bb4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-deep);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: crosshair;
+        }
+
+        /* Glassmorphic Minimal UI Layer */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px;
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s ease;
+        }
+
+        .ui-layer.hidden {
+            opacity: 0;
+            transform: scale(0.99);
+            pointer-events: none !important;
+        }
+
+        .interactive {
+            pointer-events: auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .brand {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 0 20px var(--glass-glow);
+        }
+
+        .brand h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            letter-spacing: 4px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, var(--accent-cyan) 60%, var(--accent-violet) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .brand-author {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .brand-author a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .brand-author a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .stats-badge {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-dim);
+        }
+
+        .stat-val {
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        /* Top Controls */
+        .top-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .glass-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            text-decoration: none;
+        }
+
+        .glass-btn:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+
+        .glass-btn.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(168, 85, 247, 0.25));
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+            color: #fff;
+        }
+
+        .glass-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* Tool Dock (Left) */
+        .dock {
+            position: absolute;
+            left: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 14px 10px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        }
+
+        .dock-tool {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            background: rgba(255,255,255,0.03);
+            color: var(--text-dim);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .dock-tool:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .dock-tool.active {
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.12);
+            box-shadow: 0 0 16px rgba(0, 240, 255, 0.3);
+        }
+
+        .dock-tool svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .tooltip {
+            position: absolute;
+            left: 56px;
+            background: #0d1527;
+            border: 1px solid var(--glass-border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-family: 'Space Mono', monospace;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            color: #fff;
+            z-index: 100;
+        }
+
+        .dock-tool:hover .tooltip {
+            opacity: 1;
+        }
+
+        /* Bottom Center: Thought Capsule & Soundwave */
+        .bottom-bar {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .thought-capsule {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 480px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            transition: border-color 0.3s;
+        }
+
+        .thought-capsule:focus-within {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+        }
+
+        .thought-capsule input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .thought-capsule input::placeholder {
+            color: rgba(255,255,255,0.35);
+        }
+
+        .send-thought-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+            border: none;
+            color: #000;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .send-thought-btn:hover {
+            transform: scale(1.04);
+            filter: brightness(1.15);
+        }
+
+        /* Biome Selector */
+        .biome-selector {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 6px 8px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .biome-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .biome-btn:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .biome-btn.active {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Sound Harmonic Visualizer Indicator */
+        .audio-hud {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 20px;
+            padding: 0 4px;
+        }
+
+        .bar {
+            width: 3px;
+            background: var(--accent-cyan);
+            border-radius: 2px;
+            height: 4px;
+            transition: height 0.1s ease;
+        }
+
+        /* Inspector Card (Right side) */
+        .inspector {
+            position: absolute;
+            right: 24px;
+            top: 100px;
+            width: 260px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .inspector.visible {
+            display: block;
+        }
+
+        .inspector h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 6px;
+        }
+
+        .inspector-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 8px;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .inspector-label {
+            color: var(--text-dim);
+        }
+
+        .inspector-val {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Audio Intro Overlay */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(8, 14, 30, 0.95) 0%, rgba(2, 4, 10, 0.98) 100%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(15px);
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        .overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .overlay-card {
+            text-align: center;
+            max-width: 540px;
+            padding: 40px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(0, 240, 255, 0.1);
+        }
+
+        .overlay-card h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 34px;
+            letter-spacing: 8px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff, var(--accent-cyan), var(--accent-violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .overlay-author {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            margin-bottom: 20px;
+        }
+
+        .overlay-card p {
+            color: var(--text-dim);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+            color: #030611;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 2px;
+            padding: 16px 40px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.5);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            text-transform: uppercase;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.06);
+            box-shadow: 0 0 50px rgba(0, 240, 255, 0.8);
+        }
+
+        .hint-keys {
+            margin-top: 24px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            font-family: 'Space Mono', monospace;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+  <!-- Gauransh Bansal Security & IP Protection Layer -->
+  <style>
+    /* Protection & Anti-Scraping */
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    img, canvas {
+      -webkit-user-drag: none;
+      user-drag: none;
+      pointer-events: auto;
+    }
+  </style>
+  <script>
+    (function() {
+      'use strict';
+      // 1. Anti-Framing / Framebusting
+      try {
+        if (window.top !== window.self) {
+          window.top.location = window.self.location;
+        }
+      } catch(e) {
+        document.documentElement.innerHTML = '<div style="display:flex;height:100vh;align-items:center;justify-content:center;background:#030305;color:#fff;font-family:sans-serif;text-align:center;padding:20px;"><h2>Direct access only. Embedding is prohibited.<br><br>Copyright &copy; 2026 Gauransh Bansal. All rights reserved.</h2></div>';
+      }
+
+      // 2. Domain Lock & Local Environment Safety
+      const isLocal = window.location.protocol === 'file:' || 
+                      ['localhost', '127.0.0.1', '0.0.0.0', ''].includes(window.location.hostname) ||
+                      window.location.hostname.endsWith('.local');
+      
+      const ALLOWED_DOMAINS = [
+        'gauranshbansal.com',
+        'www.gauranshbansal.com',
+        'gauranshbansal.github.io'
+      ];
+
+      if (!isLocal && !ALLOWED_DOMAINS.some(d => window.location.hostname === d || window.location.hostname.endsWith('.' + d))) {
+        console.warn('Unauthorized domain detected.');
+      }
+
+      // 3. Disable Context Menu & Key Combos (DevTools, View Source, Save)
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+      }, false);
+
+      document.addEventListener('keydown', function(e) {
+        if (e.keyCode === 123) { // F12
+          e.preventDefault();
+          return false;
+        }
+        if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
+          e.preventDefault();
+          return false;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+          e.preventDefault();
+          return false;
+        }
+      }, false);
+
+      // 4. Console Security Notice
+      const noticeStyle = 'font-size: 13px; font-weight: bold; color: #00f0ff; background: #080c16; padding: 6px 10px; border-radius: 4px;';
+      const subStyle = 'font-size: 11px; color: #94a3b8; line-height: 1.5;';
+      console.log('%câš  PROPRIETARY INTELLECTUAL PROPERTY', noticeStyle);
+      console.log('%cAll source code, simulations, design assets, and architecture are strictly owned by Gauransh Bansal.\nUnauthorized copying, distribution, decompilation, or hosting is prohibited.\nCopyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
+    })();
+  </script>
+  <!-- End Security Layer -->
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <!-- Overlay Intro for Audio Initiation -->
+    <div class="overlay" id="introOverlay">
+        <div class="overlay-card">
+            <h2>A E T H E R I A</h2>
+            <div class="overlay-author">BY GAURANSH BANSAL</div>
+            <p>An autonomous digital terrarium of bioluminescent artificial life, emergent physical flocking, and real-time synthesized harmonic ambient soundscapes.</p>
+            <button class="start-btn" id="startExperienceBtn">Awaken Universe</button>
+            <div class="hint-keys">
+                <span>[Click & Drag] Interact</span> • <span>[Space] Freeze Time</span> • <span>[H] Zen Mode</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Overlay Layer -->
+    <div class="ui-layer" id="uiLayer">
+        <!-- Header -->
+        <header class="header interactive">
+            <div class="brand">
+                <h1>A E T H E R I A</h1>
+                <div class="brand-author">
+                    <span>BY GAURANSH BANSAL</span>
+                    <span>•</span>
+                    <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer">LINKEDIN ↗</a>
+                    <span>•</span>
+                    <a href="https://github.com/gauranshbansal" target="_blank" rel="noopener noreferrer">GITHUB ↗</a>
+                </div>
+                <div class="stats-badge">
+                    <div class="stat-item">ENTITIES: <span class="stat-val" id="countEntities">0</span></div>
+                    <div class="stat-item">LEVIATHANS: <span class="stat-val" id="countWhales">0</span></div>
+                    <div class="stat-item">FPS: <span class="stat-val" id="fpsVal">60</span></div>
+                </div>
+            </div>
+
+            <div class="top-actions">
+                <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer" class="glass-btn">
+                    <svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+                    <span>LinkedIn</span>
+                </a>
+                <button class="glass-btn" id="btnAudioToggle">
+                    <div class="audio-hud" id="audioBars">
+                        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    </div>
+                    <span id="audioStatusText">Sound On</span>
+                </button>
+                <button class="glass-btn" id="btnTimeWarp">
+                    <svg viewBox="0 0 24 24"><path d="M13 2.05v3.03c3.39.49 6 3.39 6 6.92 0 .9-.18 1.75-.48 2.54l2.6 1.53c.56-1.24.88-2.62.88-4.07 0-5.18-3.95-9.45-9-9.95zM12 19c-3.87 0-7-3.13-7-7 0-3.53 2.61-6.43 6-6.92V2.05c-5.06.5-9 4.76-9 9.95 0 5.52 4.47 10 9.99 10 3.31 0 6.24-1.61 8.01-4.09l-2.45-1.45C16.14 17.86 14.2 19 12 19z"/></svg>
+                    <span id="timeScaleText">1.0x</span>
+                </button>
+                <button class="glass-btn" id="btnClear">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    <span>Clear</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Tool Selection Dock (Left) -->
+        <div class="dock interactive" id="toolDock">
+            <div class="dock-tool active" data-tool="feed" id="toolFeed">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>
+                <span class="tooltip">Feed (Draw Light Nectar)</span>
+            </div>
+            <div class="dock-tool" data-tool="graviton" id="toolGraviton">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/></svg>
+                <span class="tooltip">Gravity Singularity</span>
+            </div>
+            <div class="dock-tool" data-tool="scatter" id="toolScatter">
+                <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                <span class="tooltip">Sonic Pulse (Repel)</span>
+            </div>
+            <div class="dock-tool" data-tool="spawnSwarm" id="toolSpawnSwarm">
+                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                <span class="tooltip">Spawn Aetherling Swarm</span>
+            </div>
+            <div class="dock-tool" data-tool="spawnLeviathan" id="toolSpawnLeviathan">
+                <svg viewBox="0 0 24 24"><path d="M12 3C6.5 3 2 6.5 2 12c0 3.58 2.5 6.55 6 7.55V21l4-2 4 2v-1.45c3.5-1 6-3.97 6-7.55 0-5.5-4.5-9-10-9zm0 13c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/></svg>
+                <span class="tooltip">Summon Ancient Leviathan</span>
+            </div>
+        </div>
+
+        <!-- Right Side: Creature Inspector -->
+        <div class="inspector interactive" id="inspectorCard">
+            <h3 id="inspName">AETHERLING #409</h3>
+            <div class="inspector-row"><span class="inspector-label">GEN:</span> <span class="inspector-val" id="inspGen">Gen 1</span></div>
+            <div class="inspector-row"><span class="inspector-label">SPECIES:</span> <span class="inspector-val" id="inspSpecies">Biolume Flocker</span></div>
+            <div class="inspector-row"><span class="inspector-label">ENERGY:</span> <span class="inspector-val" id="inspEnergy">94%</span></div>
+            <div class="inspector-row"><span class="inspector-label">VELOCITY:</span> <span class="inspector-val" id="inspVelocity">3.4 c</span></div>
+            <div class="inspector-row"><span class="inspector-label">HARMONIC:</span> <span class="inspector-val" id="inspHarmonic">E4 (329.6 Hz)</span></div>
+            <div class="inspector-row"><span class="inspector-label">AUTHOR:</span> <span class="inspector-val">Gauransh Bansal</span></div>
+        </div>
+
+        <!-- Bottom Controls -->
+        <footer class="bottom-bar interactive">
+            <!-- Thought / Memory Infusion Capsule -->
+            <div class="thought-capsule">
+                <input type="text" id="thoughtInput" placeholder="Infuse a thought, memory, or wish into the cosmos..." maxlength="60">
+                <button class="send-thought-btn" id="btnSendThought">
+                    <span>Infuse</span>
+                    <svg style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+            </div>
+
+            <!-- Atmosphere / Biome Selector -->
+            <div class="biome-selector">
+                <button class="biome-btn active" data-biome="deepCosmos">Deep Cosmos</button>
+                <button class="biome-btn" data-biome="abyssalTrench">Abyssal Trench</button>
+                <button class="biome-btn" data-biome="solarAurora">Solar Aurora</button>
+                <button class="biome-btn" data-biome="etherealForest">Biolume Grove</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+    /**
+     * AETHERIA — Living Digital Terrarium & Soundscape
+     * Copyright (c) 2026 Gauransh Bansal. All rights reserved.
+     * LinkedIn: https://www.linkedin.com/in/gauransh-bansal-a71223239/
+     */
+
+    class SoundscapeEngine {
+        constructor() {
+            this.ctx = null;
+            this.masterGain = null;
+            this.reverbNode = null;
+            this.filterNode = null;
+            this.isMuted = false;
+            this.scale = [130.81, 146.83, 164.81, 196.00, 220.00, 261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99];
+            this.droneOscs = [];
+            this.lastTriggerTime = 0;
+        }
+
+        init() {
+            if (this.ctx) {
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+                return;
+            }
+
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioContextClass();
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+
+                this.filterNode = this.ctx.createBiquadFilter();
+                this.filterNode.type = 'lowpass';
+                this.filterNode.frequency.setValueAtTime(2800, this.ctx.currentTime);
+                this.filterNode.Q.setValueAtTime(1.5, this.ctx.currentTime);
+
+                this.reverbNode = this.ctx.createConvolver();
+                this.reverbNode.buffer = this.generateImpulseResponse(3.5, 2.0);
+
+                this.filterNode.connect(this.masterGain);
+                this.reverbNode.connect(this.masterGain);
+                this.masterGain.connect(this.ctx.destination);
+
+                this.startCosmicDrone();
+            } catch (err) {
+                console.warn("Web Audio notice:", err);
+            }
+        }
+
+        generateImpulseResponse(duration, decay) {
+            const sampleRate = this.ctx.sampleRate;
+            const length = sampleRate * duration;
+            const impulse = this.ctx.createBuffer(2, length, sampleRate);
+            const left = impulse.getChannelData(0);
+            const right = impulse.getChannelData(1);
+
+            for (let i = 0; i < length; i++) {
+                const factor = Math.pow(1 - i / length, decay);
+                left[i] = ((Math.random() * 2) - 1) * factor;
+                right[i] = ((Math.random() * 2) - 1) * factor;
+            }
+            return impulse;
+        }
+
+        startCosmicDrone() {
+            const baseFreqs = [65.41, 98.00, 130.81];
+            baseFreqs.forEach((freq, idx) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                const panner = this.ctx.createStereoPanner();
+
+                osc.type = idx === 0 ? 'sine' : 'triangle';
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+                const lfo = this.ctx.createOscillator();
+                const lfoGain = this.ctx.createGain();
+                lfo.frequency.setValueAtTime(0.08 + idx * 0.03, this.ctx.currentTime);
+                lfoGain.gain.setValueAtTime(2.0, this.ctx.currentTime);
+                lfo.connect(osc.frequency);
+                lfo.start();
+
+                gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+                panner.pan.setValueAtTime((idx - 1) * 0.4, this.ctx.currentTime);
+
+                osc.connect(gain);
+                gain.connect(panner);
+                panner.connect(this.filterNode);
+                panner.connect(this.reverbNode);
+                osc.start();
+                this.droneOscs.push({ osc, gain, lfo });
+            });
+        }
+
+        playChime(pitchIdx = null, volume = 0.08, pan = 0) {
+            if (!this.ctx || this.isMuted) return;
+            const now = this.ctx.currentTime;
+            if (now - this.lastTriggerTime < 0.035) return;
+            this.lastTriggerTime = now;
+
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const panner = this.ctx.createStereoPanner();
+
+            const noteFreq = pitchIdx !== null 
+                ? this.scale[pitchIdx % this.scale.length] 
+                : this.scale[Math.floor(Math.random() * this.scale.length)];
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(noteFreq, now);
+
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.exponentialRampToValueAtTime(volume, now + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
+
+            panner.pan.setValueAtTime(Math.max(-1, Math.min(1, pan)), now);
+
+            osc.connect(gain);
+            gain.connect(panner);
+            panner.connect(this.filterNode);
+            panner.connect(this.reverbNode);
+
+            osc.start(now);
+            osc.stop(now + 1.8);
+        }
+
+        playLeviathanSong(pan = 0) {
+            if (!this.ctx || this.isMuted) return;
+            const now = this.ctx.currentTime;
+
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const panner = this.ctx.createStereoPanner();
+
+            osc.type = 'sawtooth';
+            const baseF = 43.65;
+            osc.frequency.setValueAtTime(baseF, now);
+            osc.frequency.exponentialRampToValueAtTime(baseF * 1.5, now + 1.5);
+            osc.frequency.exponentialRampToValueAtTime(baseF, now + 3.0);
+
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(220, now);
+            filter.frequency.exponentialRampToValueAtTime(500, now + 1.5);
+            filter.frequency.exponentialRampToValueAtTime(180, now + 3.0);
+            filter.Q.setValueAtTime(4.0, now);
+
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.exponentialRampToValueAtTime(0.12, now + 0.8);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 3.5);
+
+            panner.pan.setValueAtTime(pan, now);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(panner);
+            panner.connect(this.reverbNode);
+
+            osc.start(now);
+            osc.stop(now + 3.8);
+        }
+
+        toggleMute() {
+            if (!this.ctx) return false;
+            this.isMuted = !this.isMuted;
+            if (this.masterGain) {
+                this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.3, this.ctx.currentTime, 0.05);
+            }
+            return !this.isMuted;
+        }
+    }
+
+    const audio = new SoundscapeEngine();
+
+    // --- Biome Palettes ---
+    const BIOMES = {
+        deepCosmos: {
+            name: "Deep Cosmos",
+            bg: "#02050f",
+            ambientGlow: "rgba(0, 240, 255, 0.03)",
+            creatureColors: ["#00f0ff", "#7000ff", "#ff0077", "#ffffff"],
+            whaleColor: "#00d2ff",
+            foodColor: "#00ffcc",
+            glowColor: "#00f0ff",
+            lineColor: "rgba(0, 240, 255, 0.08)"
+        },
+        abyssalTrench: {
+            name: "Abyssal Trench",
+            bg: "#010a12",
+            ambientGlow: "rgba(0, 255, 170, 0.04)",
+            creatureColors: ["#00ffaa", "#0088ff", "#39ff14", "#80ffea"],
+            whaleColor: "#00ffa2",
+            foodColor: "#ffe600",
+            glowColor: "#00ff88",
+            lineColor: "rgba(0, 255, 170, 0.08)"
+        },
+        solarAurora: {
+            name: "Solar Aurora",
+            bg: "#100414",
+            ambientGlow: "rgba(255, 0, 119, 0.04)",
+            creatureColors: ["#ff0055", "#ffaa00", "#ff00e1", "#ffffff"],
+            whaleColor: "#ff7700",
+            foodColor: "#ff0055",
+            glowColor: "#ffaa00",
+            lineColor: "rgba(255, 170, 0, 0.08)"
+        },
+        etherealForest: {
+            name: "Biolume Grove",
+            bg: "#020f0a",
+            ambientGlow: "rgba(100, 255, 120, 0.03)",
+            creatureColors: ["#55ff99", "#d4ff00", "#00e5ff", "#a3e635"],
+            whaleColor: "#9eff00",
+            foodColor: "#00ffff",
+            glowColor: "#55ff99",
+            lineColor: "rgba(85, 255, 153, 0.08)"
+        }
+    };
+
+    let currentBiome = BIOMES.deepCosmos;
+
+    class Vector {
+        constructor(x = 0, y = 0) {
+            this.x = x;
+            this.y = y;
+        }
+        add(v) { this.x += v.x; this.y += v.y; return this; }
+        sub(v) { this.x -= v.x; this.y -= v.y; return this; }
+        mult(n) { this.x *= n; this.y *= n; return this; }
+        div(n) { if (n !== 0) { this.x /= n; this.y /= n; } return this; }
+        mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
+        normalize() { const m = this.mag(); if (m > 0) this.div(m); return this; }
+        limit(max) { if (this.mag() > max) { this.normalize(); this.mult(max); } return this; }
+        heading() { return Math.atan2(this.y, this.x); }
+        dist(v) { return Math.hypot(this.x - v.x, this.y - v.y); }
+        static sub(v1, v2) { return new Vector(v1.x - v2.x, v1.y - v2.y); }
+        static random2D() {
+            const angle = Math.random() * Math.PI * 2;
+            return new Vector(Math.cos(angle), Math.sin(angle));
+        }
+    }
+
+    class ShootingStar {
+        constructor(bounds) {
+            this.pos = new Vector(Math.random() * bounds.width * 0.7, Math.random() * bounds.height * 0.3);
+            this.vel = new Vector(Math.random() * 6 + 4, Math.random() * 4 + 2);
+            this.length = Math.random() * 60 + 40;
+            this.life = 1.0;
+            this.decay = Math.random() * 0.012 + 0.008;
+        }
+
+        update() {
+            this.pos.add(this.vel);
+            this.life -= this.decay;
+        }
+
+        draw(ctx) {
+            if (this.life <= 0) return;
+            ctx.save();
+            const tail = Vector.sub(this.pos, new Vector(this.vel.x * (this.length / 10), this.vel.y * (this.length / 10)));
+            const grad = ctx.createLinearGradient(tail.x, tail.y, this.pos.x, this.pos.y);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+            grad.addColorStop(1, `rgba(255, 255, 255, ${this.life * 0.7})`);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 1.5;
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.moveTo(tail.x, tail.y);
+            ctx.lineTo(this.pos.x, this.pos.y);
+            ctx.stroke();
+            ctx.restore();
+        }
+    }
+
+    class Spore {
+        constructor(x, y, energy = 1.0, isTextMemory = false, text = "") {
+            this.pos = new Vector(x, y);
+            this.vel = Vector.random2D().mult(0.3);
+            this.energy = energy;
+            this.radius = isTextMemory ? 6 : Math.random() * 2.5 + 1.5;
+            this.isTextMemory = isTextMemory;
+            this.text = text;
+            this.pulse = Math.random() * Math.PI * 2;
+        }
+
+        update(bounds) {
+            this.pos.add(this.vel);
+            this.pulse += 0.04;
+            if (this.pos.x < 0) this.pos.x = bounds.width;
+            if (this.pos.x > bounds.width) this.pos.x = 0;
+            if (this.pos.y < 0) this.pos.y = bounds.height;
+            if (this.pos.y > bounds.height) this.pos.y = 0;
+        }
+
+        draw(ctx) {
+            ctx.save();
+            const glow = Math.sin(this.pulse) * 0.3 + 0.7;
+            ctx.fillStyle = currentBiome.foodColor;
+            ctx.shadowColor = currentBiome.foodColor;
+            ctx.shadowBlur = this.isTextMemory ? 16 : 8;
+
+            ctx.beginPath();
+            ctx.arc(this.pos.x, this.pos.y, this.radius * glow, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (this.isTextMemory && this.text) {
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "11px 'Space Mono', monospace";
+                ctx.shadowBlur = 4;
+                ctx.fillText(this.text, this.pos.x + 12, this.pos.y + 4);
+            }
+            ctx.restore();
+        }
+    }
+
+    class Aetherling {
+        constructor(x, y, id, dna = null) {
+            this.id = id;
+            this.pos = new Vector(x, y);
+            this.vel = Vector.random2D().mult(Math.random() * 2 + 1);
+            this.acc = new Vector(0, 0);
+
+            this.dna = dna || {
+                generation: 1,
+                maxSpeed: Math.random() * 1.5 + 2.8,
+                maxForce: Math.random() * 0.05 + 0.09,
+                wingScale: Math.random() * 0.6 + 0.7,
+                pitchIdx: Math.floor(Math.random() * 14)
+            };
+
+            this.maxSpeed = this.dna.maxSpeed;
+            this.maxForce = this.dna.maxForce;
+            this.color = currentBiome.creatureColors[Math.floor(Math.random() * currentBiome.creatureColors.length)];
+            this.history = [];
+            this.maxHistory = 10;
+            this.energy = 50 + Math.random() * 30;
+            this.age = 0;
+            this.reproduceCooldown = 300;
+            this.wingPhase = Math.random() * Math.PI * 2;
+        }
+
+        applyForce(force) {
+            this.acc.add(force);
+        }
+
+        flock(boids, spores, leviathans, mousePos, activeTool) {
+            const sep = this.separate(boids).mult(1.5);
+            const ali = this.align(boids).mult(1.0);
+            const coh = this.cohesion(boids).mult(1.0);
+            const seekFood = this.seekClosestSpore(spores).mult(1.9);
+            const avoidLeviathan = this.avoidPredators(leviathans).mult(2.2);
+
+            this.applyForce(sep);
+            this.applyForce(ali);
+            this.applyForce(coh);
+            this.applyForce(seekFood);
+            this.applyForce(avoidLeviathan);
+
+            if (mousePos && mousePos.active) {
+                const d = this.pos.dist(mousePos);
+                if (activeTool === 'graviton' && d < 350) {
+                    const attract = Vector.sub(mousePos, this.pos);
+                    attract.normalize().mult(0.6 * (1 - d / 350));
+                    this.applyForce(attract);
+                } else if (activeTool === 'scatter' && d < 250) {
+                    const rep = Vector.sub(this.pos, mousePos);
+                    rep.normalize().mult(1.2 * (1 - d / 250));
+                    this.applyForce(rep);
+                }
+            }
+        }
+
+        seekClosestSpore(spores) {
+            let closest = null;
+            let recordDist = 200;
+            for (let s of spores) {
+                const d = this.pos.dist(s.pos);
+                if (d < recordDist) {
+                    recordDist = d;
+                    closest = s;
+                }
+            }
+            if (closest) return this.seek(closest.pos);
+            return new Vector(0, 0);
+        }
+
+        avoidPredators(leviathans) {
+            let steer = new Vector(0, 0);
+            for (let lev of leviathans) {
+                const d = this.pos.dist(lev.pos);
+                if (d < 120) {
+                    const diff = Vector.sub(this.pos, lev.pos);
+                    diff.normalize();
+                    diff.div(d);
+                    steer.add(diff);
+                }
+            }
+            return steer;
+        }
+
+        seek(target) {
+            const desired = Vector.sub(target, this.pos);
+            desired.normalize();
+            desired.mult(this.maxSpeed);
+            const steer = Vector.sub(desired, this.vel);
+            steer.limit(this.maxForce);
+            return steer;
+        }
+
+        separate(boids) {
+            const desiredSeparation = 25;
+            let steer = new Vector(0, 0);
+            let count = 0;
+            for (let other of boids) {
+                const d = this.pos.dist(other.pos);
+                if (d > 0 && d < desiredSeparation) {
+                    const diff = Vector.sub(this.pos, other.pos);
+                    diff.normalize();
+                    diff.div(d);
+                    steer.add(diff);
+                    count++;
+                }
+            }
+            if (count > 0) {
+                steer.div(count);
+                steer.normalize();
+                steer.mult(this.maxSpeed);
+                steer.sub(this.vel);
+                steer.limit(this.maxForce);
+            }
+            return steer;
+        }
+
+        align(boids) {
+            const neighbordist = 50;
+            let sum = new Vector(0, 0);
+            let count = 0;
+            for (let other of boids) {
+                const d = this.pos.dist(other.pos);
+                if (d > 0 && d < neighbordist) {
+                    sum.add(other.vel);
+                    count++;
+                }
+            }
+            if (count > 0) {
+                sum.div(count);
+                sum.normalize();
+                sum.mult(this.maxSpeed);
+                const steer = Vector.sub(sum, this.vel);
+                steer.limit(this.maxForce);
+                return steer;
+            }
+            return new Vector(0, 0);
+        }
+
+        cohesion(boids) {
+            const neighbordist = 60;
+            let sum = new Vector(0, 0);
+            let count = 0;
+            for (let other of boids) {
+                const d = this.pos.dist(other.pos);
+                if (d > 0 && d < neighbordist) {
+                    sum.add(other.pos);
+                    count++;
+                }
+            }
+            if (count > 0) {
+                sum.div(count);
+                return this.seek(sum);
+            }
+            return new Vector(0, 0);
+        }
+
+        reproduce() {
+            this.energy -= 40;
+            this.reproduceCooldown = 450;
+
+            const mutatedDna = {
+                generation: this.dna.generation + 1,
+                maxSpeed: Math.max(2.0, Math.min(5.5, this.dna.maxSpeed + (Math.random() - 0.5) * 0.4)),
+                maxForce: Math.max(0.06, Math.min(0.2, this.dna.maxForce + (Math.random() - 0.5) * 0.02)),
+                wingScale: Math.max(0.5, Math.min(1.5, this.dna.wingScale + (Math.random() - 0.5) * 0.1)),
+                pitchIdx: (this.dna.pitchIdx + (Math.random() < 0.3 ? 1 : 0)) % 14
+            };
+
+            const child = new Aetherling(
+                this.pos.x + (Math.random() - 0.5) * 10,
+                this.pos.y + (Math.random() - 0.5) * 10,
+                Math.floor(Math.random() * 9000 + 1000),
+                mutatedDna
+            );
+            return child;
+        }
+
+        update(timeScale, bounds) {
+            this.vel.add(this.acc);
+            this.vel.limit(this.maxSpeed * timeScale);
+            this.pos.add(new Vector(this.vel.x * timeScale, this.vel.y * timeScale));
+            this.acc.mult(0);
+
+            this.age += 0.01 * timeScale;
+            this.wingPhase += 0.15 * timeScale;
+            this.energy -= 0.015 * timeScale;
+            if (this.reproduceCooldown > 0) this.reproduceCooldown -= timeScale;
+
+            this.history.push({ x: this.pos.x, y: this.pos.y });
+            if (this.history.length > this.maxHistory) {
+                this.history.shift();
+            }
+
+            if (this.pos.x < -10) this.pos.x = bounds.width + 10;
+            if (this.pos.x > bounds.width + 10) this.pos.x = -10;
+            if (this.pos.y < -10) this.pos.y = bounds.height + 10;
+            if (this.pos.y > bounds.height + 10) this.pos.y = -10;
+        }
+
+        draw(ctx) {
+            ctx.save();
+
+            if (this.history.length > 2) {
+                ctx.beginPath();
+                ctx.moveTo(this.history[0].x, this.history[0].y);
+                for (let i = 1; i < this.history.length; i++) {
+                    ctx.lineTo(this.history[i].x, this.history[i].y);
+                }
+                ctx.strokeStyle = this.color;
+                ctx.globalAlpha = 0.25;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+
+            ctx.globalAlpha = 0.9;
+            ctx.translate(this.pos.x, this.pos.y);
+            const theta = this.vel.heading();
+            ctx.rotate(theta);
+
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = this.color;
+
+            const scale = this.dna.wingScale;
+            const wingSpread = (Math.sin(this.wingPhase) * 4) * scale;
+
+            ctx.beginPath();
+            ctx.moveTo(7 * scale, 0);
+            ctx.lineTo(-5 * scale, (-3 - wingSpread) * scale);
+            ctx.lineTo(-2 * scale, 0);
+            ctx.lineTo(-5 * scale, (3 + wingSpread) * scale);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(1, 0, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+    }
+
+    class Leviathan {
+        constructor(x, y, name = "Astraios") {
+            this.pos = new Vector(x, y);
+            this.vel = Vector.random2D().mult(0.8);
+            this.name = name;
+            this.numSegments = 18;
+            this.segments = [];
+            this.segLength = 12;
+            for (let i = 0; i < this.numSegments; i++) {
+                this.segments.push(new Vector(x - i * this.segLength, y));
+            }
+            this.targetAngle = Math.random() * Math.PI * 2;
+            this.color = currentBiome.whaleColor;
+            this.songTimer = Math.random() * 300 + 200;
+        }
+
+        update(timeScale, bounds) {
+            if (Math.random() < 0.02) {
+                this.targetAngle += (Math.random() - 0.5) * 1.2;
+            }
+
+            const desired = new Vector(Math.cos(this.targetAngle), Math.sin(this.targetAngle)).mult(1.0);
+            this.vel.add(desired.mult(0.04));
+            this.vel.limit(1.2 * timeScale);
+            this.pos.add(new Vector(this.vel.x * timeScale, this.vel.y * timeScale));
+
+            this.segments[0].x = this.pos.x;
+            this.segments[0].y = this.pos.y;
+
+            for (let i = 1; i < this.numSegments; i++) {
+                const prev = this.segments[i - 1];
+                const curr = this.segments[i];
+                const dir = Vector.sub(curr, prev);
+                dir.normalize().mult(this.segLength);
+                curr.x = prev.x + dir.x;
+                curr.y = prev.y + dir.y;
+            }
+
+            this.songTimer -= timeScale;
+            if (this.songTimer <= 0) {
+                const pan = (this.pos.x / bounds.width) * 2 - 1;
+                audio.playLeviathanSong(pan);
+                this.songTimer = Math.random() * 400 + 350;
+            }
+
+            if (this.pos.x < -80) this.pos.x = bounds.width + 80;
+            if (this.pos.x > bounds.width + 80) this.pos.x = -80;
+            if (this.pos.y < -80) this.pos.y = bounds.height + 80;
+            if (this.pos.y > bounds.height + 80) this.pos.y = -80;
+        }
+
+        draw(ctx) {
+            ctx.save();
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 18;
+
+            for (let i = 2; i < this.numSegments - 2; i += 3) {
+                const seg = this.segments[i];
+                const prev = this.segments[i - 1];
+                const angle = Math.atan2(seg.y - prev.y, seg.x - prev.x) + Math.PI / 2;
+                const finSize = (this.numSegments - i) * 1.4;
+
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 1.5;
+                ctx.globalAlpha = 0.4;
+                ctx.beginPath();
+                ctx.moveTo(seg.x + Math.cos(angle) * finSize, seg.y + Math.sin(angle) * finSize);
+                ctx.lineTo(seg.x - Math.cos(angle) * finSize, seg.y - Math.sin(angle) * finSize);
+                ctx.stroke();
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(this.segments[0].x, this.segments[0].y);
+            for (let i = 1; i < this.numSegments; i++) {
+                ctx.lineTo(this.segments[i].x, this.segments[i].y);
+            }
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 4;
+            ctx.globalAlpha = 0.8;
+            ctx.stroke();
+
+            for (let i = 0; i < this.numSegments; i++) {
+                const seg = this.segments[i];
+                const radius = Math.max(2, (this.numSegments - i) * 0.7);
+                ctx.fillStyle = i === 0 ? "#ffffff" : this.color;
+                ctx.globalAlpha = 0.85;
+                ctx.beginPath();
+                ctx.arc(seg.x, seg.y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+            ctx.font = "9px 'Cinzel', serif";
+            ctx.fillText(this.name.toUpperCase(), this.segments[0].x + 12, this.segments[0].y - 10);
+
+            ctx.restore();
+        }
+    }
+
+    class TerrariumWorld {
+        constructor() {
+            this.canvas = document.getElementById('canvas');
+            this.ctx = this.canvas.getContext('2d');
+            this.width = window.innerWidth;
+            this.height = window.innerHeight;
+
+            this.boids = [];
+            this.spores = [];
+            this.leviathans = [];
+            this.shootingStars = [];
+            this.timeScale = 1.0;
+            this.activeTool = 'feed';
+            this.isPaused = false;
+            this.selectedEntity = null;
+
+            this.highestGen = 1;
+
+            this.mouse = { x: 0, y: 0, active: false };
+            this.fps = 60;
+            this.lastFrameTime = performance.now();
+
+            this.initCanvas();
+            this.populate();
+            this.bindEvents();
+        }
+
+        initCanvas() {
+            this.canvas.width = this.width;
+            this.canvas.height = this.height;
+            window.addEventListener('resize', () => {
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+                this.canvas.width = this.width;
+                this.canvas.height = this.height;
+            });
+        }
+
+        populate() {
+            this.boids = [];
+            this.spores = [];
+            this.leviathans = [];
+            this.shootingStars = [];
+
+            for (let i = 0; i < 70; i++) {
+                this.boids.push(new Aetherling(
+                    Math.random() * this.width,
+                    Math.random() * this.height,
+                    Math.floor(Math.random() * 9000 + 1000)
+                ));
+            }
+
+            for (let i = 0; i < 40; i++) {
+                this.spores.push(new Spore(
+                    Math.random() * this.width,
+                    Math.random() * this.height
+                ));
+            }
+
+            this.leviathans.push(new Leviathan(this.width * 0.3, this.height * 0.4, "Astraios"));
+            this.leviathans.push(new Leviathan(this.width * 0.7, this.height * 0.6, "Thalassa"));
+        }
+
+        spawnSpore(x, y, isText = false, text = "") {
+            this.spores.push(new Spore(x, y, 1.0, isText, text));
+            if (this.spores.length > 120) {
+                this.spores.shift();
+            }
+        }
+
+        spawnSwarm(x, y, count = 10) {
+            for (let i = 0; i < count; i++) {
+                this.boids.push(new Aetherling(
+                    x + (Math.random() - 0.5) * 40,
+                    y + (Math.random() - 0.5) * 40,
+                    Math.floor(Math.random() * 9000 + 1000)
+                ));
+            }
+            audio.playChime(6, 0.12);
+        }
+
+        spawnLeviathan(x, y, name = null) {
+            const names = ["Chronos", "Aether", "Hyperion", "Oceanus", "Nyx", "Solaria"];
+            const chosenName = name || names[Math.floor(Math.random() * names.length)];
+            const lev = new Leviathan(x, y, chosenName);
+            this.leviathans.push(lev);
+            audio.playLeviathanSong(0);
+        }
+
+        bindEvents() {
+            const getPos = (e) => {
+                const rect = this.canvas.getBoundingClientRect();
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            };
+
+            this.canvas.addEventListener('mousedown', (e) => {
+                const pos = getPos(e);
+                this.mouse.x = pos.x;
+                this.mouse.y = pos.y;
+                this.mouse.active = true;
+                this.handleInteraction(pos.x, pos.y);
+            });
+
+            this.canvas.addEventListener('mousemove', (e) => {
+                const pos = getPos(e);
+                this.mouse.x = pos.x;
+                this.mouse.y = pos.y;
+                if (this.mouse.active && this.activeTool === 'feed') {
+                    this.spawnSpore(pos.x, pos.y);
+                    if (Math.random() < 0.2) {
+                        const pan = (pos.x / this.width) * 2 - 1;
+                        audio.playChime(Math.floor((pos.y / this.height) * 12), 0.04, pan);
+                    }
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                this.mouse.active = false;
+            });
+
+            this.canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 0) {
+                    const pos = getPos(e.touches[0]);
+                    this.mouse.x = pos.x;
+                    this.mouse.y = pos.y;
+                    this.mouse.active = true;
+                    this.handleInteraction(pos.x, pos.y);
+                }
+            }, { passive: true });
+
+            this.canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 0) {
+                    const pos = getPos(e.touches[0]);
+                    this.mouse.x = pos.x;
+                    this.mouse.y = pos.y;
+                    if (this.activeTool === 'feed') {
+                        this.spawnSpore(pos.x, pos.y);
+                    }
+                }
+            }, { passive: true });
+
+            window.addEventListener('touchend', () => {
+                this.mouse.active = false;
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT') return;
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    this.isPaused = !this.isPaused;
+                } else if (e.key.toLowerCase() === 'h') {
+                    document.getElementById('uiLayer').classList.toggle('hidden');
+                } else if (e.key.toLowerCase() === 'm') {
+                    audio.toggleMute();
+                }
+            });
+        }
+
+        handleInteraction(x, y) {
+            for (let b of this.boids) {
+                if (b.pos.dist(new Vector(x, y)) < 22) {
+                    this.inspectCreature(b);
+                    return;
+                }
+            }
+
+            if (this.activeTool === 'feed') {
+                this.spawnSpore(x, y);
+                audio.playChime(Math.floor((y / this.height) * 12), 0.06);
+            } else if (this.activeTool === 'spawnSwarm') {
+                this.spawnSwarm(x, y);
+            } else if (this.activeTool === 'spawnLeviathan') {
+                this.spawnLeviathan(x, y);
+            } else if (this.activeTool === 'scatter') {
+                audio.playChime(2, 0.15);
+            } else if (this.activeTool === 'graviton') {
+                audio.playChime(0, 0.12);
+            }
+        }
+
+        inspectCreature(boid) {
+            this.selectedEntity = boid;
+            const inspector = document.getElementById('inspectorCard');
+            inspector.classList.add('visible');
+            document.getElementById('inspName').innerText = `AETHERLING #${boid.id}`;
+            document.getElementById('inspGen').innerText = `Gen ${boid.dna.generation}`;
+            document.getElementById('inspSpecies').innerText = "Biolume Flocker";
+            document.getElementById('inspEnergy').innerText = `${Math.floor(boid.energy)}%`;
+            document.getElementById('inspVelocity').innerText = `${boid.vel.mag().toFixed(2)} c`;
+            document.getElementById('inspHarmonic').innerText = `Note ${boid.dna.pitchIdx + 1}`;
+            audio.playChime(boid.dna.pitchIdx, 0.08);
+        }
+
+        update() {
+            if (this.isPaused) return;
+
+            const effectiveTime = this.timeScale;
+            const bounds = { width: this.width, height: this.height };
+
+            if (Math.random() < 0.004 && this.shootingStars.length < 2) {
+                this.shootingStars.push(new ShootingStar(bounds));
+            }
+
+            for (let i = this.shootingStars.length - 1; i >= 0; i--) {
+                const star = this.shootingStars[i];
+                star.update();
+                if (star.life <= 0) this.shootingStars.splice(i, 1);
+            }
+
+            for (let s of this.spores) {
+                s.update(bounds);
+            }
+
+            const newBorns = [];
+            for (let i = this.boids.length - 1; i >= 0; i--) {
+                const b = this.boids[i];
+                b.flock(this.boids, this.spores, this.leviathans, this.mouse, this.activeTool);
+                b.update(effectiveTime, bounds);
+
+                for (let j = this.spores.length - 1; j >= 0; j--) {
+                    const s = this.spores[j];
+                    if (b.pos.dist(s.pos) < 15) {
+                        b.energy = Math.min(100, b.energy + 20);
+                        const pan = (b.pos.x / this.width) * 2 - 1;
+                        audio.playChime(b.dna.pitchIdx, 0.04, pan);
+                        this.spores.splice(j, 1);
+                        break;
+                    }
+                }
+
+                if (b.energy > 92 && b.reproduceCooldown <= 0 && this.boids.length < 95) {
+                    const baby = b.reproduce();
+                    newBorns.push(baby);
+                    if (baby.dna.generation > this.highestGen) {
+                        this.highestGen = baby.dna.generation;
+                    }
+                }
+
+                if (b.energy <= 0) {
+                    this.boids.splice(i, 1);
+                }
+            }
+
+            newBorns.forEach(baby => this.boids.push(baby));
+
+            if (this.boids.length < 30) {
+                this.boids.push(new Aetherling(
+                    Math.random() * this.width,
+                    Math.random() * this.height,
+                    Math.floor(Math.random() * 9000 + 1000)
+                ));
+            }
+
+            for (let lev of this.leviathans) {
+                lev.update(effectiveTime, bounds);
+            }
+
+            if (this.spores.length < 35 && Math.random() < 0.05) {
+                this.spawnSpore(Math.random() * this.width, Math.random() * this.height);
+            }
+        }
+
+        render() {
+            this.ctx.fillStyle = currentBiome.bg;
+            this.ctx.fillRect(0, 0, this.width, this.height);
+
+            const grad = this.ctx.createRadialGradient(
+                this.width / 2, this.height / 2, 50,
+                this.width / 2, this.height / 2, this.width * 0.7
+            );
+            grad.addColorStop(0, currentBiome.ambientGlow);
+            grad.addColorStop(1, 'transparent');
+            this.ctx.fillStyle = grad;
+            this.ctx.fillRect(0, 0, this.width, this.height);
+
+            if (this.boids.length > 1) {
+                this.ctx.save();
+                this.ctx.strokeStyle = currentBiome.lineColor;
+                this.ctx.lineWidth = 0.6;
+                const maxLinkDist = 55;
+                for (let i = 0; i < this.boids.length; i++) {
+                    for (let j = i + 1; j < this.boids.length; j++) {
+                        const d = this.boids[i].pos.dist(this.boids[j].pos);
+                        if (d < maxLinkDist) {
+                            const alpha = (1 - d / maxLinkDist) * 0.25;
+                            this.ctx.globalAlpha = alpha;
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(this.boids[i].pos.x, this.boids[i].pos.y);
+                            this.ctx.lineTo(this.boids[j].pos.x, this.boids[j].pos.y);
+                            this.ctx.stroke();
+                        }
+                    }
+                }
+                this.ctx.restore();
+            }
+
+            if (this.mouse.active && (this.activeTool === 'graviton' || this.activeTool === 'scatter')) {
+                this.ctx.save();
+                const radius = this.activeTool === 'graviton' ? 140 : 100;
+                this.ctx.strokeStyle = this.activeTool === 'graviton' ? currentBiome.glowColor : '#ff0077';
+                this.ctx.lineWidth = 1;
+                this.ctx.setLineDash([4, 6]);
+                this.ctx.beginPath();
+                this.ctx.arc(this.mouse.x, this.mouse.y, radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+                this.ctx.restore();
+            }
+
+            for (let star of this.shootingStars) {
+                star.draw(this.ctx);
+            }
+
+            for (let s of this.spores) {
+                s.draw(this.ctx);
+            }
+
+            for (let lev of this.leviathans) {
+                lev.draw(this.ctx);
+            }
+
+            for (let b of this.boids) {
+                b.draw(this.ctx);
+            }
+        }
+
+        loop() {
+            const now = performance.now();
+            const delta = now - this.lastFrameTime;
+            this.lastFrameTime = now;
+            this.fps = Math.round(1000 / (delta || 1));
+
+            this.update();
+            this.render();
+
+            const elEntities = document.getElementById('countEntities');
+            const elWhales = document.getElementById('countWhales');
+            const elFps = document.getElementById('fpsVal');
+
+            if (elEntities) elEntities.innerText = this.boids.length;
+            if (elWhales) elWhales.innerText = this.leviathans.length;
+            if (elFps) elFps.innerText = this.fps;
+
+            if (audio.ctx && !audio.isMuted) {
+                const bars = document.querySelectorAll('#audioBars .bar');
+                bars.forEach((bar, idx) => {
+                    const h = Math.sin(now * 0.008 + idx) * 8 + 12;
+                    bar.style.height = `${h}px`;
+                });
+            }
+
+            requestAnimationFrame(() => this.loop());
+        }
+    }
+
+    function initAetheria() {
+        const world = new TerrariumWorld();
+        world.loop();
+
+        const introOverlay = document.getElementById('introOverlay');
+        const startBtn = document.getElementById('startExperienceBtn');
+
+        if (window.location.search.includes('thumb=1')) {
+            if (introOverlay) introOverlay.style.display = 'none';
+        }
+
+        if (startBtn) {
+            startBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                audio.init();
+                if (introOverlay) introOverlay.classList.add('fade-out');
+            });
+        }
+
+        const dockTools = document.querySelectorAll('.dock-tool');
+        dockTools.forEach(tool => {
+            tool.addEventListener('click', () => {
+                dockTools.forEach(t => t.classList.remove('active'));
+                tool.classList.add('active');
+                world.activeTool = tool.dataset.tool;
+            });
+        });
+
+        const biomeBtns = document.querySelectorAll('.biome-btn');
+        biomeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                biomeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const biomeKey = btn.dataset.biome;
+                if (BIOMES[biomeKey]) {
+                    currentBiome = BIOMES[biomeKey];
+                    world.boids.forEach(b => {
+                        b.color = currentBiome.creatureColors[Math.floor(Math.random() * currentBiome.creatureColors.length)];
+                    });
+                    world.leviathans.forEach(l => {
+                        l.color = currentBiome.whaleColor;
+                    });
+                }
+            });
+        });
+
+        const btnTimeWarp = document.getElementById('btnTimeWarp');
+        const timeScaleText = document.getElementById('timeScaleText');
+        const timeSpeeds = [1.0, 0.3, 2.0];
+        let speedIdx = 0;
+
+        if (btnTimeWarp) {
+            btnTimeWarp.addEventListener('click', () => {
+                speedIdx = (speedIdx + 1) % timeSpeeds.length;
+                world.timeScale = timeSpeeds[speedIdx];
+                if (timeScaleText) timeScaleText.innerText = `${world.timeScale}x`;
+                btnTimeWarp.classList.toggle('active', world.timeScale !== 1.0);
+            });
+        }
+
+        const btnAudioToggle = document.getElementById('btnAudioToggle');
+        const audioStatusText = document.getElementById('audioStatusText');
+
+        if (btnAudioToggle) {
+            btnAudioToggle.addEventListener('click', () => {
+                if (!audio.ctx) audio.init();
+                const unmuted = audio.toggleMute();
+                if (audioStatusText) audioStatusText.innerText = unmuted ? "Sound On" : "Muted";
+                btnAudioToggle.classList.toggle('active', !unmuted);
+            });
+        }
+
+        const btnClear = document.getElementById('btnClear');
+        if (btnClear) {
+            btnClear.addEventListener('click', () => {
+                world.boids = [];
+                world.spores = [];
+                world.leviathans = [];
+            });
+        }
+
+        const thoughtInput = document.getElementById('thoughtInput');
+        const btnSendThought = document.getElementById('btnSendThought');
+
+        const infuseThought = () => {
+            if (!thoughtInput) return;
+            const val = thoughtInput.value.trim();
+            if (!val) return;
+
+            world.spawnSpore(world.width / 2, world.height / 2, true, `“${val}”`);
+            const essence = val.slice(0, 10);
+            world.spawnLeviathan(world.width / 2, world.height / 2, essence);
+
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    audio.playChime(i * 2, 0.08, (i - 2) * 0.3);
+                }, i * 140);
+            }
+
+            thoughtInput.value = "";
+            thoughtInput.blur();
+        };
+
+        if (btnSendThought) btnSendThought.addEventListener('click', infuseThought);
+        if (thoughtInput) {
+            thoughtInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') infuseThought();
+            });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAetheria);
+    } else {
+        initAetheria();
+    }
+    </script>
+</body>
+</html>

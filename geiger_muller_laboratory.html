@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -546,6 +546,78 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
     }
   </style>
+  <!-- Gauransh Bansal Security & IP Protection Layer -->
+  <style>
+    /* Protection & Anti-Scraping */
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    img, canvas {
+      -webkit-user-drag: none;
+      user-drag: none;
+      pointer-events: auto;
+    }
+  </style>
+  <script>
+    (function() {
+      'use strict';
+      // 1. Anti-Framing / Framebusting
+      try {
+        if (window.top !== window.self) {
+          window.top.location = window.self.location;
+        }
+      } catch(e) {
+        document.documentElement.innerHTML = '<div style="display:flex;height:100vh;align-items:center;justify-content:center;background:#030305;color:#fff;font-family:sans-serif;text-align:center;padding:20px;"><h2>Direct access only. Embedding is prohibited.<br><br>Copyright &copy; 2026 Gauransh Bansal. All rights reserved.</h2></div>';
+      }
+
+      // 2. Domain Lock & Local Environment Safety
+      const isLocal = window.location.protocol === 'file:' || 
+                      ['localhost', '127.0.0.1', '0.0.0.0', ''].includes(window.location.hostname) ||
+                      window.location.hostname.endsWith('.local');
+      
+      const ALLOWED_DOMAINS = [
+        'gauranshbansal.com',
+        'www.gauranshbansal.com',
+        'gauranshbansal.github.io'
+      ];
+
+      if (!isLocal && !ALLOWED_DOMAINS.some(d => window.location.hostname === d || window.location.hostname.endsWith('.' + d))) {
+        console.warn('Unauthorized domain detected.');
+      }
+
+      // 3. Disable Context Menu & Key Combos (DevTools, View Source, Save)
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+      }, false);
+
+      document.addEventListener('keydown', function(e) {
+        if (e.keyCode === 123) { // F12
+          e.preventDefault();
+          return false;
+        }
+        if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
+          e.preventDefault();
+          return false;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+          e.preventDefault();
+          return false;
+        }
+      }, false);
+
+      // 4. Console Security Notice
+      const noticeStyle = 'font-size: 13px; font-weight: bold; color: #00f0ff; background: #080c16; padding: 6px 10px; border-radius: 4px;';
+      const subStyle = 'font-size: 11px; color: #94a3b8; line-height: 1.5;';
+      console.log('%câš  PROPRIETARY INTELLECTUAL PROPERTY', noticeStyle);
+      console.log('%cAll source code, simulations, design assets, and architecture are strictly owned by Gauransh Bansal.\nUnauthorized copying, distribution, decompilation, or hosting is prohibited.\nCopyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
+    })();
+  </script>
+  <!-- End Security Layer -->
 </head>
 <body class="h-screen flex flex-col bg-slate-950 text-slate-100 select-none overflow-hidden" data-theme="standard">
 
