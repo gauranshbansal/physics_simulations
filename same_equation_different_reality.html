@@ -1,0 +1,2677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Same Equation, Different Reality</title>
+    
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #050505;
+            --surface-color: #111111;
+            --surface-hover: #1a1a1a;
+            --border-color: #2a2a2a;
+            --text-main: #e0e0e0;
+            --text-muted: #888888;
+            
+            /* System specific accents */
+            --color-mech: #d35400; /* Warm */
+            --color-elec: #2980b9; /* Cool */
+            --color-quant: #8e44ad; /* Ethereal */
+            --color-math: #f1c40f; /* Universal */
+
+            --font-ui: 'Inter', sans-serif;
+            --font-serif: 'Lora', serif;
+        }
+
+        /* Matrix Theme Styling */
+        body.theme-matrix {
+            --bg-color: #020a04;
+            --surface-color: #051408;
+            --surface-hover: #0a240f;
+            --border-color: #123e1b;
+            --text-main: #00ff66;
+            --text-muted: #00993d;
+            --color-mech: #00ff66;
+            --color-elec: #33ff88;
+            --color-quant: #00cc55;
+            --font-ui: 'Share Tech Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* Background Matrix Canvas */
+        #matrix-bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        body.theme-matrix #matrix-bg-canvas {
+            opacity: 0.25;
+        }
+
+        /* Scanline Overlay for Matrix Theme */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 99;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        body.theme-matrix .scanlines {
+            opacity: 0.4;
+        }
+
+        /* --- Scribble Canvas & Vertical Floating Widget Toolbar --- */
+        #scribble-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1050; /* Higher than isolation modal (1000) */
+            pointer-events: none;
+        }
+
+        body.mode-scribbling #scribble-canvas {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+
+        .scribble-toolbar {
+            position: fixed;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1090; /* Higher than isolation modal (1000) */
+            background: rgba(12, 12, 18, 0.94);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(168, 85, 247, 0.2);
+            border-radius: 14px;
+            padding: 1rem 0.8rem;
+            display: flex; /* Floating widget over everything */
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 140px;
+            transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, padding 0.3s ease, border-radius 0.3s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Cute Micro-Animations for Floating Badge Widget */
+        @keyframes cuteBadgePop {
+            0% { transform: translateY(-50%) scale(0.5); opacity: 0; }
+            60% { transform: translateY(-50%) scale(1.15); opacity: 1; }
+            80% { transform: translateY(-50%) scale(0.92); }
+            100% { transform: translateY(-50%) scale(1); }
+        }
+
+        @keyframes cuteGlowPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.35), 0 4px 15px rgba(0, 0, 0, 0.6); }
+            50% { box-shadow: 0 0 22px rgba(168, 85, 247, 0.8), 0 4px 20px rgba(168, 85, 247, 0.4); }
+        }
+
+        /* Minimized State (default on load, non-distracting pill) */
+        .scribble-toolbar.minimized,
+        .scribble-toolbar.drawing-active {
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border-radius: 22px;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            overflow: hidden;
+            opacity: 0.85;
+            background: rgba(168, 85, 247, 0.25);
+            border-color: #a855f7;
+            animation: cuteBadgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, cuteGlowPulse 3s infinite ease-in-out;
+        }
+
+        .scribble-toolbar.minimized:hover {
+            opacity: 1.0;
+            transform: translateY(-50%) scale(1.12);
+        }
+
+        .scribble-toolbar.minimized > *:not(.scribble-mini-badge),
+        .scribble-toolbar.drawing-active > *:not(.scribble-mini-badge) {
+            display: none !important;
+        }
+
+        .scribble-mini-badge {
+            display: none;
+            font-size: 1.2rem;
+            line-height: 1;
+            user-select: none;
+            color: #a855f7;
+        }
+
+        .scribble-toolbar.minimized .scribble-mini-badge,
+        .scribble-toolbar.drawing-active .scribble-mini-badge {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scribble-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 700;
+            color: #a855f7;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .scribble-group-title {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-top: 0.1rem;
+            text-align: center;
+        }
+
+        .scribble-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            width: 100%;
+        }
+
+        .scribble-tool-btn, .scribble-action-btn {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-size: 0.7rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .scribble-tool-btn:hover, .scribble-action-btn:hover {
+            background: var(--surface-hover);
+            border-color: var(--text-main);
+        }
+
+        .scribble-tool-btn.active {
+            background: #a855f7;
+            border-color: #a855f7;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* Power Toggle Button */
+        .scribble-power-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.45rem;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.25 ease;
+            width: 100%;
+        }
+        .scribble-power-btn.active {
+            background: #10b981;
+            border-color: #10b981;
+            color: #000;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+        }
+
+        .scribble-colors {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.4rem;
+            width: 100%;
+        }
+
+        .color-swatch {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.15);
+        }
+
+        .color-swatch.active {
+            border-color: #ffffff;
+            transform: scale(1.2);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .scribble-glow-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            font-size: 0.68rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.4rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .scribble-glow-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .scribble-slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Typography */
+        h1 {
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            margin-bottom: 0.2rem;
+            color: var(--text-main);
+            text-align: center;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        .author-tag {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+            text-align: center;
+        }
+        .author-tag a {
+            color: #3b82f6;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .author-tag a:hover {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+
+        /* Layout */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 2rem 0 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Central Equation Area */
+        .central-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 0;
+            min-height: 250px;
+            position: relative;
+        }
+
+        .main-equation {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+            transition: all 0.5s ease;
+        }
+
+        .equation-label {
+            position: absolute;
+            top: 0;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+        }
+
+        /* Conceptual Climax Transformation Banner */
+        .transform-banner {
+            display: none;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px solid #10b981;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            max-width: 850px;
+            animation: pulseGlow 2s infinite ease-in-out alternate;
+        }
+        .transform-banner.visible {
+            display: block;
+        }
+
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+            to { box-shadow: 0 0 25px rgba(16, 185, 129, 0.4); }
+        }
+
+        .transform-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            color: var(--text-main);
+            flex-wrap: wrap;
+        }
+
+        .transform-step-box {
+            background: var(--surface-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Controls */
+        .master-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        /* Custom Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--text-main);
+            cursor: pointer;
+            margin-top: -7px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 2px;
+            cursor: pointer;
+            background: var(--border-color);
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* The Three Worlds Grid */
+        .worlds-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .world-panel {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        /* Non-overlapping Flex Header */
+        .world-header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .world-title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 0.5rem;
+        }
+
+        .world-title {
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-weight: 600;
+            text-align: left;
+            flex: 1;
+            transition: color 0.3s ease;
+        }
+
+        .isolate-btn-small {
+            position: static;
+            flex-shrink: 0;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
+        }
+        .isolate-btn-small:hover {
+            color: var(--text-main);
+            border-color: var(--text-main);
+            background: var(--surface-hover);
+        }
+
+        .tier-badge {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            align-self: flex-start;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .world-math {
+            margin-top: 0.3rem;
+            font-size: 1.1rem;
+            min-height: 2.2rem;
+            text-align: center;
+        }
+        
+        .math-interpretation {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.1rem;
+            min-height: 1.2rem;
+            text-align: center;
+            font-family: var(--font-serif);
+        }
+
+        .canvas-container {
+            width: 100%;
+            aspect-ratio: 4/3;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .energy-bar-container {
+            width: 100%;
+            height: 60px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+
+        .energy-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 100%;
+        }
+
+        .energy-bar {
+            width: 20px;
+            background: var(--border-color);
+            border-radius: 2px 2px 0 0;
+            transition: height 0.05s linear;
+        }
+        
+        .energy-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Specific accents */
+        #mech-panel .world-title { color: var(--color-mech); }
+        #elec-panel .world-title { color: var(--color-elec); }
+        #quant-panel .world-title { color: var(--color-quant); }
+
+        /* Multiverse Unlocked Grid Section & Progression Banner */
+        .multiverse-wrapper {
+            display: none;
+            flex-direction: column;
+            gap: 2rem;
+            width: 100%;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px dashed var(--border-color);
+        }
+        .multiverse-wrapper.visible {
+            display: flex;
+        }
+
+        .progression-banner {
+            text-align: center;
+            background: var(--surface-hover);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .progression-title {
+            font-size: 1.1rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #10b981;
+            margin-bottom: 0.5rem;
+        }
+        .progression-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            max-width: 850px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .multiverse-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            width: 100%;
+        }
+
+        /* Bottom Controls */
+        .action-bar {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 3rem;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border-color);
+            width: 100%;
+        }
+
+        button {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.2rem;
+            font-family: var(--font-ui);
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            color: var(--text-main);
+            border-color: var(--text-muted);
+            background: var(--surface-hover);
+        }
+
+        button.active {
+            color: var(--bg-color);
+            background: var(--text-main);
+            border-color: var(--text-main);
+        }
+
+        button.btn-matrix-highlight {
+            border-color: #00ff66;
+            color: #00ff66;
+        }
+
+        /* Params Overlay (Hidden by default) */
+        .params-overlay {
+            display: none;
+            width: 100%;
+            background: var(--surface-hover);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+        .params-overlay.visible {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            text-align: center;
+        }
+
+        /* Modes */
+        body.mode-hidden-identities .world-title[data-original="Mechanical"]::before { content: "SYSTEM A"; }
+        body.mode-hidden-identities .world-title[data-original="Electrical"]::before { content: "SYSTEM B"; }
+        body.mode-hidden-identities .world-title[data-original="Quantum"]::before { content: "SYSTEM C"; }
+        body.mode-hidden-identities .world-title { color: var(--text-main) !important; font-size: 0; }
+        body.mode-hidden-identities .world-title::before { font-size: 0.85rem; }
+        
+        body.mode-hidden-identities .world-math,
+        body.mode-hidden-identities .math-interpretation { opacity: 0; }
+        body.mode-hidden-identities .energy-label { opacity: 0; }
+
+        /* Tooltip/Helper text */
+        .conceptual-note {
+            text-align: center;
+            max-width: 750px;
+            margin: 2rem auto;
+            font-style: italic;
+            color: var(--text-muted);
+            font-family: var(--font-serif);
+        }
+
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 2rem;
+        }
+        footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* SYSTEM ISOLATION MODAL / FOCUS EXPLORATION (OPTIMIZED SOLID BG, NO HEAVY BLUR) */
+        .isolation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #080808;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        body.theme-matrix .isolation-overlay { background: #020a04; }
+
+        .isolation-overlay.visible {
+            display: flex;
+            animation: fadeIn 0.2s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .isolation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .isolation-title {
+            font-size: 1.3rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-main);
+        }
+
+        .iso-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--surface-hover);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .split-view {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            flex: 1;
+        }
+
+        @media (max-width: 900px) {
+            .worlds-container { grid-template-columns: 1fr; }
+            .params-overlay.visible { grid-template-columns: 1fr; }
+            .split-view { grid-template-columns: 1fr; }
+        }
+
+        .iso-left-pane {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .iso-canvas-container {
+            width: 100%;
+            aspect-ratio: 4/3;
+            position: relative;
+            background: #000;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .iso-right-pane {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+            max-height: calc(100vh - 160px);
+        }
+
+        .iso-section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.4rem;
+        }
+
+        .iso-eq-box {
+            background: var(--surface-hover);
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 1.3rem;
+        }
+
+        .iso-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        .iso-table th, .iso-table td {
+            padding: 0.6rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+        .iso-table th {
+            color: var(--text-muted);
+            font-weight: normal;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Matrix Background Rain Canvas -->
+    <canvas id="matrix-bg-canvas"></canvas>
+    <div class="scanlines"></div>
+
+    <!-- Full-Screen Interactive Scribble Overlay Canvas -->
+    <canvas id="scribble-canvas"></canvas>
+
+    <!-- Vertical Floating Writing/Scribble Toolbar Widget (Starts Minimized by Default on Load) -->
+    <div class="scribble-toolbar minimized" id="scribble-toolbar">
+        <div class="scribble-mini-badge" id="scribble-mini-badge" title="Expand Scribble Toolbar">✎</div>
+
+        <div class="scribble-title">
+            <span>Scribble</span>
+            <button id="btn-scribble-minimize" title="Minimize / Collapse Toolbar" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:0 4px; font-size:0.8rem;">◀</button>
+        </div>
+
+        <!-- Power / Activate Toggle Button -->
+        <button class="scribble-power-btn" id="btn-scribble-power">Activate</button>
+
+        <!-- Mode Selector: Pen, Highlighter, Eraser -->
+        <div class="scribble-group">
+            <button class="scribble-tool-btn active" id="tool-pen" title="Pen Mode">Pen</button>
+            <button class="scribble-tool-btn" id="tool-highlighter" title="Highlighter Mode">Marker</button>
+            <button class="scribble-tool-btn" id="tool-eraser" title="Eraser Mode">Eraser</button>
+        </div>
+
+        <!-- Color Palette -->
+        <div class="scribble-group-title">Colors</div>
+        <div class="scribble-colors">
+            <div class="color-swatch active" data-color="#38bdf8" style="background:#38bdf8;" title="Neon Cyan"></div>
+            <div class="color-swatch" data-color="#10b981" style="background:#10b981;" title="Neon Emerald"></div>
+            <div class="color-swatch" data-color="#f43f5e" style="background:#f43f5e;" title="Neon Pink"></div>
+            <div class="color-swatch" data-color="#fbbf24" style="background:#fbbf24;" title="Electric Gold"></div>
+            <div class="color-swatch" data-color="#ffffff" style="background:#ffffff;" title="White"></div>
+            <div class="color-swatch" data-color="#00ff66" style="background:#00ff66;" title="Matrix Green"></div>
+        </div>
+
+        <!-- Glow Feature Toggle -->
+        <div class="scribble-glow-toggle" id="btn-glow-toggle" title="Toggle Neon Glow Effect">
+            Glow: <span id="glow-status" style="color:#10b981; font-weight:bold;">ON</span>
+        </div>
+
+        <!-- Stroke Size Slider -->
+        <div class="scribble-group-title">Thickness</div>
+        <div class="scribble-slider-wrap">
+            <input type="range" id="scribble-size" min="2" max="30" value="4" style="width:65px;">
+            <span id="scribble-size-val">4px</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="scribble-group" style="margin-top:0.4rem;">
+            <button class="scribble-action-btn" id="btn-scribble-undo" title="Undo Last Stroke">Undo</button>
+            <button class="scribble-action-btn" id="btn-scribble-clear" title="Clear All Drawings">Clear</button>
+            <button class="scribble-action-btn" id="btn-scribble-close" style="border-color:#f43f5e; color:#f43f5e;">Close</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Same Equation, Different Reality</h1>
+            <div class="subtitle">One mathematical structure. Different physical realizations.</div>
+            <div class="author-tag">
+                Developed by <span style="color:var(--text-main); font-weight:600;">Gauransh Bansal</span> — 
+                <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a>
+            </div>
+        </header>
+
+        <div class="central-stage">
+            <div class="equation-label" id="eq-label">Universal Structure</div>
+            <div class="main-equation" id="main-eq"></div>
+
+            <!-- Nondimensionalization Transformation Banner -->
+            <div class="transform-banner" id="transform-banner">
+                <div style="font-size: 0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:0.15em; color:#10b981;">
+                    ⚡ Conceptual Climax: Nondimensionalization Transformation
+                </div>
+                <div class="transform-steps">
+                    <div class="transform-step-box">Different symbols & physical units</div>
+                    <div>➔</div>
+                    <div class="transform-step-box" style="border-color:#10b981; color:#10b981;">Define τ = ωt, u = state</div>
+                    <div>➔</div>
+                    <div class="transform-step-box" style="background:#10b981; color:#000; font-weight:700;">d²u/dτ² + u = 0</div>
+                </div>
+            </div>
+            
+            <div class="master-controls">
+                <div class="control-group">
+                    <div class="control-header">
+                        <span>ANGULAR FREQUENCY</span>
+                        <span id="omega-display">ω = 2.00 rad/s</span>
+                    </div>
+                    <input type="range" id="omega-slider" min="0.5" max="4.0" step="0.01" value="2.0">
+                </div>
+            </div>
+        </div>
+
+        <div class="worlds-container">
+            <!-- Mechanical World -->
+            <div class="world-panel" id="mech-panel">
+                <div class="world-header">
+                    <div class="world-title-bar">
+                        <div class="world-title" data-original="Mechanical">Mechanical</div>
+                        <button class="isolate-btn-small" onclick="isolateSystem('mech')">Isolate</button>
+                    </div>
+                    <div class="tier-badge">Level 1: Classical</div>
+                    <div class="world-math" id="math-mech"></div>
+                    <div class="math-interpretation" id="interp-mech"></div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="canvas-mech"></canvas>
+                </div>
+                <div class="energy-bar-container">
+                    <div class="energy-col">
+                        <div class="energy-bar" id="bar-mech-k" style="background: var(--color-mech);"></div>
+                        <div class="energy-label">Kinetic</div>
+                    </div>
+                    <div class="energy-col">
+                        <div class="energy-bar" id="bar-mech-u" style="background: var(--text-muted);"></div>
+                        <div class="energy-label">Potential</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Electrical World -->
+            <div class="world-panel" id="elec-panel">
+                <div class="world-header">
+                    <div class="world-title-bar">
+                        <div class="world-title" data-original="Electrical">Electrical</div>
+                        <button class="isolate-btn-small" onclick="isolateSystem('elec')">Isolate</button>
+                    </div>
+                    <div class="tier-badge">Level 1: Classical</div>
+                    <div class="world-math" id="math-elec"></div>
+                    <div class="math-interpretation" id="interp-elec"></div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="canvas-elec"></canvas>
+                </div>
+                <div class="energy-bar-container">
+                    <div class="energy-col">
+                        <div class="energy-bar" id="bar-elec-m" style="background: var(--color-elec);"></div>
+                        <div class="energy-label">Magnetic</div>
+                    </div>
+                    <div class="energy-col">
+                        <div class="energy-bar" id="bar-elec-e" style="background: var(--text-muted);"></div>
+                        <div class="energy-label">Electric</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantum World -->
+            <div class="world-panel" id="quant-panel">
+                <div class="world-header">
+                    <div class="world-title-bar">
+                        <div class="world-title" data-original="Quantum">Quantum</div>
+                        <button class="isolate-btn-small" onclick="isolateSystem('quant')">Isolate</button>
+                    </div>
+                    <div class="tier-badge">Level 2: Quantum Field</div>
+                    <div class="world-math" id="math-quant"></div>
+                    <div class="math-interpretation" id="interp-quant"></div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="canvas-quant"></canvas>
+                </div>
+                <div class="energy-bar-container" style="justify-content: center; align-items: center; border:none; height:auto; margin-top:0">
+                   <div style="font-size: 0.8rem; color: var(--text-muted); text-align:center;">
+                       Probability Density Profile <span style="font-family: var(--font-serif)">|Ψ|²</span>
+                   </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10 Realities Escalation Wrapper -->
+        <div class="multiverse-wrapper" id="multiverse-wrapper">
+            <div class="progression-banner">
+                <div class="progression-title">Spectrum of Realities: How Far Does The Structure Travel?</div>
+                <div class="progression-sub">
+                    From everyday classical physics → microscopic quantum fields → living biological networks → mind-bending economic & AI algorithms. Click <b>Normalize Form</b> to strip away physical units and witness them all collapse into the exact same dimensionless equation <span id="banner-norm-eq"></span>!
+                </div>
+            </div>
+            
+            <div class="multiverse-container" id="multiverse-container">
+                <!-- Dynamically populated when clicking Unlock 10 Realities -->
+            </div>
+        </div>
+        
+        <div class="params-overlay" id="params-display">
+            <div>
+                <div id="param-math-mech"></div>
+                <div style="color:var(--text-muted); margin-top:0.5rem">m = <span id="val-m"></span>, k = <span id="val-k"></span></div>
+            </div>
+            <div>
+                <div id="param-math-elec"></div>
+                <div style="color:var(--text-muted); margin-top:0.5rem">L = <span id="val-l"></span>, C = <span id="val-c"></span></div>
+            </div>
+            <div>
+                <div id="param-math-quant"></div>
+                <div style="color:var(--text-muted); margin-top:0.5rem">ΔE = ℏω</div>
+            </div>
+        </div>
+
+        <div class="conceptual-note" id="concept-note">
+            The mathematical pattern survives even when the physical objects change.
+        </div>
+
+        <div class="action-bar">
+            <button id="btn-identities">Hide Identities</button>
+            <button id="btn-normalize" style="border-color:#10b981;">Normalize Form</button>
+            <button id="btn-params">Show Parameters</button>
+            <button id="btn-quantum-state">Toggle Quantum State</button>
+            <button id="btn-unlock-multiverse" style="border-color:#3b82f6; color:#3b82f6;">Unlock 10 Realities</button>
+            <button id="btn-matrix-theme" class="btn-matrix-highlight">Matrix Theme</button>
+            <button id="btn-matrix-music" class="btn-matrix-highlight" style="border-color:#00ff66; color:#00ff66;">🎵 Matrix Music (OFF)</button>
+        </div>
+
+        <footer>
+            Developed by <strong>Gauransh Bansal</strong> | Interactive Physics & Dynamical Systems Lab <br>
+            <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer">Connect on LinkedIn ↗</a>
+        </footer>
+    </div>
+
+    <!-- ISOLATION OVERLAY -->
+    <div class="isolation-overlay" id="isolation-overlay">
+        <div class="isolation-header">
+            <div class="isolation-title" id="iso-title">System Isolated</div>
+            
+            <!-- Synchronized Frequency Control inside Isolated View -->
+            <div class="iso-controls">
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">Frequency (ω)</span>
+                <input type="range" id="iso-omega-slider" min="0.5" max="4.0" step="0.01" value="2.0" style="width:120px;">
+                <span id="iso-omega-display" style="font-size: 0.8rem; font-weight: 600; color: var(--text-main); min-width: 75px;">ω = 2.00</span>
+            </div>
+
+            <button onclick="closeIsolation()">✕ Exit Isolation</button>
+        </div>
+        <div class="split-view">
+            <div class="iso-left-pane">
+                <div class="iso-canvas-container">
+                    <canvas id="canvas-isolated"></canvas>
+                </div>
+            </div>
+            <div class="iso-right-pane">
+                <div>
+                    <div class="iso-section-title">Governing Differential Equation</div>
+                    <div class="iso-eq-box" id="iso-math"></div>
+                </div>
+
+                <div>
+                    <div class="iso-section-title">Variable & Physical Mapping</div>
+                    <table class="iso-table">
+                        <thead>
+                            <tr>
+                                <th>Math Symbol</th>
+                                <th>System Variable</th>
+                                <th>Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody id="iso-table-body"></tbody>
+                    </table>
+                </div>
+
+                <div>
+                    <div class="iso-section-title">Intuitive Mechanism</div>
+                    <p id="iso-explanation" style="font-size:0.95rem; color:var(--text-main); line-height:1.7; margin-top:0.5rem;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Use explicit color values for Canvas rendering
+        const COLORS = {
+            mech: '#d35400',
+            elec: '#2980b9',
+            quant: '#8e44ad',
+            hidden: '#ffffff'
+        };
+
+        // Multiverse 10 Realities Data arranged in Progressive Escalation Spectrum
+        const MULTIVERSE_SYSTEMS = [
+            // LEVEL 1: CLASSICAL PHYSICS
+            {
+                key: 'helmholtz',
+                title: '1. Acoustic Resonator',
+                tag: 'Helmholtz Bottle',
+                tier: 'Level 1: Classical Physics',
+                color: '#e67e22',
+                eq: 'V \\ddot{P} + \\frac{A^2 c^2}{L} P = 0',
+                interp: 'P ∝ acoustic pressure, τ = ωt',
+                mapping: [
+                    ['u', 'P(t)', 'Acoustic pressure fluctuation inside bottle cavity'],
+                    ['\\dot{u}', 'Q(t)', 'Air volume velocity flow through bottle neck'],
+                    ['\\omega^2', '\\frac{A^2 c^2}{V L}', 'Air neck inertia & cavity volume elasticity ratio']
+                ],
+                explanation: 'Blowing across a bottle neck traps air in the neck like a heavy piston pushing against compressed air inside the bottle, causing pure acoustic oscillation.'
+            },
+            {
+                key: 'torsional',
+                title: '2. Watch Balance Wheel',
+                tag: 'Torsional Hairspring',
+                tier: 'Level 1: Classical Physics',
+                color: '#f1c40f',
+                eq: 'I \\ddot{\\theta} + \\kappa \\theta = 0',
+                interp: '\\theta ∝ rotational angle, τ = ωt',
+                mapping: [
+                    ['u', '\\theta(t)', 'Angular displacement of balance wheel'],
+                    ['\\dot{u}', '\\Omega(t)', 'Angular rotational velocity'],
+                    ['\\omega^2', '\\frac{\\kappa}{I}', 'Hairspring torque stiffness divided by wheel moment of inertia']
+                ],
+                explanation: 'Mechanical watches keep time using a balance wheel rotating under the restoring torque of a coiled hairspring.'
+            },
+            {
+                key: 'utube',
+                title: '3. U-Tube Fluid Sloshing',
+                tag: 'Fluid Gravity Oscillator',
+                tier: 'Level 1: Classical Physics',
+                color: '#16a085',
+                eq: 'L \\ddot{y} + g y = 0',
+                interp: 'y ∝ liquid height level, τ = ωt',
+                mapping: [
+                    ['u', 'y(t)', 'Liquid height displacement above rest level'],
+                    ['\\dot{u}', 'v(t)', 'Fluid sloshing flow velocity'],
+                    ['\\omega^2', '\\frac{g}{L}', 'Gravity per total liquid column length']
+                ],
+                explanation: 'Hydrostatic pressure difference in a U-tube pulls displaced liquid downward. Fluid inertia causes it to overshoot equilibrium, sloshing indefinitely.'
+            },
+
+            // LEVEL 2: MICROSCOPIC & FIELD PHYSICS
+            {
+                key: 'optical',
+                title: '4. Optical Laser Cavity',
+                tag: 'Fabry-Pérot Standing Wave',
+                tier: 'Level 2: Micro & Field Physics',
+                color: '#9b59b6',
+                eq: '\\ddot{E} + \\omega_0^2 E = 0',
+                interp: 'E ∝ electric field, τ = ωt',
+                mapping: [
+                    ['u', 'E(t)', 'Optical electric field vector amplitude'],
+                    ['\\dot{u}', 'B(t)', 'Magnetic field flux rate of change'],
+                    ['\\omega^2', '\\omega_0^2', 'Resonant optical cavity frequency']
+                ],
+                explanation: 'Trapped light waves bouncing between two parallel mirrors continuously interchange energy between electric and magnetic field vectors.'
+            },
+            {
+                key: 'diatomic',
+                title: '5. Diatomic Bond Stretch (H₂)',
+                tag: 'Covalent Molecular Bond',
+                tier: 'Level 2: Micro & Field Physics',
+                color: '#2ecc71',
+                eq: '\\mu \\ddot{r} + k_b (r - r_0) = 0',
+                interp: 'r ∝ interatomic distance, τ = ωt',
+                mapping: [
+                    ['u', 'r(t) - r_0', 'Bond length displacement from equilibrium'],
+                    ['\\dot{u}', 'v_{rel}', 'Relative vibrational velocity of nuclei'],
+                    ['\\omega^2', '\\frac{k_b}{\\mu}', 'Chemical bond spring constant per reduced mass']
+                ],
+                explanation: 'Covalent chemical bonds behave like microscopic quantum springs, oscillating at discrete infrared vibrational frequencies.'
+            },
+            {
+                key: 'plasma',
+                title: '6. Plasma Langmuir Waves',
+                tag: 'Ionospheric Space Plasma',
+                tier: 'Level 2: Micro & Field Physics',
+                color: '#3498db',
+                eq: '\\ddot{x}_e + \\omega_p^2 x_e = 0',
+                interp: 'x_e ∝ electron displacement, τ = ωt',
+                mapping: [
+                    ['u', 'x_e(t)', 'Electron cloud displacement relative to ions'],
+                    ['\\dot{u}', 'v_e(t)', 'Electron drift velocity'],
+                    ['\\omega^2', '\\omega_p^2', 'Plasma frequency parameter']
+                ],
+                explanation: 'Displacing light mobile electrons relative to heavy ion background creates a space-charge electrostatic restoring force, causing the electron sea to ring.'
+            },
+
+            // LEVEL 3: LIVING BIOLOGICAL SYSTEMS
+            {
+                key: 'neuronal',
+                title: '7. Neuronal Voltage Ringing',
+                tag: 'Subthreshold Membrane Potential',
+                tier: 'Level 3: Living Biological Systems',
+                color: '#a855f7',
+                eq: 'C_m \\ddot{V}_m + \\frac{1}{L_m} V_m = 0',
+                interp: 'V_m ∝ membrane potential, τ = ωt',
+                mapping: [
+                    ['u', 'V_m(t)', 'Subthreshold voltage oscillation'],
+                    ['\\dot{u}', 'I_m(t)', 'Transmembrane ion current'],
+                    ['\\omega^2', '\\frac{1}{L_m C_m}', 'Ion channel inductance & lipid capacitance coupling']
+                ],
+                explanation: 'Before generating an action potential spike, biological neuron membrane potentials ring harmonically due to voltage-gated ion channel inductance coupling with lipid bilayer capacitance!'
+            },
+            {
+                key: 'predator',
+                title: '8. Predator-Prey Cycle',
+                tag: 'Linearized Lotka-Volterra',
+                tier: 'Level 3: Living Biological Systems',
+                color: '#2ecc71',
+                eq: '\\ddot{x} + (\\alpha \\beta) x = 0',
+                interp: 'x ∝ prey population deviation, τ = ωt',
+                mapping: [
+                    ['u', 'x(t)', 'Prey population deviation from equilibrium'],
+                    ['\\dot{u}', 'y(t)', 'Predator population growth rate deviation'],
+                    ['\\omega^2', '\\alpha \\beta', 'Predator consumption and prey growth product']
+                ],
+                explanation: 'Abundant prey leads to predator growth, which reduces prey, causing predator starvation and starting the cycle anew — oscillating like a pendulum!'
+            },
+
+            // LEVEL 4: MIND-BENDING ABSTRACT REALITIES
+            {
+                key: 'cobweb',
+                title: '9. Economic Business Cycle',
+                tag: 'Market Cobweb Model',
+                tier: 'Level 4: Mind-Blowing Abstract Systems 🤯',
+                color: '#e74c3c',
+                eq: '\\ddot{P} + \\omega_e^2 (P - P^*) = 0',
+                interp: 'P ∝ market price, τ = ωt',
+                mapping: [
+                    ['u', 'P(t) - P^*', 'Price deviation from equilibrium P*'],
+                    ['\\dot{u}', '\\Delta Q(t)', 'Rate of inventory oversupply / shortage'],
+                    ['\\omega^2', '\\omega_e^2', 'Production lag elasticity coefficient']
+                ],
+                explanation: 'Wait... price overshoots in agriculture and stock markets follow Hooke\'s Law! Production lags behind price signals, causing market price to bounce back and forth around equilibrium.'
+            },
+            {
+                key: 'aimomentum',
+                title: '10. AI Model Momentum Optimizer',
+                tag: 'Gradient Descent Loss Valley',
+                tier: 'Level 4: Mind-Blowing Abstract Systems 🤯',
+                color: '#10b981',
+                eq: '\\ddot{\\theta} + \\gamma \\dot{\\theta} + (\\nabla^2 L) \\theta = 0',
+                interp: '\\theta ∝ neural net parameter weight, τ = ωt',
+                mapping: [
+                    ['u', '\\theta(t) - \\theta^*', 'AI model weight parameter deviation from loss minimum'],
+                    ['\\dot{u}', 'v_\\theta', 'Optimizer momentum update velocity'],
+                    ['\\omega^2', '\\nabla^2 L', 'Loss function local curvature / Hessian matrix']
+                ],
+                explanation: 'Mind-blowing realization: Neural Network training momentum (SGD Momentum / Adam) ringing in a loss valley is mathematically the EXACT SAME PHYSICAL OSCILLATOR!'
+            }
+        ];
+
+        // --- State Management ---
+        const state = {
+            t: 0,
+            dt: 0.016,
+            omega: 2.0,
+            amplitude: 1.0,
+            
+            modes: {
+                hidden: false,
+                normalized: false,
+                showParams: false,
+                quantumSuperposition: true,
+                multiverseUnlocked: false,
+                matrixTheme: false
+            },
+
+            isolatedKey: null,
+
+            mech: { m: 1.0, get k() { return this.m * state.omega * state.omega; } },
+            elec: { L: 1.0, get C() { return 1.0 / (this.L * state.omega * state.omega); } }
+        };
+
+        // --- WebAudio UI Button Click Sound Feedback Engine ---
+        let uiAudioCtx = null;
+
+        function playUiClickSound(type = 'click') {
+            try {
+                if (!uiAudioCtx) {
+                    uiAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (uiAudioCtx.state === 'suspended') {
+                    uiAudioCtx.resume();
+                }
+                const now = uiAudioCtx.currentTime;
+                const osc = uiAudioCtx.createOscillator();
+                const gain = uiAudioCtx.createGain();
+
+                osc.type = 'sine';
+
+                if (type === 'toggle') {
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(2400, now + 0.03);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                    osc.connect(gain);
+                    gain.connect(uiAudioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                } else {
+                    osc.frequency.setValueAtTime(1400, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.02);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+                    osc.connect(gain);
+                    gain.connect(uiAudioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.025);
+                }
+            } catch(e) {}
+        }
+
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('button, .color-swatch, .scribble-glow-toggle, .isolate-btn-small, input[type="range"]');
+            if (btn) {
+                const isToggle = btn.classList.contains('active') || (btn.id && (btn.id.includes('power') || btn.id.includes('theme') || btn.id.includes('music')));
+                playUiClickSound(isToggle ? 'toggle' : 'click');
+            }
+        });
+
+        // --- DOM Elements ---
+        const els = {
+            mainEq: document.getElementById('main-eq'),
+            eqLabel: document.getElementById('eq-label'),
+            transformBanner: document.getElementById('transform-banner'),
+            omegaSlider: document.getElementById('omega-slider'),
+            omegaDisplay: document.getElementById('omega-display'),
+            isoOmegaSlider: document.getElementById('iso-omega-slider'),
+            isoOmegaDisplay: document.getElementById('iso-omega-display'),
+            
+            mathMech: document.getElementById('math-mech'),
+            mathElec: document.getElementById('math-elec'),
+            mathQuant: document.getElementById('math-quant'),
+
+            interpMech: document.getElementById('interp-mech'),
+            interpElec: document.getElementById('interp-elec'),
+            interpQuant: document.getElementById('interp-quant'),
+            
+            canvases: {
+                mech: document.getElementById('canvas-mech'),
+                elec: document.getElementById('canvas-elec'),
+                quant: document.getElementById('canvas-quant')
+            },
+            
+            bars: {
+                mechK: document.getElementById('bar-mech-k'),
+                mechU: document.getElementById('bar-mech-u'),
+                elecM: document.getElementById('bar-elec-m'),
+                elecE: document.getElementById('bar-elec-e')
+            },
+
+            btns: {
+                identities: document.getElementById('btn-identities'),
+                normalize: document.getElementById('btn-normalize'),
+                params: document.getElementById('btn-params'),
+                quantumState: document.getElementById('btn-quantum-state'),
+                unlockMultiverse: document.getElementById('btn-unlock-multiverse'),
+                matrixTheme: document.getElementById('btn-matrix-theme')
+            },
+            
+            paramsDisplay: document.getElementById('params-display'),
+            conceptNote: document.getElementById('concept-note'),
+            multiverseWrapper: document.getElementById('multiverse-wrapper'),
+            multiverseContainer: document.getElementById('multiverse-container')
+        };
+
+        // Contexts
+        const ctx = {
+            mech: els.canvases.mech.getContext('2d'),
+            elec: els.canvases.elec.getContext('2d'),
+            quant: els.canvases.quant.getContext('2d')
+        };
+
+        // --- Matrix Background Rain Engine ---
+        const matrixCanvas = document.getElementById('matrix-bg-canvas');
+        const matrixCtx = matrixCanvas.getContext('2d');
+        let matrixCols = [];
+
+        function initMatrix() {
+            matrixCanvas.width = window.innerWidth;
+            matrixCanvas.height = window.innerHeight;
+            const cols = Math.floor(matrixCanvas.width / 16);
+            matrixCols = Array(cols).fill(0).map(() => Math.floor(Math.random() * -100));
+        }
+
+        function drawMatrix() {
+            if (!state.modes.matrixTheme) return;
+            matrixCtx.fillStyle = 'rgba(2, 10, 4, 0.08)';
+            matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+            matrixCtx.fillStyle = '#00ff66';
+            matrixCtx.font = '14px "Share Tech Mono", monospace';
+
+            const chars = '0123456789ABCDEFΣ∫∂d²/dt²ωuτΨ';
+            for (let i = 0; i < matrixCols.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                const x = i * 16;
+                const y = matrixCols[i] * 16;
+                matrixCtx.fillText(char, x, y);
+                if (y > matrixCanvas.height && Math.random() > 0.975) matrixCols[i] = 0;
+                matrixCols[i]++;
+            }
+        }
+
+        // --- Interactive Scribble & Floating Widget Engine ---
+        const scribbleCanvas = document.getElementById('scribble-canvas');
+        const scribbleCtx = scribbleCanvas.getContext('2d');
+        const scribbleToolbar = document.getElementById('scribble-toolbar');
+        const btnMinimize = document.getElementById('btn-scribble-minimize');
+        const btnPower = document.getElementById('btn-scribble-power');
+
+        const scribbleState = {
+            active: false,
+            mode: 'pen', // 'pen', 'highlighter', 'eraser'
+            color: '#38bdf8',
+            size: 4,
+            glow: true,
+            drawing: false,
+            manualMinimized: true, // Default minimized/collapsed on page load
+            history: [],
+            lastX: 0,
+            lastY: 0
+        };
+
+        function setScribbleActive(active) {
+            scribbleState.active = active;
+            document.body.classList.toggle('mode-scribbling', active);
+            btnPower.classList.toggle('active', active);
+            btnPower.innerText = active ? 'Active (ON)' : 'Activate';
+            if (active) resizeScribbleCanvas();
+        }
+
+        function resizeScribbleCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            let imgData = null;
+            if (scribbleCanvas.width > 0 && scribbleCanvas.height > 0) {
+                try {
+                    imgData = scribbleCtx.getImageData(0, 0, scribbleCanvas.width, scribbleCanvas.height);
+                } catch(e) {}
+            }
+            scribbleCanvas.width = Math.floor(window.innerWidth * dpr);
+            scribbleCanvas.height = Math.floor(window.innerHeight * dpr);
+            scribbleCtx.scale(dpr, dpr);
+            if (imgData) {
+                try {
+                    scribbleCtx.putImageData(imgData, 0, 0);
+                } catch(e) {}
+            }
+        }
+        window.addEventListener('resize', resizeScribbleCanvas);
+
+        function saveScribbleState() {
+            if (scribbleCanvas.width > 0 && scribbleCanvas.height > 0) {
+                try {
+                    scribbleState.history.push(scribbleCtx.getImageData(0, 0, scribbleCanvas.width, scribbleCanvas.height));
+                    if (scribbleState.history.length > 20) scribbleState.history.shift();
+                } catch(e) {}
+            }
+        }
+
+        function undoScribble() {
+            if (scribbleState.history.length > 0) {
+                const lastState = scribbleState.history.pop();
+                try {
+                    scribbleCtx.putImageData(lastState, 0, 0);
+                } catch(e) {}
+            } else {
+                scribbleCtx.clearRect(0, 0, scribbleCanvas.width, scribbleCanvas.height);
+            }
+        }
+
+        function clearScribble() {
+            saveScribbleState();
+            scribbleCtx.clearRect(0, 0, scribbleCanvas.width, scribbleCanvas.height);
+        }
+
+        function getScribblePos(e) {
+            if (e.touches && e.touches.length > 0) {
+                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+            return { x: e.clientX, y: e.clientY };
+        }
+
+        function startDrawing(e) {
+            if (!scribbleState.active) return;
+            saveScribbleState();
+            scribbleState.drawing = true;
+            scribbleToolbar.classList.add('drawing-active');
+            const pos = getScribblePos(e);
+            scribbleState.lastX = pos.x;
+            scribbleState.lastY = pos.y;
+        }
+
+        function drawScribble(e) {
+            if (!scribbleState.active || !scribbleState.drawing) return;
+            if (e.cancelable) e.preventDefault();
+            const pos = getScribblePos(e);
+
+            scribbleCtx.save();
+            scribbleCtx.lineCap = 'round';
+            scribbleCtx.lineJoin = 'round';
+
+            if (scribbleState.mode === 'eraser') {
+                scribbleCtx.globalCompositeOperation = 'destination-out';
+                scribbleCtx.lineWidth = scribbleState.size * 3;
+                scribbleCtx.shadowBlur = 0;
+            } else if (scribbleState.mode === 'highlighter') {
+                scribbleCtx.globalCompositeOperation = 'source-over';
+                scribbleCtx.globalAlpha = 0.4;
+                scribbleCtx.strokeStyle = scribbleState.color;
+                scribbleCtx.lineWidth = scribbleState.size * 3.5;
+                if (scribbleState.glow) {
+                    scribbleCtx.shadowBlur = 10;
+                    scribbleCtx.shadowColor = scribbleState.color;
+                } else {
+                    scribbleCtx.shadowBlur = 0;
+                }
+            } else { // Pen mode
+                scribbleCtx.globalCompositeOperation = 'source-over';
+                scribbleCtx.globalAlpha = 1.0;
+                scribbleCtx.strokeStyle = scribbleState.color;
+                scribbleCtx.lineWidth = scribbleState.size;
+                if (scribbleState.glow) {
+                    scribbleCtx.shadowBlur = 12;
+                    scribbleCtx.shadowColor = scribbleState.color;
+                } else {
+                    scribbleCtx.shadowBlur = 0;
+                }
+            }
+
+            scribbleCtx.beginPath();
+            scribbleCtx.moveTo(scribbleState.lastX, scribbleState.lastY);
+            scribbleCtx.lineTo(pos.x, pos.y);
+            scribbleCtx.stroke();
+            scribbleCtx.restore();
+
+            scribbleState.lastX = pos.x;
+            scribbleState.lastY = pos.y;
+        }
+
+        function stopDrawing() {
+            scribbleState.drawing = false;
+            scribbleToolbar.classList.remove('drawing-active');
+        }
+
+        scribbleCanvas.addEventListener('mousedown', startDrawing);
+        scribbleCanvas.addEventListener('mousemove', drawScribble);
+        scribbleCanvas.addEventListener('mouseup', stopDrawing);
+        scribbleCanvas.addEventListener('mouseleave', stopDrawing);
+
+        scribbleCanvas.addEventListener('touchstart', startDrawing, { passive: false });
+        scribbleCanvas.addEventListener('touchmove', drawScribble, { passive: false });
+        scribbleCanvas.addEventListener('touchend', stopDrawing);
+
+        // Power Activate/Deactivate Toggle
+        btnPower.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setScribbleActive(!scribbleState.active);
+        });
+
+        // Minimize Button Manual Toggle
+        btnMinimize.addEventListener('click', (e) => {
+            e.stopPropagation();
+            scribbleState.manualMinimized = !scribbleState.manualMinimized;
+            scribbleToolbar.classList.toggle('minimized', scribbleState.manualMinimized);
+            btnMinimize.innerText = scribbleState.manualMinimized ? '▶' : '◀';
+        });
+
+        // Click Collapsed Widget Pill Badge to Expand & Auto-Activate
+        scribbleToolbar.addEventListener('click', (e) => {
+            if (scribbleState.manualMinimized && (scribbleToolbar.classList.contains('minimized') || e.target.closest('#scribble-mini-badge'))) {
+                scribbleState.manualMinimized = false;
+                scribbleToolbar.classList.remove('minimized');
+                btnMinimize.innerText = '◀';
+                if (!scribbleState.active) setScribbleActive(true);
+            }
+        });
+
+        document.getElementById('btn-scribble-close').addEventListener('click', () => {
+            setScribbleActive(false);
+            scribbleState.manualMinimized = true;
+            scribbleToolbar.classList.add('minimized');
+            btnMinimize.innerText = '▶';
+        });
+
+        ['pen', 'highlighter', 'eraser'].forEach(tool => {
+            document.getElementById(`tool-${tool}`).addEventListener('click', () => {
+                scribbleState.mode = tool;
+                ['pen', 'highlighter', 'eraser'].forEach(t => document.getElementById(`tool-${t}`).classList.remove('active'));
+                document.getElementById(`tool-${tool}`).classList.add('active');
+                if (!scribbleState.active) setScribbleActive(true);
+            });
+        });
+
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+                scribbleState.color = swatch.getAttribute('data-color');
+            });
+        });
+
+        document.getElementById('btn-glow-toggle').addEventListener('click', () => {
+            scribbleState.glow = !scribbleState.glow;
+            const statusEl = document.getElementById('glow-status');
+            statusEl.innerText = scribbleState.glow ? 'ON' : 'OFF';
+            statusEl.style.color = scribbleState.glow ? '#10b981' : '#888888';
+        });
+
+        const sizeSlider = document.getElementById('scribble-size');
+        sizeSlider.addEventListener('input', (e) => {
+            scribbleState.size = parseInt(e.target.value);
+            document.getElementById('scribble-size-val').innerText = `${scribbleState.size}px`;
+        });
+
+        document.getElementById('btn-scribble-undo').addEventListener('click', undoScribble);
+        document.getElementById('btn-scribble-clear').addEventListener('click', clearScribble);
+
+        // --- Resize Handling ---
+        function resizeCanvases() {
+            for (let key in els.canvases) {
+                const canvas = els.canvases[key];
+                if (!canvas) continue;
+                const rect = canvas.parentElement.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = Math.floor(rect.width * dpr);
+                canvas.height = Math.floor(rect.height * dpr);
+                ctx[key].scale(dpr, dpr);
+            }
+
+            MULTIVERSE_SYSTEMS.forEach(sys => {
+                const c = document.getElementById(`canvas-${sys.key}`);
+                if (c && c.parentElement) {
+                    const rect = c.parentElement.getBoundingClientRect();
+                    const dpr = window.devicePixelRatio || 1;
+                    c.width = Math.floor(rect.width * dpr);
+                    c.height = Math.floor(rect.height * dpr);
+                }
+            });
+
+            resizeIsolatedCanvas();
+            resizeScribbleCanvas();
+            initMatrix();
+        }
+
+        function resizeIsolatedCanvas() {
+            const isoC = document.getElementById('canvas-isolated');
+            if (isoC && isoC.parentElement) {
+                const rect = isoC.parentElement.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                isoC.width = Math.floor(rect.width * dpr);
+                isoC.height = Math.floor(rect.height * dpr);
+            }
+        }
+        window.addEventListener('resize', resizeCanvases);
+
+        // --- Math Rendering (KaTeX) ---
+        function renderMath() {
+            if (typeof katex === 'undefined') return;
+            const kOpts = { throwOnError: false, displayMode: true };
+            const kOptsInline = { throwOnError: false, displayMode: false };
+
+            // Banner Inline Equation
+            const bannerNormEl = document.getElementById('banner-norm-eq');
+            if (bannerNormEl) {
+                katex.render("\\frac{d^2u}{d\\tau^2} + u = 0", bannerNormEl, kOptsInline);
+            }
+
+            // Main Equation
+            let mainTex = state.modes.normalized ? 
+                "\\frac{d^2u}{d\\tau^2} + u = 0" : 
+                "\\ddot{u} + \\omega^2 u = 0";
+            katex.render(mainTex, els.mainEq, kOpts);
+
+            // Panel Equations
+            if (state.modes.normalized) {
+                katex.render("\\frac{d^2u}{d\\tau^2} + u = 0", els.mathMech, kOptsInline);
+                katex.render("\\frac{d^2u}{d\\tau^2} + u = 0", els.mathElec, kOptsInline);
+                katex.render("\\frac{d^2u}{d\\tau^2} + u = 0", els.mathQuant, kOptsInline);
+                
+                els.interpMech.innerText = "u = x/x₀, τ = ωt (Dimensionless)";
+                els.interpElec.innerText = "u = q/q₀, τ = ωt (Dimensionless)";
+                els.interpQuant.innerText = "u = Ψ/Ψ₀, τ = ωt (Dimensionless)";
+            } else {
+                katex.render("m\\ddot{x} + k x = 0", els.mathMech, kOptsInline);
+                katex.render("L\\ddot{q} + \\frac{1}{C} q = 0", els.mathElec, kOptsInline);
+                katex.render("i\\hbar\\frac{\\partial\\psi}{\\partial t} = \\hat{H}\\psi", els.mathQuant, kOptsInline);
+                
+                els.interpMech.innerText = "Physical units: meters, kg, N/m";
+                els.interpElec.innerText = "Physical units: Coulombs, Henrys, Farads";
+                els.interpQuant.innerText = "Quantum wavefunction probability amplitude";
+            }
+
+            // Render Multiverse panel equations if unlocked
+            if (state.modes.multiverseUnlocked) {
+                MULTIVERSE_SYSTEMS.forEach(sys => {
+                    const mathEl = document.getElementById(`math-${sys.key}`);
+                    const interpEl = document.getElementById(`interp-${sys.key}`);
+                    if (mathEl) {
+                        katex.render(state.modes.normalized ? "\\frac{d^2u}{d\\tau^2} + u = 0" : sys.eq, mathEl, kOptsInline);
+                    }
+                    if (interpEl) {
+                        interpEl.innerText = state.modes.normalized ? "u = variable/u₀, τ = ωt (Dimensionless)" : "Physical System Units";
+                    }
+                });
+            }
+
+            // Params overlay equations
+            if (state.modes.showParams) {
+                katex.render("\\omega = \\sqrt{\\frac{k}{m}}", document.getElementById('param-math-mech'), kOpts);
+                katex.render("\\omega = \\frac{1}{\\sqrt{LC}}", document.getElementById('param-math-elec'), kOpts);
+                katex.render("V(x) = \\frac{1}{2}m\\omega^2x^2", document.getElementById('param-math-quant'), kOpts);
+                
+                document.getElementById('val-m').innerText = state.mech.m.toFixed(2);
+                document.getElementById('val-k').innerText = state.mech.k.toFixed(2);
+                document.getElementById('val-l').innerText = state.elec.L.toFixed(2);
+                document.getElementById('val-c').innerText = state.elec.C.toFixed(2);
+            }
+        }
+
+        // --- Core 3 Canvas Drawers ---
+        function drawMechanical(targetCtx, targetW, targetH) {
+            const w = targetW || els.canvases.mech.clientWidth;
+            const h = targetH || els.canvases.mech.clientHeight;
+            if (w === 0 || h === 0) return;
+            const c = targetCtx || ctx.mech;
+
+            c.clearRect(0, 0, w, h);
+
+            const x = state.amplitude * Math.cos(state.omega * state.t);
+            const v = -state.amplitude * state.omega * Math.sin(state.omega * state.t);
+            
+            const centerX = w / 2;
+            const centerY = h / 2;
+            const maxPx = w * 0.3;
+            const massX = centerX + x * maxPx;
+            const massSize = 25;
+            const wallX = centerX - maxPx - 40;
+
+            // Background wall/floor
+            c.strokeStyle = state.modes.matrixTheme ? '#005511' : '#333';
+            c.lineWidth = 2;
+            c.beginPath();
+            c.moveTo(wallX, centerY - 60); c.lineTo(wallX, centerY + 60);
+            c.moveTo(wallX - 10, centerY + 30); c.lineTo(w - 20, centerY + 30);
+            c.stroke();
+
+            // Spring
+            c.strokeStyle = state.modes.matrixTheme ? '#00cc44' : '#888';
+            c.lineWidth = 3;
+            c.lineJoin = 'round';
+            c.beginPath();
+            c.moveTo(wallX, centerY);
+            
+            const coils = 12;
+            const springWidth = massX - wallX - massSize/2;
+            const coilStep = springWidth / coils;
+            
+            for(let i=1; i<=coils; i++) {
+                let px = wallX + (i - 0.5) * coilStep;
+                let py = centerY + (i % 2 === 0 ? 15 : -15);
+                c.lineTo(px, py);
+            }
+            c.lineTo(massX - massSize/2, centerY);
+            c.stroke();
+
+            // Mass
+            c.fillStyle = state.modes.hidden ? COLORS.hidden : (state.modes.matrixTheme ? '#00ff66' : COLORS.mech);
+            c.beginPath();
+            c.arc(massX, centerY, massSize, 0, Math.PI * 2);
+            c.fill();
+            
+            // Labels & Vectors
+            if(!state.modes.hidden && !state.modes.normalized) {
+                c.fillStyle = '#aaa';
+                c.font = '14px "Lora", serif';
+                c.fillText("x", massX - 4, centerY - 35);
+                
+                c.strokeStyle = '#aaa';
+                c.lineWidth = 2;
+                c.beginPath();
+                c.moveTo(massX, centerY);
+                c.lineTo(massX + v * (maxPx/state.omega) * 0.5, centerY);
+                c.stroke();
+            }
+
+            // Update Energy Bars if on primary panel
+            if (!targetCtx) {
+                const k = state.mech.k;
+                const m = state.mech.m;
+                const E_k = 0.5 * m * v * v;
+                const E_u = 0.5 * k * x * x;
+                const E_tot = 0.5 * k * state.amplitude * state.amplitude;
+                
+                els.bars.mechK.style.height = `${(E_k / E_tot) * 100}%`;
+                els.bars.mechU.style.height = `${(E_u / E_tot) * 100}%`;
+            }
+        }
+
+        function drawElectrical(targetCtx, targetW, targetH) {
+            const w = targetW || els.canvases.elec.clientWidth;
+            const h = targetH || els.canvases.elec.clientHeight;
+            if (w === 0 || h === 0) return;
+            const c = targetCtx || ctx.elec;
+
+            c.clearRect(0, 0, w, h);
+
+            const q = state.amplitude * Math.cos(state.omega * state.t);
+            const I = -state.amplitude * state.omega * Math.sin(state.omega * state.t);
+
+            const cx = w / 2;
+            const cy = h / 2;
+            const rectW = w * 0.6;
+            const rectH = h * 0.5;
+            const lx = cx - rectW/2;
+            const rx = cx + rectW/2;
+            const ty = cy - rectH/2;
+            const by = cy + rectH/2;
+
+            c.strokeStyle = state.modes.matrixTheme ? '#005511' : '#555';
+            c.lineWidth = 4;
+            
+            // Wires
+            c.beginPath();
+            c.moveTo(cx - 20, ty); c.lineTo(lx, ty); c.lineTo(lx, by); c.lineTo(cx - 20, by);
+            c.moveTo(cx + 20, ty); c.lineTo(rx, ty); c.lineTo(rx, by); c.lineTo(cx + 20, by);
+            c.stroke();
+
+            // Inductor
+            c.beginPath();
+            let numCoils = 4;
+            let coilR = 10;
+            for(let i=0; i<numCoils; i++) {
+                let startX = (cx - 20) + (i * 40 / numCoils);
+                c.arc(startX + 5, ty, coilR, Math.PI, 0);
+            }
+            c.stroke();
+
+            // Capacitor
+            c.beginPath();
+            c.moveTo(cx - 20, by - 20); c.lineTo(cx - 20, by + 20);
+            c.moveTo(cx + 20, by - 20); c.lineTo(cx + 20, by + 20);
+            c.stroke();
+
+            // Charge
+            const maxQ = state.amplitude;
+            const chargeIntensity = Math.abs(q) / maxQ;
+            const colorPos = `rgba(231, 76, 60, ${chargeIntensity})`;
+            const colorNeg = `rgba(52, 152, 219, ${chargeIntensity})`;
+            
+            c.fillStyle = q > 0 ? colorPos : colorNeg;
+            if(state.modes.hidden) c.fillStyle = `rgba(255,255,255,${chargeIntensity})`;
+            c.fillRect(cx - 25, by - 15, 4, 30);
+            
+            c.fillStyle = q > 0 ? colorNeg : colorPos;
+            if(state.modes.hidden) c.fillStyle = `rgba(255,255,255,${chargeIntensity})`;
+            c.fillRect(cx + 21, by - 15, 4, 30);
+
+            // Current dots
+            const I_normalized = I / (state.amplitude * state.omega);
+            const numDots = 8;
+            c.fillStyle = state.modes.hidden ? COLORS.hidden : (state.modes.matrixTheme ? '#00ff66' : COLORS.elec);
+            
+            const pathLen = rectW * 2 + rectH * 2;
+            const offset = (state.t * 50 * I_normalized) % pathLen;
+            
+            for(let i=0; i<numDots; i++) {
+                let d = (offset + (i * pathLen / numDots) + pathLen) % pathLen;
+                let px, py;
+                
+                if (d < rectW) { px = lx + d; py = ty; }
+                else if (d < rectW + rectH) { px = rx; py = ty + (d - rectW); }
+                else if (d < rectW*2 + rectH) { px = rx - (d - rectW - rectH); py = by; }
+                else { px = lx; py = by - (d - rectW*2 - rectH); }
+                
+                if ((py === ty && Math.abs(px - cx) < 30) || (py === by && Math.abs(px - cx) < 30)) continue;
+
+                c.beginPath();
+                c.arc(px, py, 3, 0, Math.PI*2);
+                c.fill();
+            }
+
+            if(!state.modes.hidden && !state.modes.normalized) {
+                c.fillStyle = '#aaa';
+                c.font = '14px "Lora", serif';
+                c.fillText("L", cx - 5, ty - 25);
+                c.fillText("C", cx - 5, by + 35);
+                c.fillText("q", cx - 5, by - 25);
+            }
+
+            if (!targetCtx) {
+                const L = state.elec.L;
+                const C = state.elec.C;
+                const E_m = 0.5 * L * I * I;
+                const E_e = 0.5 * (q * q) / C;
+                const E_tot = 0.5 * (state.amplitude * state.amplitude) / C;
+
+                els.bars.elecM.style.height = `${(E_m / E_tot) * 100}%`;
+                els.bars.elecE.style.height = `${(E_e / E_tot) * 100}%`;
+            }
+        }
+
+        function hermite(n, x) {
+            if (n === 0) return 1;
+            if (n === 1) return 2 * x;
+            if (n === 2) return 4 * x * x - 2;
+            if (n === 3) return 8 * x * x * x - 12 * x;
+            return 0;
+        }
+
+        function factorial(n) {
+            if (n === 0 || n === 1) return 1;
+            return n * factorial(n - 1);
+        }
+
+        function psi_n(n, x) {
+            const N = 1 / Math.sqrt(Math.pow(2, n) * factorial(n) * Math.sqrt(Math.PI));
+            return N * hermite(n, x) * Math.exp(-0.5 * x * x);
+        }
+
+        function drawQuantum(targetCtx, targetW, targetH) {
+            const w = targetW || els.canvases.quant.clientWidth;
+            const h = targetH || els.canvases.quant.clientHeight;
+            if (w === 0 || h === 0) return;
+            const c = targetCtx || ctx.quant;
+
+            c.clearRect(0, 0, w, h);
+
+            const cx = w / 2;
+            const cy = h * 0.7;
+            const scaleX = w / 8;
+            const scaleY = h / 2.5;
+            const dE = state.omega * 15;
+
+            // Potential Well
+            c.strokeStyle = state.modes.matrixTheme ? '#005511' : '#444';
+            c.lineWidth = 2;
+            c.beginPath();
+            for(let px = 0; px < w; px++) {
+                let x = (px - cx) / scaleX;
+                let py = cy - 0.5 * state.omega * state.omega * x * x * (scaleY * 0.5);
+                if (px === 0) c.moveTo(px, py);
+                else c.lineTo(px, py);
+            }
+            c.stroke();
+
+            // Energy Levels
+            c.strokeStyle = '#333';
+            c.setLineDash([5, 5]);
+            for(let n = 0; n < 4; n++) {
+                let levelY = cy - (n + 0.5) * dE;
+                c.beginPath();
+                c.moveTo(cx - 100, levelY);
+                c.lineTo(cx + 100, levelY);
+                c.stroke();
+            }
+            c.setLineDash([]);
+
+            // Wavefunction
+            const colorQuant = state.modes.hidden ? COLORS.hidden : (state.modes.matrixTheme ? '#00ff66' : COLORS.quant);
+            const points = [];
+            
+            for(let px = 0; px < w; px++) {
+                let x = (px - cx) / scaleX;
+                let xi = Math.sqrt(state.omega) * x; 
+                let psiSq = 0;
+                
+                if (state.modes.quantumSuperposition) {
+                    const p0 = psi_n(0, xi);
+                    const p1 = psi_n(1, xi);
+                    const E0 = state.omega * 0.5;
+                    const E1 = state.omega * 1.5;
+                    const re = (1/Math.SQRT2) * (p0 * Math.cos(E0 * state.t) + p1 * Math.cos(E1 * state.t));
+                    const im = (1/Math.SQRT2) * (-p0 * Math.sin(E0 * state.t) - p1 * Math.sin(E1 * state.t));
+                    psiSq = re*re + im*im;
+                } else {
+                    const p1 = psi_n(1, xi);
+                    psiSq = p1 * p1; 
+                }
+
+                let baseLevelY = state.modes.quantumSuperposition ? cy - 1.0 * dE : cy - 1.5 * dE;
+                let py = baseLevelY - psiSq * scaleY * 2.5 * Math.sqrt(state.omega);
+                points.push({x: px, y: py});
+            }
+
+            if (points.length > 0) {
+                c.fillStyle = colorQuant;
+                c.globalAlpha = 0.3;
+                c.beginPath();
+                c.moveTo(points[0].x, cy);
+                for(let p of points) c.lineTo(p.x, p.y);
+                c.lineTo(points[points.length-1].x, cy);
+                c.closePath();
+                c.fill();
+                
+                c.globalAlpha = 1.0;
+                c.strokeStyle = colorQuant;
+                c.lineWidth = 2;
+                c.beginPath();
+                for(let i=0; i<points.length; i++) {
+                    if(i===0) c.moveTo(points[i].x, points[i].y);
+                    else c.lineTo(points[i].x, points[i].y);
+                }
+                c.stroke();
+            }
+            
+            if(!state.modes.hidden && !state.modes.normalized) {
+                c.fillStyle = '#aaa';
+                c.font = '14px "Lora", serif';
+                c.fillText("V(x)", cx + w/3, cy - h/3);
+                c.fillText("E₀", cx + 110, cy - 0.5 * dE + 4);
+                c.fillText("E₁", cx + 110, cy - 1.5 * dE + 4);
+            }
+        }
+
+        // --- Multiverse Realities Custom Drawers ---
+        function drawMultiverseCanvas(sys, targetCtx, targetW, targetH) {
+            const canvas = document.getElementById(`canvas-${sys.key}`);
+            const w = targetW || (canvas ? canvas.clientWidth : 300);
+            const h = targetH || (canvas ? canvas.clientHeight : 225);
+            if (w === 0 || h === 0) return;
+
+            let c = targetCtx;
+            if (!c && canvas) {
+                c = canvas.getContext('2d');
+                c.save();
+                c.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+            } else if (targetCtx) {
+                c.save();
+            }
+
+            if (!c) return;
+
+            c.clearRect(0, 0, w, h);
+            const cx = w / 2;
+            const cy = h / 2;
+            const val = Math.cos(state.omega * state.t);
+
+            c.strokeStyle = state.modes.matrixTheme ? '#00ff66' : sys.color;
+            c.fillStyle = state.modes.matrixTheme ? '#00ff66' : sys.color;
+            c.lineWidth = 2;
+
+            if (sys.key === 'helmholtz') {
+                c.strokeRect(cx - 20, cy - 40, 40, 30);
+                c.beginPath(); c.arc(cx, cy + 20, 35, 0, Math.PI * 2); c.stroke();
+                c.fillRect(cx - 18, cy - 35 + val * 10, 36, 8);
+            } else if (sys.key === 'torsional') {
+                c.beginPath(); c.arc(cx, cy, 35, 0, Math.PI * 2); c.stroke();
+                c.save();
+                c.translate(cx, cy);
+                c.rotate(val * 0.8);
+                c.beginPath(); c.moveTo(-30, 0); c.lineTo(30, 0); c.stroke();
+                c.restore();
+            } else if (sys.key === 'utube') {
+                const tubeW = 80;
+                const tubeH = 50;
+                const dy = val * 22;
+
+                c.lineWidth = 8;
+                c.strokeStyle = state.modes.matrixTheme ? '#004411' : '#334455';
+                c.beginPath();
+                c.moveTo(cx - tubeW/2, cy - tubeH);
+                c.lineTo(cx - tubeW/2, cy + 10);
+                c.arc(cx, cy + 10, tubeW/2, Math.PI, 0, true);
+                c.lineTo(cx + tubeW/2, cy - tubeH);
+                c.stroke();
+
+                c.lineWidth = 4;
+                c.strokeStyle = state.modes.matrixTheme ? '#00ff66' : '#16a085';
+                c.fillStyle = state.modes.matrixTheme ? 'rgba(0, 255, 102, 0.4)' : 'rgba(22, 160, 133, 0.4)';
+                
+                c.fillRect(cx - tubeW/2 - 3, cy - dy, 6, tubeH + dy + 10);
+                c.fillRect(cx + tubeW/2 - 3, cy + dy, 6, tubeH - dy + 10);
+                
+                c.fillStyle = state.modes.matrixTheme ? '#00ff66' : '#2ecc71';
+                c.fillRect(cx - tubeW/2 - 8, cy - dy - 2, 16, 4);
+                c.fillRect(cx + tubeW/2 - 8, cy + dy - 2, 16, 4);
+            } else if (sys.key === 'optical') {
+                c.fillStyle = '#444';
+                c.fillRect(cx - 80, cy - 40, 6, 80);
+                c.fillRect(cx + 74, cy - 40, 6, 80);
+                c.strokeStyle = sys.color;
+                c.beginPath();
+                for (let px = cx - 74; px <= cx + 74; px += 2) {
+                    let normX = (px - (cx - 74)) / 148;
+                    let py = cy - Math.sin(normX * Math.PI * 4) * val * 30;
+                    if (px === cx - 74) c.moveTo(px, py); else c.lineTo(px, py);
+                }
+                c.stroke();
+            } else if (sys.key === 'diatomic') {
+                let dist = 40 + val * 15;
+                c.beginPath(); c.arc(cx - dist, cy, 18, 0, Math.PI * 2); c.fill();
+                c.beginPath(); c.arc(cx + dist, cy, 18, 0, Math.PI * 2); c.fill();
+                c.beginPath(); c.moveTo(cx - dist, cy); c.lineTo(cx + dist, cy); c.stroke();
+            } else if (sys.key === 'plasma') {
+                for(let i = -3; i <= 3; i++) {
+                    c.fillStyle = '#e74c3c';
+                    c.beginPath(); c.arc(cx + i * 25, cy, 6, 0, Math.PI * 2); c.fill();
+                }
+                for(let i = -3; i <= 3; i++) {
+                    c.fillStyle = '#3498db';
+                    c.beginPath(); c.arc(cx + i * 25 + val * 12, cy - 20, 4, 0, Math.PI * 2); c.fill();
+                }
+            } else if (sys.key === 'neuronal') {
+                c.beginPath();
+                for(let px = 0; px < w; px += 4) {
+                    let py = cy - Math.sin((px / w) * Math.PI * 3 + state.t * state.omega) * (val * 20);
+                    if (px === 0) c.moveTo(px, py); else c.lineTo(px, py);
+                }
+                c.stroke();
+                c.fillRect(cx - 30, cy + 30, 60, 4);
+            } else if (sys.key === 'predator') {
+                c.strokeStyle = '#2ecc71';
+                c.beginPath();
+                for(let px = 0; px < w; px += 4) {
+                    let py = cy - Math.sin((px / w) * Math.PI * 2 + state.t * state.omega) * 25;
+                    if (px === 0) c.moveTo(px, py); else c.lineTo(px, py);
+                }
+                c.stroke();
+                c.strokeStyle = '#e74c3c';
+                c.beginPath();
+                for(let px = 0; px < w; px += 4) {
+                    let py = cy - Math.cos((px / w) * Math.PI * 2 + state.t * state.omega) * 25;
+                    if (px === 0) c.moveTo(px, py); else c.lineTo(px, py);
+                }
+                c.stroke();
+            } else if (sys.key === 'cobweb') {
+                c.strokeStyle = '#666';
+                c.beginPath(); c.moveTo(cx - 40, cy + 40); c.lineTo(cx + 40, cy - 40); c.stroke();
+                c.beginPath(); c.moveTo(cx - 40, cy - 40); c.lineTo(cx + 40, cy + 40); c.stroke();
+                c.fillStyle = '#e74c3c';
+                c.beginPath(); c.arc(cx + val * 30, cy - val * 30, 6, 0, Math.PI * 2); c.fill();
+            } else if (sys.key === 'aimomentum') {
+                c.strokeStyle = '#10b981';
+                c.beginPath();
+                for(let px = 0; px < w; px += 4) {
+                    let normX = (px - cx) / (w * 0.3);
+                    let py = cy + normX * normX * 30 - 20;
+                    if (px === 0) c.moveTo(px, py); else c.lineTo(px, py);
+                }
+                c.stroke();
+                let pX = cx + val * 40;
+                let pNorm = (pX - cx) / (w * 0.3);
+                let pY = cy + pNorm * pNorm * 30 - 20;
+                c.fillStyle = '#10b981';
+                c.beginPath(); c.arc(pX, pY, 7, 0, Math.PI * 2); c.fill();
+            }
+
+            c.restore();
+        }
+
+        // --- Render Multiverse 10 Systems Grid ---
+        function renderMultiverseGrid() {
+            const container = els.multiverseContainer;
+            container.innerHTML = '';
+
+            MULTIVERSE_SYSTEMS.forEach(sys => {
+                const panel = document.createElement('div');
+                panel.className = 'world-panel';
+                panel.id = `${sys.key}-panel`;
+                panel.innerHTML = `
+                    <div class="world-header">
+                        <div class="world-title-bar">
+                            <div class="world-title" style="color:${sys.color}">${sys.title}</div>
+                            <button class="isolate-btn-small" onclick="isolateSystem('${sys.key}')">Isolate</button>
+                        </div>
+                        <div class="tier-badge">${sys.tier}</div>
+                        <div class="world-math" id="math-${sys.key}"></div>
+                        <div class="math-interpretation" id="interp-${sys.key}"></div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="canvas-${sys.key}"></canvas>
+                    </div>
+                    <div class="energy-bar-container" style="justify-content: center; align-items: center; border:none; height:auto; margin-top:0">
+                       <div style="font-size: 0.75rem; color: var(--text-muted); text-align:center;">
+                           ${sys.tag}
+                       </div>
+                    </div>
+                `;
+                container.appendChild(panel);
+            });
+
+            setTimeout(resizeCanvases, 50);
+            renderMath();
+        }
+
+        // --- Isolation Exploration Engine ---
+        function isolateSystem(key) {
+            state.isolatedKey = key;
+            const overlay = document.getElementById('isolation-overlay');
+            overlay.classList.add('visible');
+
+            // Push browser history state for Back button support
+            if (!history.state || history.state.isolated !== key) {
+                history.pushState({ isolated: key }, '', '#isolate-' + key);
+            }
+
+            let sysInfo = null;
+            if (key === 'mech') {
+                sysInfo = {
+                    title: 'Mechanical Oscillator (Mass-Spring)',
+                    eq: '\\ddot{x} + \\omega^2 x = 0',
+                    mapping: [
+                        ['u', 'x(t)', 'Position displacement from equilibrium'],
+                        ['\\dot{u}', 'v(t)', 'Mass velocity (dx/dt)'],
+                        ['\\omega^2', '\\frac{k}{m}', 'Spring constant k divided by mass m']
+                    ],
+                    explanation: 'Displacing a mass from equilibrium creates a Hooke\'s law restoring force F = -kx. Inertia carries mass past equilibrium, causing perpetual oscillation between Kinetic and Potential energy.'
+                };
+            } else if (key === 'elec') {
+                sysInfo = {
+                    title: 'Electrical LC Circuit',
+                    eq: '\\ddot{q} + \\omega^2 q = 0',
+                    mapping: [
+                        ['u', 'q(t)', 'Electric charge on capacitor plate'],
+                        ['\\dot{u}', 'I(t)', 'Electric current flow (dq/dt)'],
+                        ['\\omega^2', '\\frac{1}{LC}', 'Reciprocal product of Inductance L and Capacitance C']
+                    ],
+                    explanation: 'Capacitor electric field discharges through the inductor, building up a magnetic field. Collapsing magnetic field recharges the capacitor with opposite polarity.'
+                };
+            } else if (key === 'quant') {
+                sysInfo = {
+                    title: 'Quantum Harmonic Oscillator',
+                    eq: 'i\\hbar \\frac{\\partial \\psi}{\\partial t} = \\hat{H}\\psi',
+                    mapping: [
+                        ['u', '\\psi(x,t)', 'Quantum wavefunction probability amplitude'],
+                        ['\\dot{u}', '\\frac{\\partial \\psi}{\\partial t}', 'Quantum phase evolution rate'],
+                        ['\\omega', '\\frac{E_1 - E_0}{\\hbar}', 'Bohr transition frequency between energy levels']
+                    ],
+                    explanation: 'Trapped quantum particle in a parabolic well. In a superposition state, interference between energy levels causes probability density |Ψ|² to slosh back and forth at frequency ω.'
+                };
+            } else {
+                sysInfo = MULTIVERSE_SYSTEMS.find(s => s.key === key);
+            }
+
+            if (!sysInfo) return;
+
+            document.getElementById('iso-title').innerText = sysInfo.title;
+            if (typeof katex !== 'undefined') {
+                katex.render(state.modes.normalized ? "\\frac{d^2u}{d\\tau^2} + u = 0" : sysInfo.eq, document.getElementById('iso-math'), { displayMode: true });
+            }
+
+            // Populate mapping table using direct KaTeX render
+            const tbody = document.getElementById('iso-table-body');
+            tbody.innerHTML = '';
+            sysInfo.mapping.forEach(([sym, sysVar, desc]) => {
+                const tr = document.createElement('tr');
+                
+                const tdSym = document.createElement('td');
+                tdSym.style.fontWeight = '600';
+                tdSym.style.color = 'var(--text-main)';
+                if (typeof katex !== 'undefined') katex.render(sym, tdSym);
+                else tdSym.innerText = sym;
+
+                const tdVar = document.createElement('td');
+                tdVar.style.color = 'var(--color-mech)';
+                if (typeof katex !== 'undefined') katex.render(sysVar, tdVar);
+                else tdVar.innerText = sysVar;
+
+                const tdDesc = document.createElement('td');
+                tdDesc.style.color = 'var(--text-muted)';
+                tdDesc.innerText = desc;
+
+                tr.appendChild(tdSym);
+                tr.appendChild(tdVar);
+                tr.appendChild(tdDesc);
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('iso-explanation').innerText = sysInfo.explanation;
+            
+            // Size isolated canvas cleanly once when opening overlay
+            requestAnimationFrame(resizeIsolatedCanvas);
+        }
+
+        function closeIsolation(fromPopState = false) {
+            state.isolatedKey = null;
+            document.getElementById('isolation-overlay').classList.remove('visible');
+            
+            if (!fromPopState && history.state && history.state.isolated) {
+                history.back();
+            }
+        }
+
+        // Browser Back Button Navigation & Esc key listeners
+        window.addEventListener('popstate', (e) => {
+            if (state.isolatedKey && (!e.state || !e.state.isolated)) {
+                closeIsolation(true);
+            } else if (e.state && e.state.isolated) {
+                isolateSystem(e.state.isolated);
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && state.isolatedKey) {
+                closeIsolation();
+            }
+        });
+
+        // --- Main Animation Loop (HIGH PERFORMANCE: ONLY RENDERS ISOLATED CANVAS WHEN ISOLATED) ---
+        function animate() {
+            state.t += state.dt;
+
+            try {
+                if (state.isolatedKey) {
+                    const isoC = document.getElementById('canvas-isolated');
+                    if (isoC && isoC.width > 0 && isoC.height > 0) {
+                        const dpr = window.devicePixelRatio || 1;
+                        const w = isoC.width / dpr;
+                        const h = isoC.height / dpr;
+                        const isoCtx = isoC.getContext('2d');
+                        
+                        isoCtx.save();
+                        isoCtx.scale(dpr, dpr);
+                        
+                        if (state.isolatedKey === 'mech') drawMechanical(isoCtx, w, h);
+                        else if (state.isolatedKey === 'elec') drawElectrical(isoCtx, w, h);
+                        else if (state.isolatedKey === 'quant') drawQuantum(isoCtx, w, h);
+                        else {
+                            const sys = MULTIVERSE_SYSTEMS.find(s => s.key === state.isolatedKey);
+                            if (sys) drawMultiverseCanvas(sys, isoCtx, w, h);
+                        }
+                        isoCtx.restore();
+                    }
+                } else {
+                    drawMatrix();
+                    drawMechanical();
+                    drawElectrical();
+                    drawQuantum();
+
+                    if (state.modes.multiverseUnlocked) {
+                        MULTIVERSE_SYSTEMS.forEach(sys => {
+                            drawMultiverseCanvas(sys);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Animation loop exception caught:', err);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // --- Synchronized Frequency Controls ---
+        function updateFrequency(newOmega) {
+            state.omega = parseFloat(newOmega);
+            els.omegaSlider.value = state.omega;
+            els.isoOmegaSlider.value = state.omega;
+            els.omegaDisplay.innerText = `ω = ${state.omega.toFixed(2)} rad/s`;
+            els.isoOmegaDisplay.innerText = `ω = ${state.omega.toFixed(2)}`;
+            if (state.modes.showParams) renderMath();
+        }
+
+        els.omegaSlider.addEventListener('input', (e) => updateFrequency(e.target.value));
+        els.isoOmegaSlider.addEventListener('input', (e) => updateFrequency(e.target.value));
+
+        // Hide Identities Toggle
+        els.btns.identities.addEventListener('click', () => {
+            state.modes.hidden = !state.modes.hidden;
+            document.body.classList.toggle('mode-hidden-identities');
+            els.btns.identities.classList.toggle('active');
+            
+            if(state.modes.hidden) {
+                els.eqLabel.innerText = "Abstract Pattern";
+                els.conceptNote.innerText = "Notice how you can map the system's behavior without knowing what physical object it represents.";
+            } else {
+                els.eqLabel.innerText = "Universal Structure";
+                els.conceptNote.innerText = "The mathematical pattern survives even when the physical objects change.";
+            }
+        });
+
+        // Normalize Toggle
+        els.btns.normalize.addEventListener('click', () => {
+            state.modes.normalized = !state.modes.normalized;
+            els.btns.normalize.classList.toggle('active');
+            els.transformBanner.classList.toggle('visible', state.modes.normalized);
+            renderMath();
+            
+            if(state.modes.normalized) {
+                els.conceptNote.innerText = "NONDIMENSIONALIZATION COMPLETE: By defining dimensionless time τ = ωt and dimensionless state u, all physical parameters (m, k, L, C, V, A, c, I, κ) disappear. The underlying structural equation d²u/dτ² + u = 0 is identical across all realities!";
+            } else {
+                els.conceptNote.innerText = "The mathematical pattern survives even when the physical objects change.";
+            }
+        });
+
+        // Show Parameters Toggle
+        els.btns.params.addEventListener('click', () => {
+            state.modes.showParams = !state.modes.showParams;
+            els.btns.params.classList.toggle('active');
+            
+            if(state.modes.showParams) {
+                els.paramsDisplay.classList.add('visible');
+                renderMath();
+            } else {
+                els.paramsDisplay.classList.remove('visible');
+            }
+        });
+
+        // Toggle Quantum State
+        els.btns.quantumState.addEventListener('click', () => {
+            state.modes.quantumSuperposition = !state.modes.quantumSuperposition;
+            els.btns.quantumState.classList.toggle('active');
+            
+            if(state.modes.quantumSuperposition) {
+                els.conceptNote.innerText = "A superposition of energy levels creates a probability density profile that oscillates at the classical frequency ω.";
+            } else {
+                els.conceptNote.innerText = "An energy eigenstate is stationary. The probability density profile does not change over time.";
+            }
+        });
+
+        // Unlock 10 Realities Multiverse Button
+        els.btns.unlockMultiverse.addEventListener('click', () => {
+            state.modes.multiverseUnlocked = !state.modes.multiverseUnlocked;
+            els.btns.unlockMultiverse.classList.toggle('active');
+
+            if (state.modes.multiverseUnlocked) {
+                els.btns.unlockMultiverse.innerText = "Collapse Multiverse";
+                els.multiverseWrapper.classList.add('visible');
+                renderMultiverseGrid();
+                els.conceptNote.innerText = "Spectrum of 10 Realities Unlocked! Notice how the exact same differential equation structure travels from everyday classical physics to AI Neural Net optimizers!";
+            } else {
+                els.btns.unlockMultiverse.innerText = "Unlock 10 Realities";
+                els.multiverseWrapper.classList.remove('visible');
+                els.conceptNote.innerText = "The mathematical pattern survives even when the physical objects change.";
+            }
+        });
+
+        // Matrix Theme Toggle
+        els.btns.matrixTheme.addEventListener('click', () => {
+            state.modes.matrixTheme = !state.modes.matrixTheme;
+            document.body.classList.toggle('theme-matrix', state.modes.matrixTheme);
+            els.btns.matrixTheme.classList.toggle('active', state.modes.matrixTheme);
+            if (state.modes.matrixTheme) initMatrix();
+        });
+
+        // Procedural WebAudio Matrix Synthwave Music Sequencer
+        const matrixAudio = {
+            active: false,
+            ctx: null,
+            timer: null,
+            step: 0,
+            tempo: 125,
+            bassNotes: [55, 55, 65.41, 55, 73.42, 55, 82.41, 65.41],
+            leadNotes: [440, 523.25, 659.25, 783.99, 880, 1046.50, 987.77, 783.99],
+
+            start: function() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+                this.active = true;
+                this.step = 0;
+                const intervalMs = (60 / this.tempo / 4) * 1000;
+                this.timer = setInterval(() => this.tick(), intervalMs);
+            },
+
+            stop: function() {
+                this.active = false;
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+            },
+
+            tick: function() {
+                if (!this.ctx || !this.active) return;
+                const now = this.ctx.currentTime;
+
+                // Kick / Sub Pulse
+                if (this.step % 4 === 0) {
+                    const kickOsc = this.ctx.createOscillator();
+                    const kickGain = this.ctx.createGain();
+                    kickOsc.type = 'sine';
+                    kickOsc.frequency.setValueAtTime(130, now);
+                    kickOsc.frequency.exponentialRampToValueAtTime(32, now + 0.08);
+                    kickGain.gain.setValueAtTime(0.35, now);
+                    kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                    kickOsc.connect(kickGain);
+                    kickGain.connect(this.ctx.destination);
+                    kickOsc.start(now);
+                    kickOsc.stop(now + 0.12);
+                }
+
+                // Resonant Arpeggiated Synth Bass
+                const bassFreq = this.bassNotes[this.step % this.bassNotes.length];
+                const bassOsc = this.ctx.createOscillator();
+                const bassFilter = this.ctx.createBiquadFilter();
+                const bassGain = this.ctx.createGain();
+
+                bassOsc.type = 'sawtooth';
+                bassOsc.frequency.setValueAtTime(bassFreq, now);
+
+                bassFilter.type = 'lowpass';
+                bassFilter.Q.setValueAtTime(5, now);
+                bassFilter.frequency.setValueAtTime(1000, now);
+                bassFilter.frequency.exponentialRampToValueAtTime(180, now + 0.1);
+
+                bassGain.gain.setValueAtTime(0.2, now);
+                bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+                bassOsc.connect(bassFilter);
+                bassFilter.connect(bassGain);
+                bassGain.connect(this.ctx.destination);
+                bassOsc.start(now);
+                bassOsc.stop(now + 0.12);
+
+                // Matrix Rain Arpeggiator Lead
+                if (this.step % 2 === 0) {
+                    const leadFreq = this.leadNotes[(this.step / 2) % this.leadNotes.length];
+                    const leadOsc = this.ctx.createOscillator();
+                    const leadFilter = this.ctx.createBiquadFilter();
+                    const leadGain = this.ctx.createGain();
+
+                    leadOsc.type = 'square';
+                    leadOsc.frequency.setValueAtTime(leadFreq, now);
+
+                    leadFilter.type = 'bandpass';
+                    leadFilter.Q.setValueAtTime(3, now);
+                    leadFilter.frequency.setValueAtTime(leadFreq * 1.5, now);
+
+                    leadGain.gain.setValueAtTime(0.08, now);
+                    leadGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+                    leadOsc.connect(leadFilter);
+                    leadFilter.connect(leadGain);
+                    leadGain.connect(this.ctx.destination);
+                    leadOsc.start(now);
+                    leadOsc.stop(now + 0.1);
+                }
+
+                this.step++;
+            }
+        };
+
+        const btnMatrixMusic = document.getElementById('btn-matrix-music');
+        if (btnMatrixMusic) {
+            btnMatrixMusic.addEventListener('click', () => {
+                if (matrixAudio.active) {
+                    matrixAudio.stop();
+                    btnMatrixMusic.classList.remove('active');
+                    btnMatrixMusic.innerText = '🎵 Matrix Music (OFF)';
+                } else {
+                    matrixAudio.start();
+                    btnMatrixMusic.classList.add('active');
+                    btnMatrixMusic.innerText = '🎵 Matrix Music (ON)';
+                }
+            });
+        }
+
+        // Initialization
+        window.onload = () => {
+            resizeCanvases();
+            renderMath();
+            animate();
+        };
+    </script>
+</body>
+</html>

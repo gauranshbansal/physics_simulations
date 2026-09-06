@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glacial Lake Outburst Flood (GLOF) Simulator - Trishuli River Valley</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #1a202c; font-family: 'Inter', sans-serif; }
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+        #ui-panel { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; width: 90%; max-width: 700px; }
+        #overlay-info { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; }
+        
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Custom scrollbar for info panel */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="overlay-info" class="text-white max-w-sm glass-panel p-4 rounded-xl">
+        <h1 class="text-xl font-bold mb-1 text-cyan-400 drop-shadow-md">GLOF Simulator: Bhotekoshi / Trishuli</h1>
+        <p class="text-xs text-gray-300 mb-2">Interactive 3D simulation of a rock-ice avalanche triggering a flash flood.</p>
+        <p class="text-[11px] text-gray-400 mb-3">
+            Developed by <span class="text-gray-200 font-medium">Gauransh Bansal</span> - 
+            <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 transition">LinkedIn</a>
+        </p>
+        
+        <div id="status-indicator" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-900/60 text-blue-200 text-xs font-semibold border border-blue-500/40 shadow-inner w-full mb-2 transition-colors duration-500">
+            <span id="status-dot" class="w-2 h-2 rounded-full bg-blue-400 mr-2 animate-pulse"></span>
+            <span id="status-text">Status: Stable - Glacial Lake Intact</span>
+        </div>
+
+        <div class="text-[10px] text-gray-400 mt-2 space-y-1 bg-black/30 p-2 rounded-lg">
+            <p><span class="font-bold text-gray-300">Phase 1:</span> Avalanche descends from mountain.</p>
+            <p><span class="font-bold text-gray-300">Phase 2:</span> Impact creates displacement wave, breaching dam.</p>
+            <p><span class="font-bold text-gray-300">Phase 3:</span> Debris flow surges down river valley.</p>
+        </div>
+    </div>
+
+    <!-- Token of Peace for GLOF victims -->
+    <div id="peace-token" class="absolute bottom-5 left-5 z-10 text-[10px] text-gray-400/85 pointer-events-none max-w-[230px] bg-slate-950/70 backdrop-blur-md p-3 rounded-xl border border-white/10 flex flex-col gap-1.5 shadow-lg">
+        <div class="flex items-center gap-1.5 text-white/95">
+            <span class="text-xs">🕊️</span>
+            <span class="font-semibold text-slate-200">A Token of Peace</span>
+        </div>
+        <p class="leading-relaxed">In memory of the countless people who lost their lives or were reported missing in catastrophic Himalayan GLOF events.</p>
+    </div>
+
+    <div id="ui-panel" class="glass-panel p-5 rounded-2xl text-white">
+        <div class="flex items-center justify-between mb-4 border-b border-slate-600/50 pb-3">
+            <h2 class="text-lg font-semibold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+                Simulation Parameters
+            </h2>
+            <div class="text-xs bg-slate-800 px-2 py-1 rounded text-slate-300">Drag to rotate • Scroll to zoom</div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+            <div class="md:col-span-5 space-y-4">
+                <div>
+                    <label class="flex justify-between text-sm font-medium mb-1 text-gray-200">
+                        Avalanche Volume
+                        <span id="vol-value" class="text-cyan-400 font-mono">Medium</span>
+                    </label>
+                    <input type="range" id="avalanche-size" min="1" max="3" value="2" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+                    <div class="flex justify-between text-[10px] text-gray-400 mt-1 uppercase tracking-wider">
+                        <span>Small</span>
+                        <span>Massive</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="md:col-span-7 flex gap-3">
+                <button id="trigger-btn" class="flex-1 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(225,29,72,0.4)] active:scale-95 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                    </svg>
+                    TRIGGER EVENT
+                </button>
+                <div class="flex flex-col gap-2 w-1/3">
+                    <button id="reset-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition duration-200 text-sm flex items-center justify-center gap-1 border border-slate-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Reset
+                    </button>
+                    <button id="camera-btn" class="w-full bg-cyan-900/50 hover:bg-cyan-800/80 text-cyan-100 font-medium py-2 rounded-lg transition duration-200 text-sm border border-cyan-800/50 flex items-center justify-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        View: Valley
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, controls;
+        let terrainGroup, lake, iceDam, riverBed;
+        let infrastructure = []; // Bridges, hydropower, roads
+        
+        let isSimulating = false;
+        let simTime = 0;
+        let avalancheIntensity = 2; // 1 to 3
+        let cameraViewIndex = 0;
+        let debrisSplashedCount = 0;
+        
+        // System constants mapping to real-world approximations
+        const WORLD_SCALE = 1;
+        const VALLEY_LENGTH = 150;
+        const VALLEY_WIDTH = 80;
+        const LAKE_RADIUS = 6;
+        
+        // Physics and particle arrays
+        let fallingDebris = [];
+        let floodSurgeNodes = [];
+        let debrisFlowMesh; // For continuous flow visual
+        
+        // UI Elements
+        const btnTrigger = document.getElementById('trigger-btn');
+        const btnReset = document.getElementById('reset-btn');
+        const btnCamera = document.getElementById('camera-btn');
+        const sliderSize = document.getElementById('avalanche-size');
+        const statusBox = document.getElementById('status-indicator');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+
+        init();
+        animate();
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            // 1. Scene setup
+            scene = new THREE.Scene();
+            // Deep Himalayan sky color
+            scene.background = new THREE.Color(0x3B6283); 
+            scene.fog = new THREE.FogExp2(0x3B6283, 0.006);
+
+            // 2. Camera setup
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+            
+            // 3. Renderer setup
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap pixel ratio for performance
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
+            container.appendChild(renderer.domElement);
+
+            // 4. Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2 - 0.02; // Don't clip below ground
+            controls.minDistance = 10;
+            controls.maxDistance = 200;
+
+            // Ambient light for base visibility
+            const ambientLight = new THREE.AmbientLight(0xddeeff, 0.4);
+            scene.add(ambientLight);
+
+            // Main sun light (directional)
+            const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+            sunLight.position.set(50, 80, 20);
+            sunLight.castShadow = true;
+            
+            // Shadow properties for crisp terrain shadows
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.near = 10;
+            sunLight.shadow.camera.far = 200;
+            const d = 80;
+            sunLight.shadow.camera.left = -d;
+            sunLight.shadow.camera.right = d;
+            sunLight.shadow.camera.top = d;
+            sunLight.shadow.camera.bottom = -d;
+            sunLight.shadow.bias = -0.001; // Reduce shadow acne
+            scene.add(sunLight);
+            
+            // Fill light from sky
+            const hemiLight = new THREE.HemisphereLight(0x3B6283, 0x2d3748, 0.3);
+            scene.add(hemiLight);
+
+            terrainGroup = new THREE.Group();
+            scene.add(terrainGroup);
+
+            buildSteepTerrain();
+            buildGlacialLake();
+            buildInfrastructure();
+            
+            setCameraView(0); // Set initial view after scene is built
+
+            // Setup Event Listeners
+            window.addEventListener('resize', onWindowResize);
+            btnTrigger.addEventListener('click', startSimulation);
+            btnReset.addEventListener('click', resetSimulation);
+            btnCamera.addEventListener('click', toggleCamera);
+            
+            sliderSize.addEventListener('input', (e) => {
+                avalancheIntensity = parseInt(e.target.value);
+                const labels = ["Small", "Medium", "Massive"];
+                document.getElementById('vol-value').innerText = labels[avalancheIntensity-1];
+            });
+        }
+
+        function buildSteepTerrain() {
+            // Create a steep, V-shaped river valley typical of the Himalayas
+            const widthSegments = 64;
+            const lengthSegments = 128;
+            const geometry = new THREE.PlaneGeometry(VALLEY_WIDTH, VALLEY_LENGTH, widthSegments, lengthSegments);
+            geometry.rotateX(-Math.PI / 2);
+
+            const positions = geometry.attributes.position;
+            const colors = [];
+            
+            // Colors for vertex coloring based on height/slope
+            const colorRock = new THREE.Color(0x505459);
+            const colorSnow = new THREE.Color(0xffffff);
+            const colorVegetation = new THREE.Color(0x3a4f3a);
+            const colorRiverbed = new THREE.Color(0x8a7b6b);
+            
+            for (let i = 0; i < positions.count; i++) {
+                const x = positions.getX(i);
+                const z = positions.getZ(i);
+                let y = 0;
+
+                // 1. Overall slope of the valley (Z-axis)
+                // z goes from -75 (top of mountain) to +75 (valley exit)
+                const normalizedZ = (z + VALLEY_LENGTH/2) / VALLEY_LENGTH; // 0 to 1
+                const baseAltitude = 60 - (normalizedZ * 60); // Drops 60 units over length
+
+                // 2. V-shape of the valley (X-axis)
+                const distFromCenter = Math.abs(x);
+                // Steep canyon walls
+                const wallHeight = Math.pow(distFromCenter / (VALLEY_WIDTH/2), 1.5) * 45;
+                
+                y = baseAltitude + wallHeight;
+                
+                // 3. Glacial Lake Bowl (Top left/center)
+                const lakeCenterX = 0;
+                const lakeCenterZ = -55;
+                const distToLake = Math.sqrt(Math.pow(x - lakeCenterX, 2) + Math.pow(z - lakeCenterZ, 2));
+                
+                if (distToLake < LAKE_RADIUS * 2 && z < -40) {
+                    // Carve out a bowl for the lake
+                    let carveAmount = (1 - (distToLake / (LAKE_RADIUS * 2))) * 15;
+                    y -= carveAmount;
+                    // Ensure the bowl doesn't go below the lip (dam area)
+                    if(y < 48) y = 48; 
+                }
+
+                // 4. Meandering river trench
+                // Calculate a sine wave path for the river
+                const meanderCenter = Math.sin(z * 0.08) * 4;
+                const distFromRiver = Math.abs(x - meanderCenter);
+                if (distFromRiver < 4 && z > -50) { // Below the lake
+                    y -= (4 - distFromRiver) * 0.5; // Dig a small trench
+                }
+
+                // 5. Add noise for realistic mountains
+                y += (Math.sin(x*0.5)*Math.cos(z*0.5) + Math.sin(x*0.1)*Math.cos(z*0.1)*2) * 1.5;
+
+                positions.setY(i, y);
+
+                // 6. Assign Colors based on height and slope
+                let c = new THREE.Color();
+                if (y > 55) {
+                    // High altitude snow
+                    c.copy(colorSnow).lerp(colorRock, Math.random()*0.2);
+                } else if (distFromRiver < 3 && z > -45) {
+                    // Riverbed rocks/sand
+                    c.copy(colorRiverbed);
+                } else if (y > 20 && Math.abs(x) > 15) {
+                    // Steep rock walls
+                    c.copy(colorRock).lerp(colorVegetation, 0.2 + Math.random()*0.1);
+                } else {
+                    // Lower valley vegetation
+                    c.copy(colorVegetation).lerp(colorRock, Math.random()*0.3);
+                }
+                colors.push(c.r, c.g, c.b);
+            }
+
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.computeVertexNormals(); // Crucial for lighting
+
+            const material = new THREE.MeshStandardMaterial({ 
+                vertexColors: true,
+                roughness: 0.9,
+                metalness: 0.1,
+                flatShading: false // Smooth shading looks better here
+            });
+            
+            const terrainMesh = new THREE.Mesh(geometry, material);
+            terrainMesh.receiveShadow = true;
+            terrainMesh.castShadow = true;
+            terrainGroup.add(terrainMesh);
+            
+            // Generate visual river flow (pre-flood)
+            createNormalRiver();
+        }
+
+        function buildGlacialLake() {
+            // Lake Water
+            const lakeGeo = new THREE.CylinderGeometry(LAKE_RADIUS, LAKE_RADIUS-2, 3, 32);
+            // Move origin to bottom of cylinder for easier scaling later
+            lakeGeo.translate(0, 1.5, 0); 
+            
+            const lakeMat = new THREE.MeshPhysicalMaterial({
+                color: 0x44aaff,
+                transmission: 0.8,
+                opacity: 0.85,
+                transparent: true,
+                roughness: 0.1,
+                ior: 1.33,
+                envMapIntensity: 1.0,
+                depthWrite: false
+            });
+            lake = new THREE.Mesh(lakeGeo, lakeMat);
+            // Position in the bowl carved in terrain
+            lake.position.set(0, 48, -55); 
+            lake.name = "glacialLake";
+            terrainGroup.add(lake);
+            
+            // Moraine/Ice Dam holding it back
+            // Created from overlapping rocks/ice blocks
+            iceDam = new THREE.Group();
+            
+            const blockGeo = new THREE.DodecahedronGeometry(1.5, 0);
+            const blockMat = new THREE.MeshStandardMaterial({ 
+                color: 0x8899aa, 
+                roughness: 0.7 
+            });
+            
+            for(let i=0; i<30; i++) {
+                const block = new THREE.Mesh(blockGeo, blockMat);
+                block.position.set(
+                    (Math.random()-0.5)*8,
+                    (Math.random()-0.5)*3,
+                    (Math.random()-0.5)*3
+                );
+                block.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+                block.scale.set(1 + Math.random(), 0.5 + Math.random(), 1 + Math.random());
+                block.castShadow = true;
+                iceDam.add(block);
+            }
+            
+            iceDam.position.set(0, 50, -48); // Just in front of lake
+            terrainGroup.add(iceDam);
+        }
+
+        function createNormalRiver() {
+            // Visual representation of the normal, lower volume river
+            const curvePoints = [];
+            // Follow the same meander logic as the terrain carving
+            for(let z = -45; z <= 75; z += 5) {
+                const x = Math.sin(z * 0.08) * 4;
+                const baseY = calculateTerrainHeightFast(x, z) + 0.2; // Sit slightly above riverbed
+                curvePoints.push(new THREE.Vector3(x, baseY, z));
+            }
+            
+            const curve = new THREE.CatmullRomCurve3(curvePoints);
+            const geometry = new THREE.TubeGeometry(curve, 64, 0.8, 8, false);
+            const material = new THREE.MeshPhysicalMaterial({ 
+                color: 0x336688,
+                transmission: 0.6,
+                transparent: true,
+                roughness: 0.2
+            });
+            riverBed = new THREE.Mesh(geometry, material);
+            terrainGroup.add(riverBed);
+        }
+
+        function buildInfrastructure() {
+            // Helper to create buildings
+            const createBuilding = (color, w, h, d, x, y, z, rotY, type) => {
+                const geo = new THREE.BoxGeometry(w, h, d);
+                geo.translate(0, h/2, 0); // Origin at bottom
+                const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.8 });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.position.set(x, y, z);
+                mesh.rotation.y = rotY;
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                
+                // Physics properties
+                mesh.userData = {
+                    type: type,
+                    originalPos: mesh.position.clone(),
+                    originalRot: mesh.rotation.clone(),
+                    isDestroyed: false,
+                    mass: w*h*d, // Rough mass estimate
+                    velocity: new THREE.Vector3(0,0,0)
+                };
+                
+                terrainGroup.add(mesh);
+                infrastructure.push(mesh);
+                return mesh;
+            };
+
+            // 1. Hydropower Project (Upper Trishuli / Bhotekoshi style)
+            // Dam/Weir across river
+            const damY = calculateTerrainHeightFast(2, -20);
+            createBuilding(0xcccccc, 12, 4, 3, 2, damY, -20, 0, "hydro_dam");
+            // Powerhouse on the bank
+            const powerhouseY = calculateTerrainHeightFast(8, -15);
+            createBuilding(0x8899aa, 8, 6, 12, 8, powerhouseY, -15, -0.2, "powerhouse");
+            // Switchyard/Transformers
+            for(let i=0; i<3; i++) {
+                const zPos = -18 + i*3;
+                const equipY = calculateTerrainHeightFast(13, zPos);
+                createBuilding(0x555555, 1.5, 3, 1.5, 13, equipY, zPos, 0, "equipment");
+            }
+
+            // 2. Highway / Road cutting into mountain side
+            // Visual only, using a plane hugging the contour
+
+            // 3. Bridges connecting valleys
+            // Main Motor Bridge
+            const wallY1 = calculateTerrainHeightFast(-8, 10);
+            const wallY2 = calculateTerrainHeightFast(8, 10);
+            const bridgeY = Math.max(wallY1, wallY2) + 0.5;
+            createBuilding(0x444444, 16, 1, 4, -1, bridgeY, 10, -0.3, "bridge");
+            
+            // Bridge pillars (dynamically sized to connect riverbed to bridge deck)
+            const pillar1G = calculateTerrainHeightFast(-4, 11);
+            const pillar1H = bridgeY - pillar1G;
+            createBuilding(0x666666, 1.5, pillar1H, 1.5, -4, pillar1G, 11, 0, "pillar");
+            
+            const pillar2G = calculateTerrainHeightFast(2, 9);
+            const pillar2H = bridgeY - pillar2G;
+            createBuilding(0x666666, 1.5, pillar2H, 1.5, 2, pillar2G, 9, 0, "pillar");
+
+            // Suspension Bridge (pedestrian) lower down
+            const suspWallY1 = calculateTerrainHeightFast(-7, 40);
+            const suspWallY2 = calculateTerrainHeightFast(7, 40);
+            const suspBridgeY = Math.max(suspWallY1, suspWallY2) + 1.0;
+            createBuilding(0x773333, 14, 0.2, 1.5, 2, suspBridgeY, 40, 0.2, "bridge");
+
+            // 4. Riverside Settlements / Customs Office (Border town vibe)
+            const settlementZ = 25;
+            // Market/Customs area on wider bank
+            for(let i=0; i<8; i++) {
+                let bx = -12 + (Math.random()*6);
+                let bz = settlementZ + (i*4) + (Math.random()*2);
+                let houseY = calculateTerrainHeightFast(bx, bz);
+                
+                let col = [0xddccaa, 0xbb5544, 0x88aabb][Math.floor(Math.random()*3)];
+                createBuilding(col, 2+Math.random()*2, 2+Math.random()*2, 2+Math.random()*2, bx, houseY, bz, Math.random()*0.5, "house");
+            }
+        }
+
+        function startSimulation() {
+            if (isSimulating) return;
+            
+            isSimulating = true;
+            simTime = 0;
+            
+            // UI Updates
+            btnTrigger.disabled = true;
+            btnTrigger.classList.replace('from-red-600', 'from-gray-600');
+            btnTrigger.classList.replace('to-rose-700', 'to-gray-700');
+            btnTrigger.classList.remove('hover:from-red-500', 'hover:to-rose-600', 'shadow-[0_0_15px_rgba(225,29,72,0.4)]');
+            
+            setStatus("CRITICAL: Ice/Rock Avalanche Detected!", "bg-red-900/80", "text-red-200", "border-red-500", "bg-red-500");
+            
+            // Generate Avalanche Particles (Rocks and Ice chunks)
+            const numDebris = avalancheIntensity * 40;
+            
+            const geoRock = new THREE.DodecahedronGeometry(1.2);
+            const matRock = new THREE.MeshStandardMaterial({ color: 0x4a4a4a, roughness: 1.0 });
+            const matIce = new THREE.MeshStandardMaterial({ color: 0xddffff, roughness: 0.3, transparent:true, opacity:0.8 });
+
+            for(let i=0; i<numDebris; i++) {
+                const isIce = Math.random() > 0.4;
+                const mesh = new THREE.Mesh(geoRock, isIce ? matIce : matRock);
+                
+                // Scale variation based on intensity
+                const scale = 0.5 + Math.random() * (avalancheIntensity * 0.8);
+                mesh.scale.set(scale, scale, scale);
+                
+                // Spawn high on the mountain peak above the lake
+                // X: spread out, Y: very high, Z: deep back
+                const startX = (Math.random() - 0.5) * 20;
+                const startY = 85 + Math.random() * 20;
+                const startZ = -75 + Math.random() * 10;
+                
+                mesh.position.set(startX, startY, startZ);
+                
+                // Initial velocity vector pointing down towards the lake
+                mesh.userData = {
+                    velocity: new THREE.Vector3(
+                        (0 - startX) * 0.02 + (Math.random()-0.5), // Aim towards X=0
+                        -1 - Math.random() * 2,                    // Falling fast
+                        (-55 - startZ) * 0.05 + Math.random()      // Aim towards Z=-55 (lake)
+                    ),
+                    mass: scale * (isIce ? 0.8 : 1.5),
+                    active: true,
+                    delay: Math.random() * 30 // Stagger the start
+                };
+                
+                mesh.castShadow = true;
+                scene.add(mesh);
+                fallingDebris.push(mesh);
+            }
+        }
+
+        function triggerLakeOutburst() {
+            setStatus("DISASTER: Moraine Dam Breached! GLOF in progress.", "bg-orange-900/80", "text-orange-200", "border-orange-500", "bg-orange-500");
+            
+            // 1. Break the Ice Dam visually
+            iceDam.children.forEach(block => {
+                // Give them outward and downward velocity
+                block.userData = {
+                    velocity: new THREE.Vector3(
+                        (Math.random()-0.5)*2,
+                        Math.random()*2,
+                        1 + Math.random()*2
+                    ),
+                    isFlowing: true
+                };
+            });
+
+            // 2. Animate Lake draining
+            // Handled in update loop via simTime flags, but we mark it here
+            lake.userData.isDraining = true;
+
+            // 3. Spawn Flood/Debris Flow Particles
+            // Real GLOFs carry massive sediment, becoming mudflows. We use thick spheres to simulate this front.
+            const flowVolume = avalancheIntensity * 60;
+            
+            const mudGeo = new THREE.SphereGeometry(1.5 + (avalancheIntensity*0.5), 7, 7);
+            const mudMat = new THREE.MeshStandardMaterial({ 
+                color: 0x3d3024, // Thick muddy gray-brown
+                roughness: 0.9,
+                transparent: true,
+                opacity: 0.9
+            });
+
+            for(let i=0; i<flowVolume; i++) {
+                const node = new THREE.Mesh(mudGeo, mudMat);
+                
+                // Spawn at dam location
+                node.position.set(
+                    (Math.random()-0.5) * 8,
+                    48 + (Math.random()*4),
+                    -48 + (Math.random()*4)
+                );
+                
+                node.userData = {
+                    velocity: new THREE.Vector3(0, 0, 0),
+                    active: false,
+                    delay: Math.random() * 90 // Continuous surge over time
+                };
+                
+                scene.add(node);
+                floodSurgeNodes.push(node);
+            }
+            
+            // Hide normal clear river to imply it's overtaken by mud
+            if(riverBed) riverBed.visible = false;
+        }
+
+        function updateSimulation() {
+            if (!isSimulating) return;
+            simTime++;
+
+            // --- Phase 1: Avalanche falling ---
+            let debrisInLake = 0;
+            for(let i = fallingDebris.length - 1; i >= 0; i--) {
+                let debris = fallingDebris[i];
+                
+                if(debris.userData.delay > 0) {
+                    debris.userData.delay--;
+                    continue;
+                }
+
+                // Gravity
+                debris.userData.velocity.y -= 0.15;
+                
+                // Apply Velocity
+                debris.position.add(debris.userData.velocity);
+                debris.rotation.x += debris.userData.velocity.z * 0.1;
+                debris.rotation.y += debris.userData.velocity.x * 0.1;
+
+                // Simple collision check with terrain approximation
+                let groundY = calculateTerrainHeightFast(debris.position.x, debris.position.z);
+                
+                if (debris.position.y <= groundY) {
+                    // Check if it hit the lake area
+                    const distToLake = Math.sqrt(Math.pow(debris.position.x, 2) + Math.pow(debris.position.z + 55, 2));
+                    
+                    if (distToLake < LAKE_RADIUS * 1.5 && debris.position.y < 52) {
+                        // Splash into lake
+                        if (!debris.userData.splashed) {
+                            debris.userData.splashed = true;
+                            debrisSplashedCount++;
+                        }
+                        debris.userData.velocity.multiplyScalar(0.2); // Slow down significantly
+                        debris.userData.velocity.y = -0.5; // Sink
+                        debrisInLake++;
+                    } else {
+                        // Hit mountain side, bounce/slide
+                        debris.position.y = groundY;
+                        debris.userData.velocity.y *= -0.3; // Dampened bounce
+                        
+                        // Slide downhill based on terrain gradient
+                        const epsilon = 0.5;
+                        const heightR = calculateTerrainHeightFast(debris.position.x + epsilon, debris.position.z);
+                        const heightL = calculateTerrainHeightFast(debris.position.x - epsilon, debris.position.z);
+                        const heightD = calculateTerrainHeightFast(debris.position.x, debris.position.z + epsilon);
+                        const heightU = calculateTerrainHeightFast(debris.position.x, debris.position.z - epsilon);
+                        
+                        const slopeX = (heightR - heightL) / (2 * epsilon);
+                        const slopeZ = (heightD - heightU) / (2 * epsilon);
+                        
+                        // Add acceleration downhill
+                        debris.userData.velocity.x -= slopeX * 0.15;
+                        debris.userData.velocity.z -= slopeZ * 0.15;
+                        
+                        debris.userData.velocity.x *= 0.8;  // Friction
+                        debris.userData.velocity.z *= 0.8;
+                    }
+                }
+
+                // Remove if it falls through world somehow
+                if (debris.position.y < -20) {
+                    scene.remove(debris);
+                    fallingDebris.splice(i, 1);
+                }
+            }
+
+            // --- Phase 1.5: Trigger Outburst ---
+            // If enough mass enters lake or time passes, dam breaks
+            const requiredSplash = Math.max(8, avalancheIntensity * 6);
+            if ((simTime === 120 || debrisSplashedCount >= requiredSplash) && !lake.userData.isDraining) {
+                triggerLakeOutburst();
+            }
+
+            // Draining lake visual
+            if (lake.userData.isDraining && lake.scale.y > 0.1) {
+                lake.scale.y -= 0.005;
+            }
+
+            // Move broken dam pieces
+            if (lake.userData.isDraining) {
+                iceDam.children.forEach(block => {
+                    if (block.userData.isFlowing) {
+                        block.userData.velocity.y -= 0.1; // gravity
+                        block.userData.velocity.z += 0.05; // push downstream
+                        block.position.add(block.userData.velocity);
+                        
+                        let gY = calculateTerrainHeightFast(block.position.x, block.position.z);
+                        if (block.position.y < gY) {
+                            block.position.y = gY;
+                            block.userData.velocity.y *= -0.2;
+                            // Slide down valley
+                            block.userData.velocity.x = -block.position.x * 0.05; // toward center
+                            block.userData.velocity.z = 0.5; // down river
+                        }
+                    }
+                });
+            }
+
+            // --- Phase 2: Debris Flow (Mud and Water Surge) ---
+            for(let i = floodSurgeNodes.length - 1; i >= 0; i--) {
+                let node = floodSurgeNodes[i];
+                
+                if (!node.userData.active) {
+                    node.userData.delay--;
+                    if(node.userData.delay <= 0) node.userData.active = true;
+                    continue;
+                }
+
+                // Path following logic (River Meander)
+                // Base flow speed based on slope and volume
+                const baseFlowSpeed = 0.6 + (avalancheIntensity * 0.15);
+                
+                // Force Downstream (Z)
+                node.userData.velocity.z = baseFlowSpeed;
+                
+                // Force Downhill (Y)
+                let groundY = calculateTerrainHeightFast(node.position.x, node.position.z);
+                // The flood rides slightly above the bare ground
+                let targetY = groundY + node.geometry.parameters.radius * node.scale.x; 
+                
+                // Fall towards ground
+                node.userData.velocity.y += (targetY - node.position.y) * 0.3;
+                // Add gravity if airborne
+                if (node.position.y > targetY + 1) node.userData.velocity.y -= 0.2;
+                
+                // Damp Y velocity to prevent extreme oscillations
+                node.userData.velocity.y *= 0.75;
+                
+                // Force to River Center (X meander)
+                let targetX = Math.sin(node.position.z * 0.08) * 4;
+                // Add some chaotic widening based on intensity
+                let chaoticSpread = (Math.random()-0.5) * (2 + avalancheIntensity);
+                
+                node.userData.velocity.x = (targetX + chaoticSpread - node.position.x) * 0.15;
+
+                // Apply velocity
+                node.position.add(node.userData.velocity);
+                
+                // Visual pulsing/churning effect
+                const pulse = 1 + Math.sin(simTime * 0.2 + i) * 0.3;
+                node.scale.set(pulse, pulse*0.8, pulse); // Flatten slightly like water
+
+                // Collision with Infrastructure
+                checkInfrastructureDamage(node);
+
+                // Remove if it goes past the end of the valley
+                if (node.position.z > VALLEY_LENGTH / 2 + 10) {
+                    scene.remove(node);
+                    floodSurgeNodes.splice(i, 1);
+                }
+            }
+
+            // --- Phase 3: Moving destroyed infrastructure ---
+            updateDestroyedInfrastructure();
+
+            // End simulation when all particles have left the scene
+            if (lake.userData.isDraining && fallingDebris.length === 0 && floodSurgeNodes.length === 0) {
+                isSimulating = false;
+                setStatus("Event Concluded: Flood surge subsided.", "bg-slate-900/80", "text-slate-300", "border-slate-700", "bg-slate-500");
+                btnTrigger.disabled = true; // Keep disabled until reset
+            }
+        }
+
+        function checkInfrastructureDamage(waterNode) {
+            // Calculate an effective radius for the flood front based on scale and intensity
+            const floodRadius = waterNode.geometry.parameters.radius * waterNode.scale.x * 1.8;
+
+            infrastructure.forEach(struct => {
+                if(struct.userData.isDestroyed) return;
+
+                // Bounding box style distance check is better, but simple distance works for demo
+                // Adjust Y check because structures have pivot at bottom
+                const centerPos = struct.position.clone();
+                centerPos.y += struct.geometry.parameters.height / 2;
+
+                const dist = centerPos.distanceTo(waterNode.position);
+                
+                // If water is close enough and has enough mass/momentum (simulated by avalancheIntensity)
+                if (dist < floodRadius + (struct.geometry.parameters.width/2)) {
+                    
+                    // Simple threshold logic: Bridges/small houses break easily. Big dams need bigger floods.
+                    let resistance = struct.userData.mass;
+                    let floodPower = avalancheIntensity * 20; 
+                    
+                    if (struct.userData.type === "hydro_dam" && avalancheIntensity < 2) {
+                        // Dam survives small flood
+                        struct.material.color.setHex(0x7c6a58); // Get muddy but don't break
+                        return;
+                    }
+
+                    // Destroyed!
+                    struct.userData.isDestroyed = true;
+                    // Turn mud colored
+                    struct.material.color.setHex(0x4a3a2c); 
+                    
+                    // Impart initial velocity from water
+                    struct.userData.velocity.copy(waterNode.userData.velocity).multiplyScalar(0.5);
+                    struct.userData.velocity.y += 1; // Pop up slightly
+
+                    if(struct.userData.type.includes("bridge") || struct.userData.type === "hydro_dam") {
+                        setStatus(`CRITICAL: ${struct.userData.type.replace('_', ' ').toUpperCase()} DESTROYED!`, "bg-red-900/90", "text-red-100", "border-red-400", "bg-red-500");
+                    }
+                }
+            });
+        }
+
+        function updateDestroyedInfrastructure() {
+            infrastructure.forEach(struct => {
+                if(struct.userData.isDestroyed) {
+                    
+                    // Gravity
+                    struct.userData.velocity.y -= 0.15;
+                    
+                    // Flow downstream
+                    // Push them along the river meander roughly
+                    let targetX = Math.sin(struct.position.z * 0.08) * 4;
+                    struct.userData.velocity.x += (targetX - struct.position.x) * 0.05;
+                    struct.userData.velocity.z += 0.1; // River current push
+                    
+                    // Apply drag
+                    struct.userData.velocity.multiplyScalar(0.95);
+
+                    struct.position.add(struct.userData.velocity);
+                    
+                    // Tumbling rotation
+                    struct.rotation.x += struct.userData.velocity.z * 0.05;
+                    struct.rotation.z -= struct.userData.velocity.x * 0.05;
+                    
+                    // Ground collision
+                    let groundY = calculateTerrainHeightFast(struct.position.x, struct.position.z);
+                    if (struct.position.y < groundY + struct.geometry.parameters.height/2) {
+                        struct.position.y = groundY + struct.geometry.parameters.height/2;
+                        struct.userData.velocity.y *= -0.3; // Bounce
+                        
+                        // High friction on ground
+                        struct.userData.velocity.x *= 0.5;
+                        struct.userData.velocity.z *= 0.8;
+                    }
+                }
+            });
+        }
+
+        // Helper function mirroring the terrain generation math to get ground height at any X,Z
+        function calculateTerrainHeightFast(x, z) {
+            const normalizedZ = (z + VALLEY_LENGTH/2) / VALLEY_LENGTH;
+            const baseAltitude = 60 - (normalizedZ * 60);
+            
+            const distFromCenter = Math.abs(x);
+            const wallHeight = Math.pow(distFromCenter / (VALLEY_WIDTH/2), 1.5) * 45;
+            
+            let y = baseAltitude + wallHeight;
+
+            // Glacial Lake Bowl
+            const lakeCenterX = 0;
+            const lakeCenterZ = -55;
+            const distToLake = Math.sqrt(Math.pow(x - lakeCenterX, 2) + Math.pow(z - lakeCenterZ, 2));
+            if (distToLake < LAKE_RADIUS * 2 && z < -40) {
+                let carveAmount = (1 - (distToLake / (LAKE_RADIUS * 2))) * 15;
+                y -= carveAmount;
+                if(y < 48) y = 48; 
+            }
+
+            // Approximate river trench
+            const meanderCenter = Math.sin(z * 0.08) * 4;
+            const distFromRiver = Math.abs(x - meanderCenter);
+            if (distFromRiver < 4 && z > -50) {
+                y -= (4 - distFromRiver) * 0.5;
+            }
+            
+            // Add noise exactly matching terrain generation
+            y += (Math.sin(x*0.5)*Math.cos(z*0.5) + Math.sin(x*0.1)*Math.cos(z*0.1)*2) * 1.5;
+            
+            return y;
+        }
+
+        function resetSimulation() {
+            isSimulating = false;
+            simTime = 0;
+            debrisSplashedCount = 0;
+            
+            // 1. Cleanup Particle Arrays
+            fallingDebris.forEach(p => scene.remove(p));
+            fallingDebris = [];
+            
+            floodSurgeNodes.forEach(p => scene.remove(p));
+            floodSurgeNodes = [];
+
+            // 2. Reset Lake and Dam
+            lake.scale.set(1, 1, 1);
+            lake.position.set(0, 48, -55);
+            lake.userData.isDraining = false;
+            
+            // Replace dam blocks
+            iceDam.children.forEach(block => {
+                block.position.set(
+                    (Math.random()-0.5)*8,
+                    (Math.random()-0.5)*3,
+                    (Math.random()-0.5)*3
+                );
+                block.userData.isFlowing = false;
+                block.userData.velocity = new THREE.Vector3();
+            });
+
+            if(riverBed) riverBed.visible = true;
+
+            // 3. Reset Infrastructure
+            infrastructure.forEach(struct => {
+                struct.position.copy(struct.userData.originalPos);
+                struct.rotation.copy(struct.userData.originalRot);
+                struct.userData.isDestroyed = false;
+                struct.userData.velocity.set(0,0,0);
+                
+                // Reset colors based on type
+                if(struct.userData.type === "hydro_dam") struct.material.color.setHex(0xcccccc);
+                else if(struct.userData.type === "powerhouse") struct.material.color.setHex(0x8899aa);
+                else if(struct.userData.type.includes("bridge")) struct.material.color.setHex(0x444444);
+                else struct.material.color.setHex(0xbb5544); // default house color roughly
+            });
+
+            // 4. UI Reset
+            btnTrigger.disabled = false;
+            btnTrigger.classList.replace('from-gray-600', 'from-red-600');
+            btnTrigger.classList.replace('to-gray-700', 'to-rose-700');
+            btnTrigger.classList.add('hover:from-red-500', 'hover:to-rose-600', 'shadow-[0_0_15px_rgba(225,29,72,0.4)]');
+            
+            setStatus("Stable - Glacial Lake Intact", "bg-blue-900/60", "text-blue-200", "border-blue-500/40", "bg-blue-400");
+        }
+
+        function setStatus(text, bgClass, textClass, borderClass, dotClass) {
+            statusBox.className = `inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold border shadow-inner w-full mb-2 transition-colors duration-500 ${bgClass} ${textClass} ${borderClass}`;
+            statusDot.className = `w-2 h-2 rounded-full mr-2 animate-pulse ${dotClass}`;
+            statusText.innerText = text;
+        }
+
+        function toggleCamera() {
+            cameraViewIndex = (cameraViewIndex + 1) % 3;
+            setCameraView(cameraViewIndex);
+        }
+
+        function setCameraView(index) {
+            const labels = ["View: Valley Wide", "View: Glacial Lake", "View: Infrastructure"];
+            btnCamera.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                ${labels[index]}
+            `;
+
+            if (index === 0) {
+                // Wide Isometric-ish View looking up valley
+                camera.position.set(-60, 60, 50);
+                controls.target.set(0, 10, -10);
+            } else if (index === 1) {
+                // Close up on Glacial Lake and peak
+                camera.position.set(-25, 70, -35);
+                controls.target.set(0, 50, -55);
+            } else if (index === 2) {
+                // Followcam behind the dam looking down river
+                camera.position.set(0, 40, -10);
+                controls.target.set(0, 0, 30);
+            }
+            controls.update();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            updateSimulation();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

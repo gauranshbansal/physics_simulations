@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landscape of Futures - Nonlinear Dynamics Explorer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        space: {
+                            950: '#03050a',
+                            900: '#060a17',
+                            800: '#0b132b',
+                            700: '#1c2541',
+                            600: '#3a506b',
+                        }
+                    },
+                    boxShadow: {
+                        'neon-glow': '0 0 25px rgba(51, 136, 255, 0.35)',
+                        'radial-glow': '0 0 40px rgba(255, 51, 102, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #03050a;
+            overflow-x: hidden;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Range Sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #0b132b;
+            height: 4px;
+            border-radius: 2px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -6px;
+            background-color: #3388ff;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(51, 136, 255, 0.8);
+            transition: all 0.1s ease;
+        }
+        input[type="range"]:focus::-webkit-slider-thumb,
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background-color: #66a3ff;
+            transform: scale(1.25);
+            box-shadow: 0 0 15px rgba(102, 163, 255, 0.9);
+        }
+
+        /* LOKI TVA THEME OVERRIDES FOR LANDSCAPE OF FUTURES */
+        body.tva-theme {
+            background-color: #120902 !important;
+            color: #ff9d00 !important;
+        }
+        body.tva-theme header {
+            background-color: rgba(26, 14, 3, 0.95) !important;
+            border-color: #5c350a !important;
+        }
+        body.tva-theme h1 {
+            background: linear-gradient(to right, #ff9d00, #ffc87c, #d97706) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+        }
+        body.tva-theme .bg-space-950,
+        body.tva-theme .bg-space-900,
+        body.tva-theme .bg-space-800,
+        body.tva-theme div[class*="bg-space-"],
+        body.tva-theme div[class*="bg-gradient-to-"] {
+            background: #1a0e04 !important;
+            border-color: #593309 !important;
+        }
+        body.tva-theme p, 
+        body.tva-theme span, 
+        body.tva-theme div, 
+        body.tva-theme label,
+        body.tva-theme strong {
+            color: #ffb700 !important;
+        }
+        body.tva-theme .text-slate-500,
+        body.tva-theme .text-slate-400,
+        body.tva-theme .text-slate-300 {
+            color: #d97706 !important;
+        }
+        body.tva-theme .text-blue-400,
+        body.tva-theme .text-blue-300,
+        body.tva-theme .text-blue-200 {
+            color: #ff9d00 !important;
+        }
+        body.tva-theme .tab-btn {
+            color: #d97706 !important;
+        }
+        body.tva-theme .tab-btn.bg-space-800 {
+            background-color: #3b2006 !important;
+            color: #ff9d00 !important;
+            border-color: #ff9d00 !important;
+        }
+        body.tva-theme input[type="range"]::-webkit-slider-runnable-track {
+            background: #3b2006 !important;
+        }
+        body.tva-theme input[type="range"]::-webkit-slider-thumb {
+            background-color: #ff9d00 !important;
+            box-shadow: 0 0 10px rgba(255, 157, 0, 0.8) !important;
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
+
+    <!-- Header Banner -->
+    <header class="border-b border-space-800/80 bg-space-950/90 backdrop-blur-md sticky top-0 z-50 px-4 py-3.5 lg:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <!-- Brand -->
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-gradient-to-tr from-pink-600 via-purple-600 to-blue-600 rounded-xl shadow-lg shadow-blue-500/10">
+                    <svg class="w-8 h-8 text-white animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="animation-duration: 25s;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    </svg>
+                </div>
+               <div>
+    <h1 class="text-xl lg:text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-pink-400 via-blue-200 to-emerald-400">
+        LANDSCAPE OF FUTURES
+    </h1>
+
+    <p class="text-xs text-blue-300/75 font-medium tracking-wide uppercase">
+        Explore how initial conditions shape destiny • WebGL Ultra Edition
+    </p>
+
+    <p class="mt-1 text-[11px] text-slate-500">
+        Developed by
+        <span class="text-slate-300 font-medium">Gauransh Bansal</span>
+        ·
+        <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/"
+           target="_blank"
+           class="text-blue-400 hover:text-blue-300 transition">
+            LinkedIn
+        </a>
+    </p>
+</div>
+            </div>
+
+            <!-- Global Tabs -->
+            <nav class="flex items-center gap-1 md:gap-2 overflow-x-auto">
+                <button onclick="switchTab('explore')" id="btn-tab-explore" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition bg-space-800 text-blue-400 border border-blue-500/30">
+                    Explore
+                </button>
+                <button onclick="switchTab('presets')" id="btn-tab-presets" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-space-800/50">
+                    Gallery
+                </button>
+                <button onclick="switchTab('settings')" id="btn-tab-settings" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-space-800/50">
+                    Map Settings
+                </button>
+                <button onclick="switchTab('about')" id="btn-tab-about" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-space-800/50">
+                    About
+                </button>
+                <button onclick="toggleTVATheme()" id="btn-tva-theme" class="tab-btn px-3 py-2 rounded-lg text-sm font-semibold transition border border-amber-500/30 text-amber-400 hover:bg-amber-900/30 ml-2">
+                    ⏳ Loki TVA Theme
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 lg:p-6 flex flex-col gap-6">
+
+        <!-- TAB: EXPLORE (Main Dashboard Layout) -->
+        <div id="tab-explore" class="tab-content flex flex-col gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Left Column: Interactive Map -->
+                <div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-4">
+                    <div class="flex justify-between items-center bg-space-900 border border-space-800/60 rounded-xl px-4 py-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="relative flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                            </span>
+                            <span class="text-xs text-blue-400 uppercase font-semibold tracking-wider">Dynamic GPU Simulator</span>
+                        </div>
+                        
+                        <div class="flex bg-space-950 px-3 py-1.5 rounded-lg border border-space-800/50">
+                            <span class="text-xs font-semibold text-blue-300">2D Basin Map</span>
+                        </div>
+                    </div>
+
+                    <!-- The Map Canvas Container -->
+                    <div class="relative bg-space-950 border border-space-800/80 rounded-2xl overflow-hidden aspect-square flex items-center justify-center shadow-radial-glow group">
+                        
+                        <!-- WebGL Canvas for 2D Maps -->
+                        <canvas id="map-canvas" class="w-full h-full object-cover cursor-crosshair transition-all duration-300"></canvas>
+                        
+                        <!-- Real-time Reticle Ring (Matches style in image_1c7c9d.jpg) -->
+                        <div id="canvas-reticle" class="absolute w-8 h-8 border-2 border-white/80 rounded-full pointer-events-none hidden mix-blend-difference z-20">
+                            <div class="absolute inset-0 m-auto w-1 h-1 bg-white rounded-full"></div>
+                        </div>
+
+                        <!-- Tooltip Overlay -->
+                        <div id="tooltip-overlay" class="absolute pointer-events-none hidden bg-space-950/95 border border-blue-500/50 rounded-xl p-3 shadow-neon-glow backdrop-blur-md text-xs w-52 z-30 select-none transition-all duration-75">
+                            <div class="font-bold text-blue-300 border-b border-space-800 pb-1 mb-2 flex items-center justify-between">
+                                <span>Initial Condition</span>
+                                <div class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-ping"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-y-1 text-slate-300 code-font">
+                                <span>x₀:</span> <span id="tooltip-x" class="text-right text-white">0.00000</span>
+                                <span>y₀:</span> <span id="tooltip-y" class="text-right text-white">0.00000</span>
+                                <span>Fate:</span> <span id="tooltip-fate" class="text-right font-bold text-pink-400">Fixed Point A</span>
+                                <span>Steps to settle:</span> <span id="tooltip-steps" class="text-right text-white">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Touch Helper Controls for Mobile / drag rotate -->
+                        <div id="canvas-instructions" class="absolute bottom-4 left-4 right-4 bg-space-950/80 border border-space-800 px-4 py-2 rounded-xl text-xs text-slate-300 backdrop-blur-sm pointer-events-none transition duration-500 flex items-center justify-between">
+                            <span id="instruction-text">Hover or click map to trace trajectory orbits.</span>
+                            <span class="text-[10px] bg-space-800 text-blue-400 border border-space-700 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">Live</span>
+                        </div>
+                    </div>
+
+                    <!-- Status Bar Info -->
+                    <div class="text-sm text-slate-400 bg-space-900/40 border border-space-800/60 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-blue-400">ℹ</span>
+                            <p>Drag sliders to watch the glowing basins shift like continental plates.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs bg-space-950 border border-space-800 text-slate-300 px-2.5 py-1 rounded-lg">
+                                Attractor Bounds: <strong class="text-white">x, y ∈ [-2.5, 2.5]</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Control Panel -->
+                <div class="lg:col-span-5 xl:col-span-4 flex flex-col gap-6">
+                    
+                    <!-- System Equation Panel -->
+                    <div class="bg-gradient-to-br from-space-900 to-space-950 border border-space-800/80 p-5 rounded-2xl flex flex-col gap-3 shadow-lg">
+                        <h3 class="text-xs text-blue-400 font-bold uppercase tracking-wider">Dynamical System</h3>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="font-bold text-slate-200">Forced Complex Newton Map</span>
+                                <p class="text-xs text-slate-400 mt-0.5">Damped Newton step for a cubic polynomial</p>
+                            </div>
+                        </div>
+                        <div class="bg-space-950/80 p-3 rounded-xl border border-space-800/80 flex flex-col gap-1 text-center justify-center text-sm font-semibold tracking-wide code-font text-blue-300">
+                            <div>z_{n+1} = z_n - δ f(z_n)/f'(z_n) + γ e^{i ω n}</div>
+                            <div class="text-xs text-slate-500 italic mt-1 font-normal">f(z) = z³ + (α - 1)z - β</div>
+                        </div>
+                    </div>
+
+                    <!-- Parameter Sliders -->
+                    <div class="bg-gradient-to-br from-space-900 to-space-950 border border-space-800/80 p-5 rounded-2xl flex flex-col gap-5 shadow-lg relative">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="flex h-2 w-2 relative">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                </span>
+                                <h3 class="text-xs text-blue-400 font-bold uppercase tracking-wider">Parameters</h3>
+                            </div>
+                            <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded font-extrabold tracking-wider uppercase">Live Modulating</span>
+                        </div>
+
+                        <!-- Param 1: Alpha (Nonlinearity) -->
+                        <div class="flex flex-col gap-1">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <span class="text-slate-300">α <span class="text-slate-500 font-normal">(nonlinearity)</span></span>
+                                <span id="val-alpha" class="text-blue-400 code-font font-bold">-1.20</span>
+                            </div>
+                            <input type="range" id="slider-alpha" min="-3.00" max="3.00" step="0.01" value="-1.20" class="w-full">
+                        </div>
+
+                        <!-- Param 2: Beta (Asymmetry) -->
+                        <div class="flex flex-col gap-1">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <span class="text-slate-300">β <span class="text-slate-500 font-normal">(cubic offset)</span></span>
+                                <span id="val-beta" class="text-blue-400 code-font font-bold">1.00</span>
+                            </div>
+                            <input type="range" id="slider-beta" min="-3.00" max="3.00" step="0.01" value="1.00" class="w-full">
+                        </div>
+
+                        <!-- Param 3: Delta (Damping step size) -->
+                        <div class="flex flex-col gap-1">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <span class="text-slate-300">δ <span class="text-slate-500 font-normal">(damping/step)</span></span>
+                                <span id="val-delta" class="text-blue-400 code-font font-bold">0.20</span>
+                            </div>
+                            <input type="range" id="slider-delta" min="0.01" max="1.50" step="0.01" value="0.20" class="w-full">
+                        </div>
+
+                        <!-- Param 4: Gamma (Forcing perturbation) -->
+                        <div class="flex flex-col gap-1">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <span class="text-slate-300">γ <span class="text-slate-500 font-normal">(forcing amplitude)</span></span>
+                                <span id="val-gamma" class="text-blue-400 code-font font-bold">0.37</span>
+                            </div>
+                            <input type="range" id="slider-gamma" min="0.00" max="2.00" step="0.01" value="0.37" class="w-full">
+                        </div>
+
+                        <!-- Param 5: Omega (Frequency) -->
+                        <div class="flex flex-col gap-1">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <span class="text-slate-300">ω <span class="text-slate-500 font-normal">(frequency)</span></span>
+                                <span id="val-omega" class="text-blue-400 code-font font-bold">1.20</span>
+                            </div>
+                            <input type="range" id="slider-omega" min="0.10" max="4.00" step="0.05" value="1.20" class="w-full">
+                        </div>
+
+                        <!-- Interactive Control Buttons -->
+                        <div class="grid grid-cols-3 gap-2 pt-2 border-t border-space-800">
+                            <button id="btn-reset" class="px-2.5 py-1.5 text-xs font-bold rounded-lg border border-space-700 bg-space-950/50 hover:bg-space-800 hover:text-white transition flex items-center justify-center gap-1">
+                                Reset
+                            </button>
+                            <button id="btn-pause" class="px-2.5 py-1.5 text-xs font-bold rounded-lg border border-space-700 bg-space-950/50 hover:bg-space-800 hover:text-white transition flex items-center justify-center gap-1">
+                                Pause
+                            </button>
+                            <button id="btn-randomize" class="px-2.5 py-1.5 text-xs font-bold rounded-lg border border-blue-500/20 bg-blue-950/10 text-blue-400 hover:bg-blue-900/20 hover:text-blue-200 transition flex items-center justify-center gap-1">
+                                Randomize
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Basin legend -->
+                    <div class="bg-gradient-to-br from-space-900 to-space-950 border border-space-800/80 p-5 rounded-2xl flex flex-col gap-3.5 shadow-lg">
+                        <h3 class="text-xs text-blue-400 font-bold uppercase tracking-wider">Basin Legend & Distribution</h3>
+                        
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3.5 h-3.5 rounded bg-pink-500 shadow-sm shadow-pink-500/50"></div>
+                                    <span class="font-medium text-slate-300">Root 1 basin</span>
+                                </div>
+                                <span id="dist-root1" class="font-bold text-slate-400 code-font">0.0%</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3.5 h-3.5 rounded bg-blue-500 shadow-sm shadow-blue-500/50"></div>
+                                    <span class="font-medium text-slate-300">Root 2 basin</span>
+                                </div>
+                                <span id="dist-root2" class="font-bold text-slate-400 code-font">0.0%</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3.5 h-3.5 rounded bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
+                                    <span class="font-medium text-slate-300">Root 3 basin</span>
+                                </div>
+                                <span id="dist-root3" class="font-bold text-slate-400 code-font">0.0%</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3.5 h-3.5 rounded bg-yellow-500 shadow-sm shadow-yellow-500/50"></div>
+                                    <span class="font-medium text-slate-300">Unsettled after limit</span>
+                                </div>
+                                <span id="dist-unsettled" class="font-bold text-slate-400 code-font">0.0%</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3.5 h-3.5 rounded bg-slate-600 shadow-sm shadow-slate-600/50"></div>
+                                    <span class="font-medium text-slate-300">Escape / Diverge</span>
+                                </div>
+                                <span id="dist-escape" class="font-bold text-slate-400 code-font">0.0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map Statistics -->
+                    <div class="bg-gradient-to-br from-space-900 to-space-950 border border-space-800/80 p-5 rounded-2xl flex flex-col gap-3 shadow-lg text-xs">
+                        <h3 class="text-xs text-blue-400 font-bold uppercase tracking-wider">Map Statistics</h3>
+                        <div class="grid grid-cols-2 gap-y-2 border-b border-space-800 pb-3 font-semibold text-slate-300">
+                            <span>Resolution:</span> <span id="stat-resolution" class="text-right text-white code-font">800 × 800</span>
+                            <span>Total Points:</span> <span id="stat-points" class="text-right text-white code-font">2,250,000</span>
+                            <span>Render Time:</span> <span id="stat-calc-time" class="text-right text-emerald-400 code-font">0.0 ms</span>
+                            <span>Lyapunov Estimate:</span> <span id="stat-lyapunov" class="text-right text-amber-400 code-font">--</span>
+                            <span>Unsettled Area:</span> <span id="stat-unsettled-area" class="text-right text-yellow-400 code-font">0.0%</span>
+                        </div>
+                        <div class="pt-1">
+                            <button id="btn-save-map" class="w-full px-2.5 py-1.5 text-[11px] font-bold rounded-lg border border-space-700 bg-space-950/50 hover:bg-space-800 hover:text-white transition flex items-center justify-center gap-1.5">
+                                Save Map
+                            </button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Bottom Row: Diagnostic Panels & Live Charts -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Chart 1: Bifurcation Diagram -->
+                <div class="bg-space-900/85 border border-space-800 p-4 rounded-2xl flex flex-col gap-2.5 shadow-lg relative overflow-hidden">
+                    <h3 class="text-xs text-blue-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                        <span>Bifurcation Diagram</span>
+                        <span class="text-[10px] text-slate-500 font-normal">γ (forcing) vs x</span>
+                    </h3>
+                    <div class="h-40 bg-space-950 rounded-xl relative border border-space-800/80 flex items-center justify-center">
+                        <canvas id="bifurcation-canvas" class="absolute inset-0 w-full h-full rounded-xl"></canvas>
+                        <div class="absolute bottom-2 left-2 text-[9px] text-slate-500 font-bold">γ = 0.0</div>
+                        <div class="absolute bottom-2 right-2 text-[9px] text-slate-500 font-bold">γ = 2.0</div>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Lyapunov Exponent -->
+                <div class="bg-space-900/85 border border-space-800 p-4 rounded-2xl flex flex-col gap-2.5 shadow-lg relative overflow-hidden">
+                    <h3 class="text-xs text-blue-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                        <span>Lyapunov Exponent</span>
+                        <span class="text-[10px] text-slate-500 font-normal">Varying forcing (γ)</span>
+                    </h3>
+                    <div class="h-40 bg-space-950 rounded-xl relative border border-space-800/80 flex items-center justify-center">
+                        <canvas id="lyapunov-canvas" class="absolute inset-0 w-full h-full rounded-xl"></canvas>
+                        <div class="absolute bottom-2 left-2 text-[9px] text-slate-500 font-bold">More Order</div>
+                        <div class="absolute bottom-2 right-2 text-[9px] text-slate-500 font-bold text-right">More Chaos</div>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Sample Orbit -->
+                <div class="bg-space-900/85 border border-space-800 p-4 rounded-2xl flex flex-col gap-2.5 shadow-lg relative overflow-hidden">
+                    <h3 class="text-xs text-blue-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                        <span>Sample Orbit</span>
+                        <span class="text-[10px] text-slate-500 font-normal">same complex map</span>
+                    </h3>
+                    <div class="h-40 bg-space-950 rounded-xl relative border border-space-800/80 flex items-center justify-center overflow-hidden">
+                        <canvas id="sample-orbit-canvas" class="absolute inset-0 w-full h-full rounded-xl"></canvas>
+                        <div class="absolute top-2 right-2 flex gap-1 z-10">
+                            <span class="text-[9px] bg-space-900 px-1.5 py-0.5 rounded text-blue-400 border border-space-800">Complex-map orbit</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 4: Time Evolution (Selected Point Orbit) -->
+                <div class="bg-space-900/85 border border-space-800 p-4 rounded-2xl flex flex-col gap-2.5 shadow-lg relative overflow-hidden">
+                    <h3 class="text-xs text-blue-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                        <span>Time Evolution (Point)</span>
+                        <span id="evolution-point-fate" class="text-[10px] text-emerald-400 font-bold">Hover coordinate</span>
+                    </h3>
+                    <div class="h-40 bg-space-950 rounded-xl relative border border-space-800/80 flex items-center justify-center">
+                        <canvas id="time-evolution-canvas" class="absolute inset-0 w-full h-full rounded-xl"></canvas>
+                        <div class="absolute bottom-2 left-2 text-[9px] text-slate-500 font-bold">t = 0</div>
+                        <div class="absolute bottom-2 right-2 text-[9px] text-slate-500 font-bold">t = 1000</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: GALLERY PRESETS -->
+        <div id="tab-presets" class="tab-content hidden flex flex-col gap-6">
+            <div class="bg-space-900 border border-space-800 p-6 rounded-2xl flex flex-col gap-4">
+                <h2 class="text-lg font-bold text-white">Preset Gallery Configurations</h2>
+                <p class="text-sm text-slate-400">Instantly load preset parameters that exhibit fascinating qualitative phases of complex basins and fractal divisions.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                    <!-- Preset 1 -->
+                    <div onclick="loadPreset('continents')" class="border border-space-800 bg-space-950 p-4 rounded-xl hover:border-blue-500 cursor-pointer hover:shadow-neon-glow transition flex flex-col gap-2 group">
+                        <div class="flex justify-between items-center border-b border-space-800 pb-2">
+                            <h3 class="font-bold text-blue-400 group-hover:text-blue-300">The Living Continents</h3>
+                            <span class="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded font-semibold uppercase">Smooth Orbits</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Features wide, sweeping basins of attraction resembling tectonic continents separated by razor-thin coastlines.</p>
+                        <div class="text-[10px] text-slate-500 mt-2 code-font">α = -1.20, β = 1.00, δ = 0.20, γ = 0.05, ω = 1.20</div>
+                    </div>
+
+                    <!-- Preset 2 -->
+                    <div onclick="loadPreset('fractal')" class="border border-space-800 bg-space-950 p-4 rounded-xl hover:border-emerald-500 cursor-pointer hover:shadow-neon-glow transition flex flex-col gap-2 group">
+                        <div class="flex justify-between items-center border-b border-space-800 pb-2">
+                            <h3 class="font-bold text-emerald-400 group-hover:text-emerald-300">Fractal Coastline</h3>
+                            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-semibold uppercase">Complex Boundary</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Creates incredibly rich spirals and micro-islands. Zoom bounds generate beautiful interlocking fractal filigree patterns.</p>
+                        <div class="text-[10px] text-slate-500 mt-2 code-font">α = -0.50, β = 1.80, δ = 0.55, γ = 0.25, ω = 0.80</div>
+                    </div>
+
+                    <!-- Preset 3 -->
+                    <div onclick="loadPreset('chaos')" class="border border-space-800 bg-space-950 p-4 rounded-xl hover:border-yellow-500 cursor-pointer hover:shadow-neon-glow transition flex flex-col gap-2 group">
+                        <div class="flex justify-between items-center border-b border-space-800 pb-2">
+                            <h3 class="font-bold text-yellow-400 group-hover:text-yellow-300">Chaos Invasion</h3>
+                            <span class="text-[10px] bg-yellow-500/10 text-yellow-400 px-2 py-0.5 rounded font-semibold uppercase">Strange Attractor</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Maximum forcing amplifies the chaotic territories (yellow), dissolving stable fixed states into a boiling ocean of chaos.</p>
+                        <div class="text-[10px] text-slate-500 mt-2 code-font">α = -1.10, β = 0.70, δ = 0.15, γ = 0.95, ω = 1.80</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: MAP SETTINGS -->
+        <div id="tab-settings" class="tab-content hidden flex flex-col gap-6">
+            <div class="bg-space-900 border border-space-800 p-6 rounded-2xl flex flex-col gap-6">
+                <h2 class="text-lg font-bold text-white">Renderer & Coordinate Configuration</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex flex-col gap-4">
+                        <h3 class="text-sm font-semibold text-blue-400 border-b border-space-800 pb-2">Super-Sampling & Quality</h3>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-xs text-slate-300 font-medium">Render Density Preset</label>
+                            <p class="text-xs text-slate-500 mb-1">Select the level of screen grid multi-sampling. Higher limits produce smooth fractal coastlines.</p>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                <button onclick="setQuality(400)" data-res="400" class="qual-btn border border-space-700 bg-space-950/50 py-2 rounded-lg text-xs font-semibold hover:border-blue-500">
+                                    Fast (400x400)
+                                </button>
+                                <button onclick="setQuality(800)" data-res="800" class="qual-btn border border-blue-500 bg-blue-900/20 py-2 rounded-lg text-xs font-semibold text-blue-300">
+                                    Gorgeous (800x800)
+                                </button>
+                                <button onclick="setQuality(1500)" data-res="1500" class="qual-btn border border-space-700 bg-space-950/50 py-2 rounded-lg text-xs font-semibold hover:border-blue-500">
+                                    Ultra (1500x1500)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: ABOUT THE MATH -->
+        <div id="tab-about" class="tab-content hidden flex flex-col gap-6">
+            <div class="bg-space-900 border border-space-800 p-6 rounded-2xl flex flex-col gap-4">
+                <h2 class="text-lg font-bold text-white">About the Mathematical Model</h2>
+                <div class="text-sm text-slate-300 flex flex-col gap-4 leading-relaxed">
+                    <p>
+                        This simulator iterates a damped Newton map for <strong>f(z) = z³ + (α - 1)z - β</strong>, with an optional complex periodic forcing term. When <strong>γ = 0</strong>, the colored regions are classical Newton basins for the exact cubic roots. When <strong>γ &gt; 0</strong>, the forcing makes the map time-dependent, so yellow marks points that did not settle near a root within the iteration limit.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    <!-- JavaScript Simulator Logic -->
+    <script>
+        let state = {
+            alpha: -1.20,
+            beta: 1.00,
+            delta: 0.20,
+            gamma: 0.37,
+            omega: 1.20,
+            maxIter: 60,
+            density: 800,
+            isPaused: false,
+            activeTab: 'explore',
+            bounds: { minX: -2.5, maxX: 2.5, minY: -2.5, maxY: 2.5 },
+            hoverPoint: null
+        };
+
+        const canvas = document.getElementById('map-canvas');
+        const reticle = document.getElementById('canvas-reticle');
+        const tooltipOverlay = document.getElementById('tooltip-overlay');
+        const tooltipX = document.getElementById('tooltip-x');
+        const tooltipY = document.getElementById('tooltip-y');
+        const tooltipFate = document.getElementById('tooltip-fate');
+        const tooltipSteps = document.getElementById('tooltip-steps');
+
+        const distRoot1El = document.getElementById('dist-root1');
+        const distRoot2El = document.getElementById('dist-root2');
+        const distRoot3El = document.getElementById('dist-root3');
+        const distUnsettledEl = document.getElementById('dist-unsettled');
+        const distEscapeEl = document.getElementById('dist-escape');
+        const lyapunovStatEl = document.getElementById('stat-lyapunov');
+        const unsettledAreaEl = document.getElementById('stat-unsettled-area');
+
+        const bifurcationCanvas = document.getElementById('bifurcation-canvas');
+        const lyapunovCanvas = document.getElementById('lyapunov-canvas');
+        const orbitCanvas = document.getElementById('sample-orbit-canvas');
+        const evolutionCanvas = document.getElementById('time-evolution-canvas');
+        const evolutionFateEl = document.getElementById('evolution-point-fate');
+
+        let gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        let useWebGL = !!gl;
+        let programInfo = null;
+        const ESCAPE_RADIUS = 4.0;
+        const ESCAPE_RADIUS_SQ = ESCAPE_RADIUS * ESCAPE_RADIUS;
+
+        function currentParams(overrides = {}) {
+            return {
+                alpha: state.alpha,
+                beta: state.beta,
+                delta: state.delta,
+                gamma: state.gamma,
+                omega: state.omega,
+                maxIter: state.maxIter,
+                ...overrides
+            };
+        }
+
+        function realCbrt(x) {
+            return Math.sign(x) * Math.pow(Math.abs(x), 1 / 3);
+        }
+
+        function cubicRoots(alpha = state.alpha, beta = state.beta) {
+            const A = alpha - 1.0;
+            const B = beta;
+            const discriminant = 0.25 * B * B + (A * A * A) / 27.0;
+
+            if (discriminant >= 0) {
+                const s = Math.sqrt(discriminant);
+                const u = realCbrt(0.5 * B + s);
+                const v = realCbrt(0.5 * B - s);
+                const pairReal = -0.5 * (u + v);
+                const pairImag = (Math.sqrt(3) / 2) * (u - v);
+
+                return [
+                    { x: u + v, y: 0 },
+                    { x: pairReal, y: pairImag },
+                    { x: pairReal, y: -pairImag }
+                ];
+            }
+
+            const radius = 2 * Math.sqrt(-A / 3);
+            const arg = Math.max(-1, Math.min(1, (-3 * B / (2 * A)) * Math.sqrt(-3 / A)));
+            const theta = Math.acos(arg) / 3;
+
+            return [
+                { x: radius * Math.cos(theta), y: 0 },
+                { x: radius * Math.cos(theta - 2 * Math.PI / 3), y: 0 },
+                { x: radius * Math.cos(theta - 4 * Math.PI / 3), y: 0 }
+            ];
+        }
+
+        function cMul(a, b) {
+            return { x: a.x * b.x - a.y * b.y, y: a.x * b.y + a.y * b.x };
+        }
+
+        function cSub(a, b) {
+            return { x: a.x - b.x, y: a.y - b.y };
+        }
+
+        function cScale(a, scalar) {
+            return { x: a.x * scalar, y: a.y * scalar };
+        }
+
+        function cDiv(a, b) {
+            const denom = b.x * b.x + b.y * b.y + 1e-8;
+            return {
+                x: (a.x * b.x + a.y * b.y) / denom,
+                y: (a.y * b.x - a.x * b.y) / denom
+            };
+        }
+
+        function polynomial(z, params = currentParams()) {
+            const A = params.alpha - 1.0;
+            const z2 = cMul(z, z);
+            const z3 = cMul(z2, z);
+            return { x: z3.x + A * z.x - params.beta, y: z3.y + A * z.y };
+        }
+
+        function polynomialDerivative(z, params = currentParams()) {
+            const A = params.alpha - 1.0;
+            const z2 = cMul(z, z);
+            return { x: 3 * z2.x + A, y: 3 * z2.y };
+        }
+
+        function mapStep(z, n, params = currentParams()) {
+            const fz = polynomial(z, params);
+            const dfz = polynomialDerivative(z, params);
+            const newtonStep = cDiv(fz, dfz);
+            const phase = params.omega * n;
+
+            return {
+                x: z.x - params.delta * newtonStep.x + params.gamma * Math.cos(phase),
+                y: z.y - params.delta * newtonStep.y + params.gamma * Math.sin(phase)
+            };
+        }
+
+        function mapDerivative(z, params = currentParams()) {
+            const fz = polynomial(z, params);
+            const dfz = polynomialDerivative(z, params);
+            const d2fz = { x: 6 * z.x, y: 6 * z.y };
+            const dfz2 = cMul(dfz, dfz);
+            const numerator = cSub(dfz2, cMul(fz, d2fz));
+            const quotientDerivative = cDiv(numerator, dfz2);
+
+            return {
+                x: 1 - params.delta * quotientDerivative.x,
+                y: -params.delta * quotientDerivative.y
+            };
+        }
+
+        function rootTolerance(params = currentParams()) {
+            return Math.min(0.65, 0.05 + 1.25 * Math.abs(params.gamma));
+        }
+
+        function squaredDistance(a, b) {
+            const dx = a.x - b.x;
+            const dy = a.y - b.y;
+            return dx * dx + dy * dy;
+        }
+
+        function classifyOrbit(x0, y0, params = currentParams(), roots = cubicRoots(params.alpha, params.beta)) {
+            let z = { x: x0, y: y0 };
+            let steps = params.maxIter;
+            let escaped = false;
+
+            for (let n = 0; n < params.maxIter; n++) {
+                z = mapStep(z, n, params);
+                if (z.x * z.x + z.y * z.y > ESCAPE_RADIUS_SQ) {
+                    steps = n + 1;
+                    escaped = true;
+                    break;
+                }
+            }
+
+            const distances = roots.map(root => Math.sqrt(squaredDistance(z, root)));
+            let nearestIndex = 0;
+            if (distances[1] < distances[nearestIndex]) nearestIndex = 1;
+            if (distances[2] < distances[nearestIndex]) nearestIndex = 2;
+
+            let kind = 'unsettled';
+            if (escaped) {
+                kind = 'escape';
+            } else if (distances[nearestIndex] <= rootTolerance(params)) {
+                kind = `root${nearestIndex + 1}`;
+            }
+
+            return {
+                kind,
+                steps,
+                final: z,
+                nearestIndex,
+                nearestDistance: distances[nearestIndex]
+            };
+        }
+
+        function labelForKind(kind) {
+            if (kind === 'root1') return 'Root 1 basin';
+            if (kind === 'root2') return 'Root 2 basin';
+            if (kind === 'root3') return 'Root 3 basin';
+            if (kind === 'escape') return 'Escape / Diverge';
+            return 'Unsettled';
+        }
+
+        function percent(count, total) {
+            return `${((count / total) * 100).toFixed(1)}%`;
+        }
+
+        function estimateLyapunov(overrides = {}) {
+            const params = currentParams(overrides);
+            let z = { x: 0.37, y: 0.21 };
+            let sum = 0;
+            let count = 0;
+            const burnIn = 20;
+            const samples = 90;
+
+            for (let n = 0; n < burnIn + samples; n++) {
+                const derivative = mapDerivative(z, params);
+                const stretch = Math.hypot(derivative.x, derivative.y);
+                z = mapStep(z, n, params);
+
+                if (z.x * z.x + z.y * z.y > ESCAPE_RADIUS_SQ) {
+                    return Number.NaN;
+                }
+
+                if (n >= burnIn) {
+                    sum += Math.log(Math.max(stretch, 1e-12));
+                    count++;
+                }
+            }
+
+            return count ? sum / count : Number.NaN;
+        }
+
+        function toCanvasX(x, width) {
+            return ((x - state.bounds.minX) / (state.bounds.maxX - state.bounds.minX)) * width;
+        }
+
+        function toCanvasY(y, height) {
+            return ((state.bounds.maxY - y) / (state.bounds.maxY - state.bounds.minY)) * height;
+        }
+
+        function drawRootMarkers(ctx, width, height, roots) {
+            const colors = ['#ff3366', '#3388ff', '#00d17d'];
+            roots.forEach((root, index) => {
+                const x = toCanvasX(root.x, width);
+                const y = toCanvasY(root.y, height);
+                if (x < 0 || x > width || y < 0 || y > height) return;
+
+                ctx.fillStyle = colors[index];
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
+
+        const vsSource = `
+            attribute vec2 position;
+            varying vec2 uv;
+            void main() {
+                uv = position * 0.5 + 0.5;
+                gl_Position = vec4(position, 0.0, 1.0);
+            }
+        `;
+
+        const fsSource = `
+            precision highp float;
+            varying vec2 uv;
+
+            uniform float u_alpha;
+            uniform float u_beta;
+            uniform float u_delta;
+            uniform float u_gamma;
+            uniform float u_omega;
+            uniform int u_maxIter;
+            uniform vec4 u_bounds; // minX, maxX, minY, maxY
+
+            const float PI = 3.141592653589793;
+
+            vec2 c_mul(vec2 a, vec2 b) {
+                return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
+            }
+
+            vec2 c_div(vec2 a, vec2 b) {
+                float denom = dot(b, b) + 1e-8;
+                return vec2(dot(a, b), a.y*b.x - a.x*b.y) / denom;
+            }
+
+            float real_cbrt(float x) {
+                return sign(x) * pow(abs(x), 1.0 / 3.0);
+            }
+
+            void cubic_roots(float A, float B, out vec2 r1, out vec2 r2, out vec2 r3) {
+                float discriminant = 0.25 * B * B + (A * A * A) / 27.0;
+
+                if (discriminant >= 0.0) {
+                    float s = sqrt(discriminant);
+                    float u = real_cbrt(0.5 * B + s);
+                    float v = real_cbrt(0.5 * B - s);
+                    float pairReal = -0.5 * (u + v);
+                    float pairImag = 0.8660254037844386 * (u - v);
+
+                    r1 = vec2(u + v, 0.0);
+                    r2 = vec2(pairReal, pairImag);
+                    r3 = vec2(pairReal, -pairImag);
+                } else {
+                    float radius = 2.0 * sqrt(-A / 3.0);
+                    float arg = clamp((-3.0 * B / (2.0 * A)) * sqrt(-3.0 / A), -1.0, 1.0);
+                    float theta = acos(arg) / 3.0;
+
+                    r1 = vec2(radius * cos(theta), 0.0);
+                    r2 = vec2(radius * cos(theta - 2.0 * PI / 3.0), 0.0);
+                    r3 = vec2(radius * cos(theta - 4.0 * PI / 3.0), 0.0);
+                }
+            }
+
+            void main() {
+                float minX = u_bounds.x;
+                float maxX = u_bounds.y;
+                float minY = u_bounds.z;
+                float maxY = u_bounds.w;
+
+                vec2 z = vec2(minX + uv.x * (maxX - minX), minY + uv.y * (maxY - minY));
+                vec2 z0 = z;
+
+                float A = u_alpha - 1.0;
+                float B = u_beta;
+                vec2 root1;
+                vec2 root2;
+                vec2 root3;
+                cubic_roots(A, B, root1, root2, root3);
+
+                float minDist1 = 1e5;
+                float minDist2 = 1e5;
+                float minDist3 = 1e5;
+
+                int finalN = u_maxIter;
+                vec2 finalZ = z;
+                bool escaped = false;
+
+                for (int n = 0; n < 100; ++n) {
+                    if (n >= u_maxIter) break;
+
+                    vec2 z2 = c_mul(z, z);
+                    vec2 fz = c_mul(z2, z) + A*z - vec2(B, 0.0);
+                    vec2 dfz = 3.0*z2 + vec2(A, 0.0);
+                    vec2 newtonStep = c_div(fz, dfz);
+
+                    float phase = u_omega * float(n);
+                    vec2 force = u_gamma * vec2(cos(phase), sin(phase));
+                    vec2 nextZ = z - u_delta * newtonStep + force;
+
+                    minDist1 = min(minDist1, distance(z, root1));
+                    minDist2 = min(minDist2, distance(z, root2));
+                    minDist3 = min(minDist3, distance(z, root3));
+
+                    finalN = n + 1;
+                    finalZ = nextZ;
+
+                    if (dot(nextZ, nextZ) > 16.0) {
+                        escaped = true;
+                        break;
+                    }
+
+                    z = nextZ;
+                }
+
+                float d1 = distance(finalZ, root1);
+                float d2 = distance(finalZ, root2);
+                float d3 = distance(finalZ, root3);
+                float nearest = min(d1, min(d2, d3));
+                float rootTol = min(0.65, 0.05 + 1.25 * u_gamma);
+
+                vec3 colorRoot1 = vec3(1.0, 0.15, 0.35);
+                vec3 colorRoot2 = vec3(0.15, 0.5, 1.0);
+                vec3 colorRoot3 = vec3(0.05, 0.85, 0.4);
+                vec3 colorUnsettled = vec3(1.0, 0.7, 0.0);
+                vec3 colorEscape = vec3(0.10, 0.12, 0.20);
+
+                vec3 color = colorUnsettled;
+                if (escaped) {
+                    color = colorEscape;
+                } else if (nearest <= rootTol) {
+                    if (d1 <= d2 && d1 <= d3) {
+                        color = colorRoot1;
+                    } else if (d2 <= d1 && d2 <= d3) {
+                        color = colorRoot2;
+                    } else {
+                        color = colorRoot3;
+                    }
+                }
+
+                float smoothN = float(finalN);
+                float distCenter = length(z0);
+                float concentric = sin(distCenter * 16.0 - smoothN * 0.3) * 0.5 + 0.5;
+                float traps = exp(-4.0 * minDist1) + exp(-4.0 * minDist2) + exp(-4.0 * minDist3);
+                float settleShade = 0.45 + 0.55 * (1.0 - clamp(smoothN / float(u_maxIter), 0.0, 1.0));
+
+                vec3 finalColor = color * settleShade
+                                + vec3(0.3, 0.4, 0.8) * concentric * 0.10
+                                + traps * 0.28 * color;
+
+                gl_FragColor = vec4(clamp(finalColor, 0.0, 1.0), 1.0);
+            }
+        `;
+
+        function initWebGL() {
+            if (!useWebGL) return;
+
+            const compileShader = (type, source) => {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error(gl.getShaderInfoLog(shader));
+                    useWebGL = false;
+                    return null;
+                }
+
+                return shader;
+            };
+
+            const vs = compileShader(gl.VERTEX_SHADER, vsSource);
+            const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
+            if (!vs || !fs) return;
+
+            const program = gl.createProgram();
+            gl.attachShader(program, vs);
+            gl.attachShader(program, fs);
+            gl.linkProgram(program);
+
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error(gl.getProgramInfoLog(program));
+                useWebGL = false;
+                return;
+            }
+
+            programInfo = {
+                program,
+                attribs: {
+                    position: gl.getAttribLocation(program, 'position')
+                },
+                uniforms: {
+                    alpha: gl.getUniformLocation(program, 'u_alpha'),
+                    beta: gl.getUniformLocation(program, 'u_beta'),
+                    delta: gl.getUniformLocation(program, 'u_delta'),
+                    gamma: gl.getUniformLocation(program, 'u_gamma'),
+                    omega: gl.getUniformLocation(program, 'u_omega'),
+                    maxIter: gl.getUniformLocation(program, 'u_maxIter'),
+                    bounds: gl.getUniformLocation(program, 'u_bounds')
+                }
+            };
+
+            const positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+                -1, -1,  1, -1, -1,  1,
+                -1,  1,  1, -1,  1,  1
+            ]), gl.STATIC_DRAW);
+        }
+
+        function initApp() {
+            initWebGL();
+            setQuality(800);
+            bindEvents();
+            runRenderLoop();
+            initCharts();
+        }
+
+        function bindEvents() {
+            const bindSlider = (id, field, valueId) => {
+                const el = document.getElementById(id);
+                el.addEventListener('input', (e) => {
+                    state[field] = parseFloat(e.target.value);
+                    document.getElementById(valueId).innerText = state[field].toFixed(2);
+                    requestAnimationFrame(drawAll);
+                });
+            };
+
+            bindSlider('slider-alpha', 'alpha', 'val-alpha');
+            bindSlider('slider-beta', 'beta', 'val-beta');
+            bindSlider('slider-delta', 'delta', 'val-delta');
+            bindSlider('slider-gamma', 'gamma', 'val-gamma');
+            bindSlider('slider-omega', 'omega', 'val-omega');
+
+            document.getElementById('btn-reset').addEventListener('click', resetParams);
+
+            document.getElementById('btn-pause').addEventListener('click', () => {
+                state.isPaused = !state.isPaused;
+                document.getElementById('btn-pause').innerText = state.isPaused ? 'Play' : 'Pause';
+            });
+
+            document.getElementById('btn-randomize').addEventListener('click', randomizeParams);
+
+            document.getElementById('btn-save-map').addEventListener('click', saveMapImage);
+
+            canvas.addEventListener('mousemove', handleCanvasMove);
+            canvas.addEventListener('mouseleave', handleCanvasLeave);
+        }
+
+        function setQuality(res) {
+            state.density = res;
+            canvas.width = res;
+            canvas.height = res;
+            document.getElementById('stat-resolution').innerText = `${res} × ${res}`;
+            document.getElementById('stat-points').innerText = (res * res).toLocaleString();
+            
+            document.querySelectorAll('.qual-btn').forEach(btn => {
+                const active = Number(btn.dataset.res) === res;
+                btn.classList.toggle('border-blue-500', active);
+                btn.classList.toggle('text-blue-300', active);
+                btn.classList.toggle('bg-blue-900/20', active);
+                btn.classList.toggle('border-space-700', !active);
+                btn.classList.toggle('bg-space-950/50', !active);
+            });
+            
+            requestAnimationFrame(drawAll);
+        }
+
+        function resetParams() {
+            state.alpha = -1.20;
+            state.beta = 1.00;
+            state.delta = 0.20;
+            state.gamma = 0.37;
+            state.omega = 1.20;
+            updateSlidersUI();
+            requestAnimationFrame(drawAll);
+        }
+
+        function randomizeParams() {
+            state.alpha = parseFloat((Math.random() * 4.0 - 2.0).toFixed(2));
+            state.beta = parseFloat((Math.random() * 4.0 - 2.0).toFixed(2));
+            state.delta = parseFloat((Math.random() * 0.9 + 0.1).toFixed(2));
+            state.gamma = parseFloat((Math.random() * 0.8).toFixed(2));
+            state.omega = parseFloat((Math.random() * 2.5 + 0.5).toFixed(2));
+            updateSlidersUI();
+            requestAnimationFrame(drawAll);
+        }
+
+        function updateSlidersUI() {
+            const setVal = (id, field, valId) => {
+                document.getElementById(id).value = state[field];
+                document.getElementById(valId).innerText = state[field].toFixed(2);
+            };
+            setVal('slider-alpha', 'alpha', 'val-alpha');
+            setVal('slider-beta', 'beta', 'val-beta');
+            setVal('slider-delta', 'delta', 'val-delta');
+            setVal('slider-gamma', 'gamma', 'val-gamma');
+            setVal('slider-omega', 'omega', 'val-omega');
+        }
+
+        function drawAll() {
+            if (state.activeTab !== 'explore') return;
+            const startTime = performance.now();
+
+            if (useWebGL && programInfo) {
+                gl.viewport(0, 0, canvas.width, canvas.height);
+                gl.useProgram(programInfo.program);
+
+                gl.uniform1f(programInfo.uniforms.alpha, state.alpha);
+                gl.uniform1f(programInfo.uniforms.beta, state.beta);
+                gl.uniform1f(programInfo.uniforms.delta, state.delta);
+                gl.uniform1f(programInfo.uniforms.gamma, state.gamma);
+                gl.uniform1f(programInfo.uniforms.omega, state.omega);
+                gl.uniform1i(programInfo.uniforms.maxIter, state.maxIter);
+                gl.uniform4f(programInfo.uniforms.bounds, state.bounds.minX, state.bounds.maxX, state.bounds.minY, state.bounds.maxY);
+
+                gl.enableVertexAttribArray(programInfo.attribs.position);
+                gl.vertexAttribPointer(programInfo.attribs.position, 2, gl.FLOAT, false, 0, 0);
+
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+            } else {
+                drawCpuMapFallback();
+            }
+
+            const endTime = performance.now();
+            document.getElementById('stat-calc-time').innerText = (endTime - startTime).toFixed(1) + " ms";
+
+            updateDistributionStats();
+            drawBifurcation();
+            drawLyapunovCurve();
+            drawSampleOrbit();
+            drawTimeEvolution();
+        }
+
+        function colorForKind(kind) {
+            if (kind === 'root1') return '#ff3366';
+            if (kind === 'root2') return '#3388ff';
+            if (kind === 'root3') return '#00d17d';
+            if (kind === 'escape') return '#1a1f36';
+            return '#ffdd00';
+        }
+
+        function drawCpuMapFallback() {
+            const ctx2D = canvas.getContext('2d');
+            if (!ctx2D) return;
+
+            const params = currentParams();
+            const roots = cubicRoots(params.alpha, params.beta);
+            const tile = Math.max(2, Math.ceil(canvas.width / 220));
+            ctx2D.fillStyle = '#03050a';
+            ctx2D.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let py = 0; py < canvas.height; py += tile) {
+                for (let px = 0; px < canvas.width; px += tile) {
+                    const x = state.bounds.minX + (px / canvas.width) * (state.bounds.maxX - state.bounds.minX);
+                    const y = state.bounds.maxY - (py / canvas.height) * (state.bounds.maxY - state.bounds.minY);
+                    const result = classifyOrbit(x, y, params, roots);
+                    ctx2D.fillStyle = colorForKind(result.kind);
+                    ctx2D.fillRect(px, py, tile, tile);
+                }
+            }
+        }
+
+        function updateDistributionStats() {
+            const sampleSize = 36;
+            const params = currentParams();
+            const roots = cubicRoots(params.alpha, params.beta);
+            const counts = { root1: 0, root2: 0, root3: 0, unsettled: 0, escape: 0 };
+
+            for (let row = 0; row < sampleSize; row++) {
+                const y = state.bounds.maxY - ((row + 0.5) / sampleSize) * (state.bounds.maxY - state.bounds.minY);
+                for (let col = 0; col < sampleSize; col++) {
+                    const x = state.bounds.minX + ((col + 0.5) / sampleSize) * (state.bounds.maxX - state.bounds.minX);
+                    counts[classifyOrbit(x, y, params, roots).kind]++;
+                }
+            }
+
+            const total = sampleSize * sampleSize;
+            distRoot1El.innerText = percent(counts.root1, total);
+            distRoot2El.innerText = percent(counts.root2, total);
+            distRoot3El.innerText = percent(counts.root3, total);
+            distUnsettledEl.innerText = percent(counts.unsettled, total);
+            distEscapeEl.innerText = percent(counts.escape, total);
+            unsettledAreaEl.innerText = percent(counts.unsettled, total);
+
+            const lyapunov = estimateLyapunov();
+            lyapunovStatEl.innerText = Number.isFinite(lyapunov) ? lyapunov.toFixed(3) : 'escape';
+        }
+
+        function handleCanvasMove(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            reticle.style.left = `${mouseX - 16}px`;
+            reticle.style.top = `${mouseY - 16}px`;
+            reticle.classList.remove('hidden');
+
+            const cx = state.bounds.minX + (mouseX / rect.width) * (state.bounds.maxX - state.bounds.minX);
+            const cy = state.bounds.maxY - (mouseY / rect.height) * (state.bounds.maxY - state.bounds.minY);
+            const result = classifyOrbit(cx, cy);
+            state.hoverPoint = { x: cx, y: cy };
+
+            tooltipOverlay.classList.remove('hidden');
+            tooltipOverlay.style.left = `${mouseX + 20}px`;
+            tooltipOverlay.style.top = `${mouseY + 20}px`;
+
+            tooltipX.innerText = cx.toFixed(5);
+            tooltipY.innerText = cy.toFixed(5);
+            tooltipSteps.innerText = result.steps;
+            tooltipFate.innerText = labelForKind(result.kind);
+            evolutionFateEl.innerText = labelForKind(result.kind);
+
+            drawSampleOrbit();
+            drawTimeEvolution();
+        }
+
+        function handleCanvasLeave() {
+            reticle.classList.add('hidden');
+            tooltipOverlay.classList.add('hidden');
+            state.hoverPoint = null;
+            evolutionFateEl.innerText = 'Hover coordinate';
+            drawSampleOrbit();
+            drawTimeEvolution();
+        }
+
+        function drawBifurcation() {
+            const w = bifurcationCanvas.width = bifurcationCanvas.parentElement.clientWidth;
+            const h = bifurcationCanvas.height = bifurcationCanvas.parentElement.clientHeight;
+            const bCtx = bifurcationCanvas.getContext('2d');
+            bCtx.fillStyle = '#03050a';
+            bCtx.fillRect(0, 0, w, h);
+
+            bCtx.fillStyle = 'rgba(51, 136, 255, 0.55)';
+
+            for (let col = 0; col < w; col += 2) {
+                const gamma = (col / Math.max(1, w - 1)) * 2.0;
+                const params = currentParams({ gamma });
+                let z = { x: 0.5, y: 0.0 };
+
+                for (let i = 0; i < 36; i++) {
+                    z = mapStep(z, i, params);
+                    if (z.x * z.x + z.y * z.y > ESCAPE_RADIUS_SQ) break;
+                }
+
+                for (let i = 36; i < 72; i++) {
+                    z = mapStep(z, i, params);
+                    if (z.x * z.x + z.y * z.y > ESCAPE_RADIUS_SQ) break;
+
+                    const sy = h / 2 - (z.x * (h / 5));
+                    if (sy >= 0 && sy < h) bCtx.fillRect(col, sy, 1.4, 1.4);
+                }
+            }
+        }
+
+        function drawLyapunovCurve() {
+            const w = lyapunovCanvas.width = lyapunovCanvas.parentElement.clientWidth;
+            const h = lyapunovCanvas.height = lyapunovCanvas.parentElement.clientHeight;
+            const lCtx = lyapunovCanvas.getContext('2d');
+            lCtx.fillStyle = '#03050a';
+            lCtx.fillRect(0, 0, w, h);
+
+            lCtx.strokeStyle = 'rgba(255,255,255,0.15)';
+            lCtx.beginPath();
+            lCtx.moveTo(0, h/2);
+            lCtx.lineTo(w, h/2);
+            lCtx.stroke();
+
+            let previous = null;
+            for (let col = 0; col < w; col += 4) {
+                const gamma = (col / Math.max(1, w - 1)) * 2.0;
+                const lyapunov = estimateLyapunov({ gamma });
+                const value = Number.isFinite(lyapunov) ? Math.max(-1, Math.min(1, lyapunov)) : 1;
+                const point = { x: col, y: h / 2 - value * (h * 0.42) };
+
+                if (previous) {
+                    lCtx.strokeStyle = Number.isFinite(lyapunov)
+                        ? (lyapunov > 0 ? '#ffdd00' : '#3388ff')
+                        : '#64748b';
+                    lCtx.beginPath();
+                    lCtx.moveTo(previous.x, previous.y);
+                    lCtx.lineTo(point.x, point.y);
+                    lCtx.stroke();
+                }
+
+                previous = point;
+            }
+        }
+
+        function drawSampleOrbit() {
+            const w = orbitCanvas.width = orbitCanvas.parentElement.clientWidth;
+            const h = orbitCanvas.height = orbitCanvas.parentElement.clientHeight;
+            const oCtx = orbitCanvas.getContext('2d');
+            const roots = cubicRoots();
+            const params = currentParams();
+            let z = state.hoverPoint ? { ...state.hoverPoint } : { x: 0.5, y: 0.5 };
+
+            oCtx.fillStyle = '#03050a';
+            oCtx.fillRect(0, 0, w, h);
+            oCtx.strokeStyle = 'rgba(255,255,255,0.12)';
+            oCtx.lineWidth = 1;
+            oCtx.beginPath();
+            oCtx.moveTo(0, toCanvasY(0, h));
+            oCtx.lineTo(w, toCanvasY(0, h));
+            oCtx.moveTo(toCanvasX(0, w), 0);
+            oCtx.lineTo(toCanvasX(0, w), h);
+            oCtx.stroke();
+            drawRootMarkers(oCtx, w, h, roots);
+
+            oCtx.strokeStyle = 'rgba(0, 240, 255, 0.75)';
+            oCtx.lineWidth = 1.5;
+            oCtx.beginPath();
+
+            for (let i = 0; i < 140; i++) {
+                const px = toCanvasX(z.x, w);
+                const py = toCanvasY(z.y, h);
+                if (i === 0) oCtx.moveTo(px, py);
+                else oCtx.lineTo(px, py);
+
+                z = mapStep(z, i, params);
+                if (z.x * z.x + z.y * z.y > ESCAPE_RADIUS_SQ) break;
+            }
+
+            oCtx.stroke();
+        }
+
+        function drawTimeEvolution() {
+            const w = evolutionCanvas.width = evolutionCanvas.parentElement.clientWidth;
+            const h = evolutionCanvas.height = evolutionCanvas.parentElement.clientHeight;
+            const eCtx = evolutionCanvas.getContext('2d');
+            const params = currentParams();
+            let z = state.hoverPoint ? { ...state.hoverPoint } : { x: 0.5, y: 0.5 };
+
+            eCtx.fillStyle = '#03050a';
+            eCtx.fillRect(0, 0, w, h);
+            eCtx.strokeStyle = 'rgba(255,255,255,0.16)';
+            eCtx.beginPath();
+            eCtx.moveTo(0, h / 2);
+            eCtx.lineTo(w, h / 2);
+            eCtx.stroke();
+
+            eCtx.beginPath();
+            eCtx.strokeStyle = '#a855f7';
+            eCtx.lineWidth = 1.5;
+
+            for (let step = 0; step < w; step++) {
+                z = mapStep(z, step, params);
+                const displayX = Math.max(state.bounds.minY, Math.min(state.bounds.maxY, z.x));
+                const sy = toCanvasY(displayX, h);
+
+                if (step === 0) eCtx.moveTo(step, sy);
+                else eCtx.lineTo(step, sy);
+
+                if (z.x * z.x + z.y * z.y > ESCAPE_RADIUS_SQ) break;
+            }
+
+            eCtx.stroke();
+        }
+
+        function loadPreset(key) {
+            const presets = {
+                continents: { alpha: -1.20, beta: 1.00, delta: 0.20, gamma: 0.05, omega: 1.20 },
+                fractal: { alpha: -0.50, beta: 1.80, delta: 0.55, gamma: 0.25, omega: 0.80 },
+                chaos: { alpha: -1.10, beta: 0.70, delta: 0.15, gamma: 0.95, omega: 1.80 }
+            };
+            const p = presets[key];
+            if (p) {
+                state.alpha = p.alpha; state.beta = p.beta; state.delta = p.delta;
+                state.gamma = p.gamma; state.omega = p.omega;
+                updateSlidersUI();
+                switchTab('explore');
+                requestAnimationFrame(drawAll);
+            }
+        }
+
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                const active = btn.id === `btn-tab-${tabId}`;
+                btn.classList.toggle('bg-space-800', active);
+                btn.classList.toggle('text-blue-400', active);
+                btn.classList.toggle('border', active);
+                btn.classList.toggle('border-blue-500/30', active);
+                btn.classList.toggle('text-slate-400', !active);
+            });
+
+            if (tabId === 'explore') requestAnimationFrame(drawAll);
+        }
+
+        function saveMapImage() {
+            const link = document.createElement('a');
+            link.download = 'landscape-of-futures.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function runRenderLoop() {
+            function loop() {
+                if (!state.isPaused && state.activeTab === 'explore') {
+                    drawSampleOrbit();
+                }
+                requestAnimationFrame(loop);
+            }
+            requestAnimationFrame(loop);
+        }
+
+        function toggleTVATheme() {
+            document.body.classList.toggle('tva-theme');
+            const btn = document.getElementById('btn-tva-theme');
+            if (document.body.classList.contains('tva-theme')) {
+                btn.innerHTML = '⏳ TVA Active (Sacred Timeline)';
+                btn.classList.add('bg-amber-600/30', 'text-amber-300', 'border-amber-400');
+            } else {
+                btn.innerHTML = '⏳ Loki TVA Theme';
+                btn.classList.remove('bg-amber-600/30', 'text-amber-300', 'border-amber-400');
+            }
+            if (typeof drawAll === 'function') drawAll();
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>

@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Same Equation: Transcendence & Invariants</title>
+    
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #030305;
+            --surface-color: #0d0d14;
+            --surface-hover: #161622;
+            --border-color: #222233;
+            --text-main: #e2e8f0;
+            --text-muted: #8892b0;
+            --accent-emerald: #10b981;
+            --accent-purple: #a855f7;
+            --accent-cyan: #06b6d4;
+            --accent-gold: #f59e0b;
+            --accent-rose: #f43f5e;
+            --font-ui: 'Inter', sans-serif;
+            --font-serif: 'Lora', serif;
+            --font-mono: 'Share Tech Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Matrix Rain Canvas */
+        #matrix-bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.15;
+        }
+
+        /* Scribble Floating Widget */
+        #scribble-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1050;
+            pointer-events: none;
+        }
+
+        body.mode-scribbling #scribble-canvas {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+
+        .scribble-toolbar {
+            position: fixed;
+            left: 1.2rem; top: 50%;
+            transform: translateY(-50%);
+            z-index: 1090;
+            background: rgba(12, 12, 20, 0.94);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(168, 85, 247, 0.2);
+            border-radius: 14px;
+            padding: 1rem 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 140px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes cuteBadgePop {
+            0% { transform: translateY(-50%) scale(0.5); opacity: 0; }
+            60% { transform: translateY(-50%) scale(1.15); opacity: 1; }
+            100% { transform: translateY(-50%) scale(1); }
+        }
+
+        .scribble-toolbar.minimized {
+            width: 44px; height: 44px; padding: 0;
+            border-radius: 22px; justify-content: center; align-items: center;
+            cursor: pointer; overflow: hidden; opacity: 0.85;
+            background: rgba(168, 85, 247, 0.25); border-color: #a855f7;
+            animation: cuteBadgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .scribble-toolbar.minimized:hover {
+            transform: translateY(-50%) scale(1.12); opacity: 1.0;
+        }
+
+        .scribble-toolbar.minimized > *:not(.scribble-mini-badge) { display: none !important; }
+        .scribble-mini-badge { display: none; font-size: 1.2rem; color: #a855f7; }
+        .scribble-toolbar.minimized .scribble-mini-badge { display: flex; }
+
+        .scribble-title { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #a855f7; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem; }
+        .scribble-tool-btn, .scribble-action-btn { background: var(--surface-color); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.7rem; padding: 0.35rem; border-radius: 6px; cursor: pointer; text-align: center; width: 100%; }
+        .scribble-tool-btn.active { background: #a855f7; color: #fff; font-weight: 600; }
+        .scribble-power-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.7rem; font-weight: 700; padding: 0.4rem; border-radius: 6px; cursor: pointer; width: 100%; text-transform: uppercase; }
+        .scribble-power-btn.active { background: #10b981; color: #000; }
+
+        .scribble-colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.3rem; width: 100%; }
+        .color-swatch { width: 100%; aspect-ratio: 1; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .color-swatch.active { border-color: #fff; transform: scale(1.15); }
+
+        /* App Container & Header */
+        .container {
+            width: 100%; max-width: 1400px;
+            padding: 2rem; display: flex; flex-direction: column; gap: 2.5rem;
+            position: relative; z-index: 1;
+        }
+
+        header {
+            text-align: center; padding: 2rem 0 1rem; border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-weight: 300; letter-spacing: 0.12em; font-size: 1.8rem; text-transform: uppercase;
+            background: linear-gradient(135deg, #e2e8f0 0%, #a855f7 50%, #06b6d4 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle { font-size: 0.95rem; color: var(--text-muted); margin-top: 0.4rem; font-family: var(--font-serif); }
+        .author-tag { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; }
+        .author-tag a { color: #3b82f6; text-decoration: none; }
+
+        /* Navigation Bar for 15 Conceptual Dimensions */
+        .nav-tabs {
+            display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;
+            background: var(--surface-color); padding: 0.6rem; border-radius: 12px; border: 1px solid var(--border-color);
+        }
+
+        .nav-btn {
+            background: transparent; border: 1px solid transparent; color: var(--text-muted);
+            padding: 0.5rem 1rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;
+            border-radius: 6px; cursor: pointer; transition: all 0.25s ease;
+        }
+
+        .nav-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.04); }
+        .nav-btn.active { color: #fff; background: var(--accent-purple); border-color: var(--accent-purple); font-weight: 600; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+        .nav-btn.matrix-music-btn { border-color: #00ff66; color: #00ff66; }
+        .nav-btn.matrix-music-btn.active { background: #00ff66; color: #000; font-weight: 700; box-shadow: 0 0 15px rgba(0, 255, 102, 0.5); }
+
+        /* Main Display Stage */
+        .stage-card {
+            background: var(--surface-color); border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 2rem; display: flex; flex-direction: column; gap: 1.8rem;
+            position: relative; overflow: hidden;
+        }
+
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; flex-wrap: wrap; gap: 1rem;
+        }
+
+        .section-title { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent-cyan); }
+        .section-desc { font-size: 0.9rem; color: var(--text-muted); max-width: 900px; line-height: 1.7; }
+
+        /* Grid Panels & Canvas Containers */
+        .canvas-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; width: 100%;
+        }
+
+        .panel-box {
+            background: var(--surface-hover); border: 1px solid var(--border-color);
+            border-radius: 10px; padding: 1.2rem; display: flex; flex-direction: column; gap: 1rem;
+            position: relative;
+        }
+
+        .panel-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-emerald); display: flex; justify-content: space-between; }
+        
+        .canvas-wrap {
+            width: 100%; aspect-ratio: 16/10; position: relative; background: #000; border-radius: 8px; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        canvas { width: 100%; height: 100%; display: block; }
+
+        /* Controls & Buttons */
+        .btn-group { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+        .btn-action {
+            background: var(--surface-color); border: 1px solid var(--border-color); color: var(--text-main);
+            padding: 0.5rem 1rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;
+            border-radius: 6px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .btn-action:hover { background: var(--surface-hover); border-color: var(--text-main); }
+        .btn-action.active { background: var(--accent-emerald); color: #000; border-color: var(--accent-emerald); font-weight: 700; }
+        .btn-action.btn-purple { border-color: var(--accent-purple); color: var(--accent-purple); }
+        .btn-action.btn-purple.active { background: var(--accent-purple); color: #fff; }
+
+        /* Special Modules */
+        .math-display-box {
+            background: #000; padding: 1.2rem; border-radius: 8px; border: 1px solid var(--border-color);
+            text-align: center; font-size: 1.8rem; margin: 0.5rem 0; min-height: 80px;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .slider-control {
+            display: flex; flex-direction: column; gap: 0.3rem; width: 100%; font-size: 0.8rem; color: var(--text-muted);
+        }
+
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: var(--text-main); cursor: pointer; margin-top: -7px; box-shadow: 0 0 10px rgba(255,255,255,0.4);
+        }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 3px; background: var(--border-color); }
+
+        /* Philosophical Epilogue Card */
+        .epilogue-card {
+            display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2rem;
+            padding: 3.5rem 2rem; background: linear-gradient(180deg, var(--surface-color) 0%, #000 100%);
+            border: 1px solid var(--accent-purple); border-radius: 16px; margin-top: 1rem;
+        }
+
+        .epilogue-box {
+            border: 1px solid var(--border-color); padding: 1rem 2rem; border-radius: 8px; font-size: 1.2rem;
+            text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted);
+        }
+
+        .epilogue-quote {
+            font-family: var(--font-serif); font-size: 1.15rem; font-style: italic; color: var(--text-main);
+            max-width: 800px; line-height: 1.8;
+        }
+
+        footer { text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color); margin-top: 2rem; }
+        footer a { color: #3b82f6; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix-bg-canvas"></canvas>
+    <canvas id="scribble-canvas"></canvas>
+
+    <!-- Floating Scribble Toolbar Widget -->
+    <div class="scribble-toolbar minimized" id="scribble-toolbar">
+        <div class="scribble-mini-badge" id="scribble-mini-badge" title="Expand Scribble Toolbar">✎</div>
+        <div class="scribble-title">
+            <span>Scribble</span>
+            <button id="btn-scribble-minimize" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:0.8rem;">◀</button>
+        </div>
+        <button class="scribble-power-btn" id="btn-scribble-power">Activate</button>
+        <div style="display:flex; flex-direction:column; gap:0.3rem;">
+            <button class="scribble-tool-btn active" id="tool-pen">Pen</button>
+            <button class="scribble-tool-btn" id="tool-highlighter">Marker</button>
+            <button class="scribble-tool-btn" id="tool-eraser">Eraser</button>
+        </div>
+        <div class="scribble-colors">
+            <div class="color-swatch active" data-color="#38bdf8" style="background:#38bdf8;"></div>
+            <div class="color-swatch" data-color="#10b981" style="background:#10b981;"></div>
+            <div class="color-swatch" data-color="#f43f5e" style="background:#f43f5e;"></div>
+            <div class="color-swatch" data-color="#fbbf24" style="background:#fbbf24;"></div>
+            <div class="color-swatch" data-color="#ffffff" style="background:#ffffff;"></div>
+            <div class="color-swatch" data-color="#a855f7" style="background:#a855f7;"></div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.3rem;">
+            <button class="scribble-action-btn" id="btn-scribble-undo">Undo</button>
+            <button class="scribble-action-btn" id="btn-scribble-clear">Clear</button>
+            <button class="scribble-action-btn" id="btn-scribble-close" style="color:#f43f5e;">Close</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Same Equation: Transcendence & Invariants</h1>
+            <div class="subtitle">From physical realizations → symmetry, conserved invariants, emergence, and cultural geometry.</div>
+            <div class="author-tag">
+                Developed by <span style="color:var(--text-main); font-weight:600;">Gauransh Bansal</span> — 
+                <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs across the 15 Conceptual Realms -->
+        <nav class="nav-tabs">
+            <button class="nav-btn active" onclick="switchRealm('representation')">1. Representation & Phasors</button>
+            <button class="nav-btn" onclick="switchRealm('phase-space')">2. Phase Space & Invariants</button>
+            <button class="nav-btn" onclick="switchRealm('symmetry-breaking')">3. Symmetry Breaking</button>
+            <button class="nav-btn" onclick="switchRealm('emergence')">4. Emergence Engine</button>
+            <button class="nav-btn" onclick="switchRealm('audio-visual')">5. Audio Beats & Lissajous</button>
+            <button class="nav-btn" onclick="switchRealm('fourier-eigen')">6. Fourier Lens & Eigenmodes</button>
+            <button class="nav-btn" onclick="switchRealm('epistemology')">7. Epistemology & Theory Lab</button>
+            <button class="nav-btn matrix-music-btn" id="btn-matrix-music" onclick="toggleMatrixMusic()">🎵 Matrix Music (OFF)</button>
+        </nav>
+
+        <!-- REALM 1: REPRESENTATION & PHASORS -->
+        <div class="stage-card realm-panel" id="realm-representation">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">1. Representation Transformation & Phase Symmetry</div>
+                    <div class="section-desc">Shift the mathematical representation from real displacement to complex Euler phasor rotations $z = A e^{i(\omega t + \phi)}$. The physical motion stays unchanged, but the mathematical reality unveils $U(1)$ gauge symmetry!</div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-action active" id="btn-rep-real" onclick="setRepresentation('real')">1D Cosine Wave</button>
+                    <button class="btn-action" id="btn-rep-euler" onclick="setRepresentation('euler')">Euler Phasor Re(Ae^{i\omega t})</button>
+                    <button class="btn-action btn-purple" id="btn-rep-u1" onclick="setRepresentation('u1')">Complex U(1) Gauge Orbit</button>
+                </div>
+            </div>
+
+            <div class="math-display-box" id="rep-math-display"></div>
+
+            <div class="canvas-grid">
+                <div class="panel-box">
+                    <div class="panel-title"><span>Physical System Motion</span><span id="rep-phys-title">Mass-Spring</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-rep-phys"></canvas></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-title"><span>Mathematical State Representation</span><span id="rep-state-title">Phase Plane S¹</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-rep-math"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REALM 2: PHASE SPACE & CONSERVED INVARIANTS -->
+        <div class="stage-card realm-panel" id="realm-phase-space" style="display:none;">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">2. Canonical Phase Space & Conserved Invariants</div>
+                    <div class="section-desc">Trace real $(x, p)$ phase space orbits. When switching between Mechanical $(x, p)$, Electrical $(q, \Phi)$, and Quantum $|\psi\rangle$, the trajectory remains identical! Click <b>WHAT DOESN'T CHANGE?</b> to strip away everything physical and expose the Hamiltonian invariant.</div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-action btn-purple" id="btn-invariant-toggle" onclick="toggleInvariantMode()">⚡ WHAT DOESN'T CHANGE?</button>
+                </div>
+            </div>
+
+            <div class="math-display-box" id="invariant-math-display"></div>
+
+            <div class="canvas-grid">
+                <div class="panel-box">
+                    <div class="panel-title"><span>Real-Space Motion (x vs t)</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-phase-real"></canvas></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-title"><span>Canonical Phase Space Orbit (x vs p)</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-phase-orbit"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REALM 3: SYMMETRY BREAKING -->
+        <div class="stage-card realm-panel" id="realm-symmetry-breaking" style="display:none;">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">3. Symmetry Breaking & Non-Linear Bifurcations</div>
+                    <div class="section-desc">Watch pristine universal harmonic symmetry break down under damping, external driving resonance, or non-linear Duffing potential anharmonicity $\lambda u^3$.</div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-action active" onclick="setSymmetryRegime('perfect')">1. Perfect (Conserved)</button>
+                    <button class="btn-action" onclick="setSymmetryRegime('damped')">2. Damped (Sink)</button>
+                    <button class="btn-action" onclick="setSymmetryRegime('driven')">3. Driven Resonance</button>
+                    <button class="btn-action btn-purple" onclick="setSymmetryRegime('duffing')">4. Nonlinear Duffing</button>
+                </div>
+            </div>
+
+            <div class="math-display-box" id="sym-math-display"></div>
+
+            <div class="canvas-grid">
+                <div class="panel-box">
+                    <div class="panel-title"><span>Phase Space Trajectory Distortion</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-sym-phase"></canvas></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-title"><span>Damping & Non-Linearity Parameters</span></div>
+                    <div style="display:flex; flex-direction:column; gap:1rem; padding:0.5rem;">
+                        <div class="slider-control">
+                            <div style="display:flex; justify-content:space-between;"><span>Damping Coefficient (γ)</span><span id="val-gamma">0.00</span></div>
+                            <input type="range" id="slider-gamma" min="0" max="0.5" step="0.01" value="0" oninput="updateSymParams()">
+                        </div>
+                        <div class="slider-control">
+                            <div style="display:flex; justify-content:space-between;"><span>Driving Force (F)</span><span id="val-force">0.00</span></div>
+                            <input type="range" id="slider-force" min="0" max="2" step="0.05" value="0" oninput="updateSymParams()">
+                        </div>
+                        <div class="slider-control">
+                            <div style="display:flex; justify-content:space-between;"><span>Non-Linearity (λ u³)</span><span id="val-lambda">0.00</span></div>
+                            <input type="range" id="slider-lambda" min="0" max="1.5" step="0.05" value="0" oninput="updateSymParams()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REALM 4: EMERGENCE ENGINE -->
+        <div class="stage-card realm-panel" id="realm-emergence" style="display:none;">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">4. Emergence Engine: Microscopic Chaos → Macroscopic Harmonic Motion</div>
+                    <div class="section-desc">Watch 10 to 10,000 microscopic uncoupled/coupled chaotic particles self-organize into a smooth collective order parameter oscillator $U'' + U = 0$!</div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-action" onclick="setParticleCount(10)">10 Particles</button>
+                    <button class="btn-action" onclick="setParticleCount(100)">100 Particles</button>
+                    <button class="btn-action active" onclick="setParticleCount(1000)">1,000 Particles</button>
+                    <button class="btn-action btn-purple" onclick="setParticleCount(5000)">5,000 Particles</button>
+                </div>
+            </div>
+
+            <div class="math-display-box">
+                \text{Many Degrees of Freedom } (N \to \infty) \longrightarrow \text{One Effective Oscillator } U'' + U = 0
+            </div>
+
+            <div class="canvas-grid">
+                <div class="panel-box">
+                    <div class="panel-title"><span>Microscopic Chaotic Ensemble</span><span id="particle-count-display">N = 1000</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-micro-ensemble"></canvas></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-title"><span>Emergent Macroscopic Order Parameter U(t)</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-macro-order"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REALM 5: AUDIO BEATS & LISSAJOUS GEOMETRY -->
+        <div class="stage-card realm-panel" id="realm-audio-visual" style="display:none;">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">5. Auditory Resonance & Parametric Lissajous Geometry</div>
+                    <div class="section-desc">Synthesize live WebAudio tones from $\omega$, produce acoustic beat interference, and drive 2D/3D Lissajous geometrical figures. Differential equations → sound → geometry → visual art!</div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-action btn-purple" id="btn-audio-toggle" onclick="toggleAudio()">🔊 Audio Synthesizer (OFF)</button>
+                    <button class="btn-action" onclick="setLissajousRatio(1, 1)">Ratio 1:1</button>
+                    <button class="btn-action" onclick="setLissajousRatio(2, 1)">Ratio 2:1</button>
+                    <button class="btn-action" onclick="setLissajousRatio(3, 2)">Ratio 3:2</button>
+                    <button class="btn-action" onclick="setLissajousRatio(5, 4)">Ratio 5:4</button>
+                </div>
+            </div>
+
+            <div class="math-display-box">
+                \cos(\omega_1 t) + \cos(\omega_2 t) = 2 \cos\left(\frac{\omega_1 - \omega_2}{2} t\right) \cos\left(\frac{\omega_1 + \omega_2}{2} t\right)
+            </div>
+
+            <div class="canvas-grid">
+                <div class="panel-box">
+                    <div class="panel-title"><span>Acoustic Interference Waveform (Beats)</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-audio-beats"></canvas></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-title"><span>Parametric Lissajous Geometry Curve</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-lissajous"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REALM 6: FOURIER LENS & EIGENMODES -->
+        <div class="stage-card realm-panel" id="realm-fourier-eigen" style="display:none;">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">6. Fourier Harmonic Lens & Spatial Eigenmodes</div>
+                    <div class="section-desc">Decompose complex arbitrary waveforms into fundamental harmonic modes $u_n(t)$, and witness spatial eigenmodes $\sin(n\pi x / L)$ travel across vibrating strings, acoustic pipes, and quantum box wavefunctions!</div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-action active" id="btn-fourier-toggle" onclick="toggleFourierDecompose()">Decompose Fourier Modes</button>
+                    <button class="btn-action" onclick="setEigenmode(1)">Mode n=1</button>
+                    <button class="btn-action" onclick="setEigenmode(2)">Mode n=2</button>
+                    <button class="btn-action" onclick="setEigenmode(3)">Mode n=3</button>
+                    <button class="btn-action btn-purple" onclick="setEigenmode(4)">Mode n=4</button>
+                </div>
+            </div>
+
+            <div class="math-display-box" id="fourier-math-display"></div>
+
+            <div class="canvas-grid">
+                <div class="panel-box">
+                    <div class="panel-title"><span>Fourier Mode Decomposition</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-fourier-modes"></canvas></div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-title"><span>Multiverse Spatial Eigenmodes Across Ontologies</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-spatial-eigenmodes"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REALM 7: EPISTEMOLOGY & THEORY LAB -->
+        <div class="stage-card realm-panel" id="realm-epistemology" style="display:none;">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">7. Epistemology & Theory Lab: Invent A World</div>
+                    <div class="section-desc">Instead of starting from a physical system, start with $\ddot{u} + \omega^2 u = 0$ and <b>Invent a Reality</b>! Define your own state variables, inertia, and restoring forces to synthesize a brand new physical reality.</div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-action active" onclick="setCoordinateLens('cartesian')">Cartesian (x,t)</button>
+                    <button class="btn-action" onclick="setCoordinateLens('polar')">Polar (R,θ)</button>
+                    <button class="btn-action" onclick="setCoordinateLens('fourier')">Fourier Frequency</button>
+                    <button class="btn-action btn-purple" onclick="setCoordinateLens('abstract')">Abstract U(1)</button>
+                </div>
+            </div>
+
+            <div class="canvas-grid">
+                <div class="panel-box">
+                    <div class="panel-title"><span>Theorist World Creator</span></div>
+                    <div style="display:flex; flex-direction:column; gap:0.8rem; padding:0.5rem;">
+                        <input type="text" id="world-var" value="Interstellar Plasma Density" placeholder="State Variable u(t)" style="background:#000; border:1px solid var(--border-color); color:#fff; padding:0.5rem; border-radius:6px;">
+                        <input type="text" id="world-inertia" value="Gravitational Cloud Mass M" placeholder="Inertial Element" style="background:#000; border:1px solid var(--border-color); color:#fff; padding:0.5rem; border-radius:6px;">
+                        <input type="text" id="world-restore" value="Magnetic Pressure K" placeholder="Restoring Force Element" style="background:#000; border:1px solid var(--border-color); color:#fff; padding:0.5rem; border-radius:6px;">
+                        <button class="btn-action btn-purple" onclick="synthesizeUserWorld()">Synthesize Reality ➔</button>
+                    </div>
+                </div>
+                <div class="panel-box">
+                    <div class="panel-title"><span>Synthesized Theoretical World Simulation</span><span id="user-world-name">Custom System</span></div>
+                    <div class="canvas-wrap"><canvas id="canvas-user-world"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Final Epilogue Climax Card -->
+            <div class="epilogue-card">
+                <div class="epilogue-box">What changes?</div>
+                <div style="font-size:0.95rem; color:var(--text-muted);">The object. The units. The interpretation. The observer's representation.</div>
+                
+                <div class="epilogue-box" style="border-color:var(--accent-emerald); color:var(--accent-emerald);">What survives?</div>
+                <div id="epilogue-eq-display" style="font-size:2.2rem;"></div>
+
+                <div class="epilogue-quote">
+                    "Perhaps understanding is not recognizing things. Perhaps it is recognizing what remains when the things are gone — finding form that survives its embodiment."
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Developed by <strong>Gauransh Bansal</strong> | Interactive Physics & Dynamical Systems Lab <br>
+            <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer">Connect on LinkedIn ↗</a>
+        </footer>
+    </div>
+
+    <script>
+        // --- State Management ---
+        const state = {
+            t: 0,
+            dt: 0.016,
+            omega: 2.0,
+            amplitude: 1.0,
+            realm: 'representation',
+            
+            // Realm 1
+            representationMode: 'real', // 'real', 'euler', 'u1'
+            
+            // Realm 2
+            invariantMode: false,
+            
+            // Realm 3
+            symRegime: 'perfect', // 'perfect', 'damped', 'driven', 'duffing'
+            gamma: 0,
+            force: 0,
+            lambda: 0,
+            symPos: 1.0,
+            symVel: 0.0,
+
+            // Realm 4
+            numParticles: 1000,
+            particles: [],
+
+            // Realm 5
+            audioActive: false,
+            audioCtx: null,
+            osc1: null,
+            osc2: null,
+            gainNode: null,
+            lissajousRatioX: 1,
+            lissajousRatioY: 1,
+
+            // Realm 6
+            fourierDecomposed: true,
+            eigenmodeN: 1,
+
+            // Realm 7
+            coordLens: 'cartesian',
+            userWorld: { var: 'Interstellar Plasma Density', inertia: 'Cloud Mass M', restore: 'Magnetic Pressure K' }
+        };
+
+        // --- WebAudio UI Button Click Sound Feedback Engine ---
+        let uiAudioCtx = null;
+
+        function playUiClickSound(type = 'click') {
+            try {
+                if (!uiAudioCtx) {
+                    uiAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (uiAudioCtx.state === 'suspended') {
+                    uiAudioCtx.resume();
+                }
+                const now = uiAudioCtx.currentTime;
+                const osc = uiAudioCtx.createOscillator();
+                const gain = uiAudioCtx.createGain();
+
+                osc.type = 'sine';
+
+                if (type === 'toggle') {
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(2400, now + 0.03);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                    osc.connect(gain);
+                    gain.connect(uiAudioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                } else {
+                    osc.frequency.setValueAtTime(1400, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.02);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+                    osc.connect(gain);
+                    gain.connect(uiAudioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.025);
+                }
+            } catch(e) {}
+        }
+
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('button, .color-swatch, .scribble-glow-toggle, .isolate-btn-small, input[type="range"]');
+            if (btn) {
+                const isToggle = btn.classList.contains('active') || (btn.id && (btn.id.includes('power') || btn.id.includes('theme') || btn.id.includes('music')));
+                playUiClickSound(isToggle ? 'toggle' : 'click');
+            }
+        });
+
+        // --- Matrix Background Rain Engine ---
+        const matrixCanvas = document.getElementById('matrix-bg-canvas');
+        const matrixCtx = matrixCanvas.getContext('2d');
+        let matrixCols = [];
+
+        function initMatrix() {
+            matrixCanvas.width = window.innerWidth;
+            matrixCanvas.height = window.innerHeight;
+            const cols = Math.floor(matrixCanvas.width / 16);
+            matrixCols = Array(cols).fill(0).map(() => Math.floor(Math.random() * -100));
+        }
+
+        function drawMatrix() {
+            matrixCtx.fillStyle = 'rgba(3, 3, 5, 0.08)';
+            matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+            matrixCtx.fillStyle = '#00ff66';
+            matrixCtx.font = '14px "Share Tech Mono", monospace';
+
+            const chars = '0123456789ABCDEFΣ∫∂d²/dt²ωuτΨz=Ae^{i\\phi}';
+            for (let i = 0; i < matrixCols.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                matrixCtx.fillText(char, i * 16, matrixCols[i] * 16);
+                if (matrixCols[i] * 16 > matrixCanvas.height && Math.random() > 0.975) matrixCols[i] = 0;
+                matrixCols[i]++;
+            }
+        }
+
+        // --- PROCEDURAL WEBAUDIO MATRIX SYNTHWAVE MUSIC SEQUENCER ---
+        const matrixAudio = {
+            active: false,
+            ctx: null,
+            timer: null,
+            step: 0,
+            tempo: 125, // BPM
+            bassNotes: [55, 55, 65.41, 55, 73.42, 55, 82.41, 65.41], // A1, C2, D2, E2...
+            leadNotes: [440, 523.25, 659.25, 783.99, 880, 1046.50, 987.77, 783.99],
+
+            start: function() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+                this.active = true;
+                this.step = 0;
+                const intervalMs = (60 / this.tempo / 4) * 1000;
+                this.timer = setInterval(() => this.tick(), intervalMs);
+            },
+
+            stop: function() {
+                this.active = false;
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+            },
+
+            tick: function() {
+                if (!this.ctx || !this.active) return;
+                const now = this.ctx.currentTime;
+
+                // 1. Kick / Sub Pulse
+                if (this.step % 4 === 0) {
+                    const kickOsc = this.ctx.createOscillator();
+                    const kickGain = this.ctx.createGain();
+                    kickOsc.type = 'sine';
+                    kickOsc.frequency.setValueAtTime(130, now);
+                    kickOsc.frequency.exponentialRampToValueAtTime(32, now + 0.08);
+                    kickGain.gain.setValueAtTime(0.35, now);
+                    kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                    kickOsc.connect(kickGain);
+                    kickGain.connect(this.ctx.destination);
+                    kickOsc.start(now);
+                    kickOsc.stop(now + 0.12);
+                }
+
+                // 2. Resonant Arpeggiated Synth Bass
+                const bassFreq = this.bassNotes[this.step % this.bassNotes.length];
+                const bassOsc = this.ctx.createOscillator();
+                const bassFilter = this.ctx.createBiquadFilter();
+                const bassGain = this.ctx.createGain();
+
+                bassOsc.type = 'sawtooth';
+                bassOsc.frequency.setValueAtTime(bassFreq, now);
+
+                bassFilter.type = 'lowpass';
+                bassFilter.Q.setValueAtTime(5, now);
+                bassFilter.frequency.setValueAtTime(1000, now);
+                bassFilter.frequency.exponentialRampToValueAtTime(180, now + 0.1);
+
+                bassGain.gain.setValueAtTime(0.2, now);
+                bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+                bassOsc.connect(bassFilter);
+                bassFilter.connect(bassGain);
+                bassGain.connect(this.ctx.destination);
+                bassOsc.start(now);
+                bassOsc.stop(now + 0.12);
+
+                // 3. Matrix Rain Arpeggiator Lead
+                if (this.step % 2 === 0) {
+                    const leadFreq = this.leadNotes[(this.step / 2) % this.leadNotes.length];
+                    const leadOsc = this.ctx.createOscillator();
+                    const leadFilter = this.ctx.createBiquadFilter();
+                    const leadGain = this.ctx.createGain();
+
+                    leadOsc.type = 'square';
+                    leadOsc.frequency.setValueAtTime(leadFreq, now);
+
+                    leadFilter.type = 'bandpass';
+                    leadFilter.Q.setValueAtTime(3, now);
+                    leadFilter.frequency.setValueAtTime(leadFreq * 1.5, now);
+
+                    leadGain.gain.setValueAtTime(0.08, now);
+                    leadGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+                    leadOsc.connect(leadFilter);
+                    leadFilter.connect(leadGain);
+                    leadGain.connect(this.ctx.destination);
+                    leadOsc.start(now);
+                    leadOsc.stop(now + 0.1);
+                }
+
+                this.step++;
+            }
+        };
+
+        function toggleMatrixMusic() {
+            const btn = document.getElementById('btn-matrix-music');
+            if (matrixAudio.active) {
+                matrixAudio.stop();
+                btn.classList.remove('active');
+                btn.innerText = '🎵 Matrix Music (OFF)';
+            } else {
+                matrixAudio.start();
+                btn.classList.add('active');
+                btn.innerText = '🎵 Matrix Music (ON)';
+            }
+        }
+
+        // --- Interactive Scribble & Floating Widget Engine ---
+        const scribbleCanvas = document.getElementById('scribble-canvas');
+        const scribbleCtx = scribbleCanvas.getContext('2d');
+        const scribbleToolbar = document.getElementById('scribble-toolbar');
+        const btnMinimize = document.getElementById('btn-scribble-minimize');
+        const btnPower = document.getElementById('btn-scribble-power');
+
+        const scribbleState = {
+            active: false,
+            mode: 'pen',
+            color: '#38bdf8',
+            size: 4,
+            drawing: false,
+            manualMinimized: true,
+            history: [],
+            lastX: 0, lastY: 0
+        };
+
+        function setScribbleActive(active) {
+            scribbleState.active = active;
+            document.body.classList.toggle('mode-scribbling', active);
+            btnPower.classList.toggle('active', active);
+            btnPower.innerText = active ? 'Active (ON)' : 'Activate';
+            if (active) resizeScribbleCanvas();
+        }
+
+        function resizeScribbleCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            scribbleCanvas.width = Math.floor(window.innerWidth * dpr);
+            scribbleCanvas.height = Math.floor(window.innerHeight * dpr);
+            scribbleCtx.scale(dpr, dpr);
+        }
+        window.addEventListener('resize', () => { resizeScribbleCanvas(); initMatrix(); });
+
+        btnPower.addEventListener('click', (e) => { e.stopPropagation(); setScribbleActive(!scribbleState.active); });
+        btnMinimize.addEventListener('click', (e) => {
+            e.stopPropagation();
+            scribbleState.manualMinimized = !scribbleState.manualMinimized;
+            scribbleToolbar.classList.toggle('minimized', scribbleState.manualMinimized);
+            btnMinimize.innerText = scribbleState.manualMinimized ? '▶' : '◀';
+        });
+
+        scribbleToolbar.addEventListener('click', (e) => {
+            if (scribbleState.manualMinimized && (scribbleToolbar.classList.contains('minimized') || e.target.closest('#scribble-mini-badge'))) {
+                scribbleState.manualMinimized = false;
+                scribbleToolbar.classList.remove('minimized');
+                btnMinimize.innerText = '◀';
+                if (!scribbleState.active) setScribbleActive(true);
+            }
+        });
+
+        document.getElementById('btn-scribble-close').addEventListener('click', () => {
+            setScribbleActive(false);
+            scribbleState.manualMinimized = true;
+            scribbleToolbar.classList.add('minimized');
+            btnMinimize.innerText = '▶';
+        });
+
+        ['pen', 'highlighter', 'eraser'].forEach(tool => {
+            document.getElementById(`tool-${tool}`).addEventListener('click', () => {
+                scribbleState.mode = tool;
+                ['pen', 'highlighter', 'eraser'].forEach(t => document.getElementById(`tool-${t}`).classList.remove('active'));
+                document.getElementById(`tool-${tool}`).classList.add('active');
+                if (!scribbleState.active) setScribbleActive(true);
+            });
+        });
+
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+                scribbleState.color = swatch.getAttribute('data-color');
+            });
+        });
+
+        document.getElementById('btn-scribble-undo').addEventListener('click', () => {
+            if (scribbleState.history.length > 0) scribbleCtx.putImageData(scribbleState.history.pop(), 0, 0);
+            else scribbleCtx.clearRect(0, 0, scribbleCanvas.width, scribbleCanvas.height);
+        });
+
+        document.getElementById('btn-scribble-clear').addEventListener('click', () => {
+            scribbleCtx.clearRect(0, 0, scribbleCanvas.width, scribbleCanvas.height);
+        });
+
+        function getScribblePos(e) {
+            return e.touches && e.touches.length > 0 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
+        }
+
+        scribbleCanvas.addEventListener('mousedown', (e) => {
+            if (!scribbleState.active) return;
+            scribbleState.drawing = true;
+            const pos = getScribblePos(e);
+            scribbleState.lastX = pos.x; scribbleState.lastY = pos.y;
+        });
+
+        scribbleCanvas.addEventListener('mousemove', (e) => {
+            if (!scribbleState.active || !scribbleState.drawing) return;
+            const pos = getScribblePos(e);
+            scribbleCtx.save();
+            scribbleCtx.lineCap = 'round'; scribbleCtx.lineJoin = 'round';
+            if (scribbleState.mode === 'eraser') {
+                scribbleCtx.globalCompositeOperation = 'destination-out'; scribbleCtx.lineWidth = 20;
+            } else {
+                scribbleCtx.globalCompositeOperation = 'source-over'; scribbleCtx.strokeStyle = scribbleState.color;
+                scribbleCtx.lineWidth = scribbleState.mode === 'highlighter' ? 14 : 4;
+                scribbleCtx.globalAlpha = scribbleState.mode === 'highlighter' ? 0.4 : 1.0;
+                scribbleCtx.shadowBlur = 10; scribbleCtx.shadowColor = scribbleState.color;
+            }
+            scribbleCtx.beginPath(); scribbleCtx.moveTo(scribbleState.lastX, scribbleState.lastY);
+            scribbleCtx.lineTo(pos.x, pos.y); scribbleCtx.stroke(); scribbleCtx.restore();
+            scribbleState.lastX = pos.x; scribbleState.lastY = pos.y;
+        });
+
+        scribbleCanvas.addEventListener('mouseup', () => scribbleState.drawing = false);
+
+        // --- Realm Switching Navigation ---
+        function switchRealm(realmKey) {
+            state.realm = realmKey;
+            document.querySelectorAll('.realm-panel').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            const targetPanel = document.getElementById(`realm-${realmKey}`);
+            if (targetPanel) targetPanel.style.display = 'flex';
+            event.target.classList.add('active');
+
+            renderMath();
+            setTimeout(resizeAllCanvases, 50);
+        }
+
+        // --- Math KaTeX Rendering ---
+        function renderMath() {
+            if (typeof katex === 'undefined') return;
+            const kOpts = { throwOnError: false, displayMode: true };
+
+            // Realm 1 Math
+            const repDisplay = document.getElementById('rep-math-display');
+            if (repDisplay) {
+                if (state.representationMode === 'real') katex.render("u(t) = A \\cos(\\omega t + \\phi)", repDisplay, kOpts);
+                else if (state.representationMode === 'euler') katex.render("u(t) = \\Re\\left(A e^{i(\\omega t + \\phi)}\\right)", repDisplay, kOpts);
+                else katex.render("z(t) = A e^{i(\\omega t + \\phi)} \\in U(1) \\text{ Complex Phase Orbit}", repDisplay, kOpts);
+            }
+
+            // Realm 2 Math
+            const invDisplay = document.getElementById('invariant-math-display');
+            if (invDisplay) {
+                if (state.invariantMode) katex.render("E = \\frac{1}{2}\\dot{u}^2 + \\frac{1}{2}u^2 = \\text{Const (Universal Phase Volume Invariant)}", invDisplay, kOpts);
+                else katex.render("E = \\frac{1}{2}m\\dot{x}^2 + \\frac{1}{2}kx^2 = \\frac{1}{2}L I^2 + \\frac{q^2}{2C}", invDisplay, kOpts);
+            }
+
+            // Realm 3 Math
+            const symDisplay = document.getElementById('sym-math-display');
+            if (symDisplay) {
+                if (state.symRegime === 'perfect') katex.render("\\ddot{u} + \\omega^2 u = 0 \\quad \\text{(Perfect Conserved Symmetry)}", symDisplay, kOpts);
+                else if (state.symRegime === 'damped') katex.render("\\ddot{u} + 2\\gamma \\dot{u} + \\omega^2 u = 0 \\quad \\text{(Energy Dissipation Sink)}", symDisplay, kOpts);
+                else if (state.symRegime === 'driven') katex.render("\\ddot{u} + 2\\gamma \\dot{u} + \\omega^2 u = F \\cos(\\Omega t) \\quad \\text{(Driven Resonance)}", symDisplay, kOpts);
+                else katex.render("\\ddot{u} + \\omega^2 u + \\lambda u^3 = 0 \\quad \\text{(Anharmonic Duffing Chaos)}", symDisplay, kOpts);
+            }
+
+            // Realm 6 Math
+            const fourierDisplay = document.getElementById('fourier-math-display');
+            if (fourierDisplay) {
+                katex.render("f(t) = a_0 + \\sum_{n=1}^N \\left[ a_n \\cos(n\\omega t) + b_n \\sin(n\\omega t) \\right] \\quad | \\quad \\psi_n(x) = \\sin\\left(\\frac{n\\pi x}{L}\\right)", fourierDisplay, kOpts);
+            }
+
+            // Epilogue Math
+            const epilogueEq = document.getElementById('epilogue-eq-display');
+            if (epilogueEq) katex.render("\\ddot{u} + u = 0", epilogueEq, kOpts);
+        }
+
+        // --- Realm 1 Controls ---
+        function setRepresentation(mode) {
+            state.representationMode = mode;
+            document.querySelectorAll('#realm-representation .btn-action').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-rep-${mode}`).classList.add('active');
+            renderMath();
+        }
+
+        // --- Realm 2 Controls ---
+        function toggleInvariantMode() {
+            state.invariantMode = !state.invariantMode;
+            document.getElementById('btn-invariant-toggle').classList.toggle('active', state.invariantMode);
+            renderMath();
+        }
+
+        // --- Realm 3 Controls & Integration ---
+        function setSymmetryRegime(regime) {
+            state.symRegime = regime;
+            state.symPos = 1.0; state.symVel = 0.0;
+            if (regime === 'perfect') { state.gamma = 0; state.force = 0; state.lambda = 0; }
+            else if (regime === 'damped') { state.gamma = 0.15; state.force = 0; state.lambda = 0; }
+            else if (regime === 'driven') { state.gamma = 0.08; state.force = 0.8; state.lambda = 0; }
+            else if (regime === 'duffing') { state.gamma = 0.02; state.force = 0; state.lambda = 0.8; }
+
+            document.getElementById('slider-gamma').value = state.gamma;
+            document.getElementById('slider-force').value = state.force;
+            document.getElementById('slider-lambda').value = state.lambda;
+            updateSymParams();
+            renderMath();
+        }
+
+        function updateSymParams() {
+            state.gamma = parseFloat(document.getElementById('slider-gamma').value);
+            state.force = parseFloat(document.getElementById('slider-force').value);
+            state.lambda = parseFloat(document.getElementById('slider-lambda').value);
+            document.getElementById('val-gamma').innerText = state.gamma.toFixed(2);
+            document.getElementById('val-force').innerText = state.force.toFixed(2);
+            document.getElementById('val-lambda').innerText = state.lambda.toFixed(2);
+        }
+
+        // --- Realm 4 Emergence Particle Initializer ---
+        function setParticleCount(n) {
+            state.numParticles = n;
+            document.getElementById('particle-count-display').innerText = `N = ${n}`;
+            initParticles();
+        }
+
+        function initParticles() {
+            state.particles = [];
+            for (let i = 0; i < state.numParticles; i++) {
+                state.particles.push({
+                    x: (Math.random() - 0.5) * 2,
+                    v: (Math.random() - 0.5) * 2,
+                    freq: state.omega + (Math.random() - 0.5) * 0.4,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+        }
+
+        // --- Realm 5 WebAudio Beats Synthesizer ---
+        function toggleAudio() {
+            state.audioActive = !state.audioActive;
+            const btn = document.getElementById('btn-audio-toggle');
+            btn.classList.toggle('active', state.audioActive);
+            btn.innerText = state.audioActive ? '🔊 Audio Synthesizer (ON)' : '🔊 Audio Synthesizer (OFF)';
+
+            if (state.audioActive) {
+                if (!state.audioCtx) {
+                    state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
+
+                state.osc1 = state.audioCtx.createOscillator();
+                state.osc2 = state.audioCtx.createOscillator();
+                state.gainNode = state.audioCtx.createGain();
+
+                state.osc1.type = 'sine';
+                state.osc2.type = 'sine';
+                state.osc1.frequency.setValueAtTime(220, state.audioCtx.currentTime); // A3
+                state.osc2.frequency.setValueAtTime(224, state.audioCtx.currentTime); // 4Hz Beats
+
+                state.gainNode.gain.setValueAtTime(0.15, state.audioCtx.currentTime);
+
+                state.osc1.connect(state.gainNode);
+                state.osc2.connect(state.gainNode);
+                state.gainNode.connect(state.audioCtx.destination);
+
+                state.osc1.start(); state.osc2.start();
+            } else {
+                if (state.osc1) { state.osc1.stop(); state.osc1.disconnect(); }
+                if (state.osc2) { state.osc2.stop(); state.osc2.disconnect(); }
+            }
+        }
+
+        function setLissajousRatio(rx, ry) {
+            state.lissajousRatioX = rx;
+            state.lissajousRatioY = ry;
+        }
+
+        // --- Realm 6 Controls ---
+        function toggleFourierDecompose() {
+            state.fourierDecomposed = !state.fourierDecomposed;
+            document.getElementById('btn-fourier-toggle').classList.toggle('active', state.fourierDecomposed);
+        }
+
+        function setEigenmode(n) {
+            state.eigenmodeN = n;
+        }
+
+        // --- Realm 7 Controls ---
+        function setCoordinateLens(lens) {
+            state.coordLens = lens;
+        }
+
+        function synthesizeUserWorld() {
+            state.userWorld.var = document.getElementById('world-var').value || 'Custom State';
+            state.userWorld.inertia = document.getElementById('world-inertia').value || 'Inertia M';
+            state.userWorld.restore = document.getElementById('world-restore').value || 'Restoring K';
+            document.getElementById('user-world-name').innerText = state.userWorld.var;
+        }
+
+        // --- CANVAS RENDERERS ---
+        function resizeAllCanvases() {
+            document.querySelectorAll('canvas').forEach(c => {
+                if (c.parentElement && c.id !== 'scribble-canvas' && c.id !== 'matrix-bg-canvas') {
+                    const rect = c.parentElement.getBoundingClientRect();
+                    const dpr = window.devicePixelRatio || 1;
+                    c.width = Math.floor(rect.width * dpr);
+                    c.height = Math.floor(rect.height * dpr);
+                }
+            });
+        }
+
+        // 1. Render Realm 1
+        function renderRealm1() {
+            const cPhys = document.getElementById('canvas-rep-phys');
+            const cMath = document.getElementById('canvas-rep-math');
+            if (!cPhys || !cMath) return;
+            const ctxP = cPhys.getContext('2d');
+            const ctxM = cMath.getContext('2d');
+            const wP = cPhys.width, hP = cPhys.height;
+            const wM = cMath.width, hM = cMath.height;
+
+            ctxP.clearRect(0, 0, wP, hP); ctxM.clearRect(0, 0, wM, hM);
+
+            const pos = Math.cos(state.omega * state.t);
+            const vel = -state.omega * Math.sin(state.omega * state.t);
+
+            // Physical Spring Renders
+            const cxP = wP / 2, cyP = hP / 2;
+            const massX = cxP + pos * (wP * 0.3);
+            ctxP.strokeStyle = '#a855f7'; ctxP.lineWidth = 3;
+            ctxP.beginPath(); ctxP.moveTo(cxP - wP*0.3, cyP); ctxP.lineTo(massX, cyP); ctxP.stroke();
+            ctxP.fillStyle = '#06b6d4'; ctxP.beginPath(); ctxP.arc(massX, cyP, 20, 0, Math.PI*2); ctxP.fill();
+
+            // Mathematical State Renders
+            const cxM = wM / 2, cyM = hM / 2;
+            ctxM.strokeStyle = '#334'; ctxM.lineWidth = 1;
+            ctxM.beginPath(); ctxM.moveTo(cxM - 100, cyM); ctxM.lineTo(cxM + 100, cyM); ctxM.moveTo(cxM, cyM - 100); ctxM.lineTo(cxM, cyM + 100); ctxM.stroke();
+
+            if (state.representationMode === 'real') {
+                // 1D Position Wave
+                ctxM.strokeStyle = '#10b981'; ctxM.lineWidth = 2;
+                ctxM.beginPath(); ctxM.arc(cxM + pos * 80, cyM, 8, 0, Math.PI*2); ctxM.fill();
+            } else if (state.representationMode === 'euler') {
+                // Euler Phasor Vector
+                ctxM.strokeStyle = '#a855f7'; ctxM.lineWidth = 3;
+                ctxM.beginPath(); ctxM.moveTo(cxM, cyM); ctxM.lineTo(cxM + pos * 80, cyM + vel * 40); ctxM.stroke();
+                ctxM.fillStyle = '#a855f7'; ctxM.beginPath(); ctxM.arc(cxM + pos * 80, cyM + vel * 40, 6, 0, Math.PI*2); ctxM.fill();
+            } else {
+                // Complex U(1) Circle Orbit
+                ctxM.strokeStyle = 'rgba(6, 182, 212, 0.4)'; ctxM.lineWidth = 2;
+                ctxM.beginPath(); ctxM.arc(cxM, cyM, 80, 0, Math.PI*2); ctxM.stroke();
+                ctxM.fillStyle = '#06b6d4'; ctxM.beginPath();
+                ctxM.arc(cxM + 80 * Math.cos(state.omega * state.t), cyM - 80 * Math.sin(state.omega * state.t), 8, 0, Math.PI*2);
+                ctxM.fill();
+            }
+        }
+
+        // 2. Render Realm 2 Phase Space Orbits & Invariants
+        function renderRealm2() {
+            const cReal = document.getElementById('canvas-phase-real');
+            const cOrbit = document.getElementById('canvas-phase-orbit');
+            if (!cReal || !cOrbit) return;
+            const ctxR = cReal.getContext('2d'); const ctxO = cOrbit.getContext('2d');
+            const w = cReal.width, h = cReal.height;
+
+            ctxR.clearRect(0, 0, w, h); ctxO.clearRect(0, 0, w, h);
+
+            const x = Math.cos(state.omega * state.t);
+            const p = -Math.sin(state.omega * state.t);
+
+            // Real Time Series
+            ctxR.strokeStyle = state.invariantMode ? '#10b981' : '#38bdf8'; ctxR.lineWidth = 2;
+            ctxR.beginPath();
+            for (let px = 0; px < w; px += 3) {
+                let tVal = state.t - (w - px) * 0.02;
+                let yVal = h/2 - Math.cos(state.omega * tVal) * (h * 0.35);
+                if (px === 0) ctxR.moveTo(px, yVal); else ctxR.lineTo(px, yVal);
+            }
+            ctxR.stroke();
+
+            // Phase Space Orbit (x vs p)
+            const cx = w/2, cy = h/2;
+            ctxO.strokeStyle = state.invariantMode ? '#10b981' : '#a855f7'; ctxO.lineWidth = state.invariantMode ? 4 : 2;
+            ctxO.beginPath(); ctxO.arc(cx, cy, h * 0.35, 0, Math.PI*2); ctxO.stroke();
+
+            ctxO.fillStyle = '#fff'; ctxO.beginPath(); ctxO.arc(cx + x * (h * 0.35), cy + p * (h * 0.35), 6, 0, Math.PI*2); ctxO.fill();
+        }
+
+        // 3. Render Realm 3 Symmetry Breaking
+        function renderRealm3() {
+            const cSym = document.getElementById('canvas-sym-phase');
+            if (!cSym) return;
+            const ctx = cSym.getContext('2d');
+            const w = cSym.width, h = cSym.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // RK4 Numerical Integration for Damped/Driven/Duffing Oscillator
+            let dt = 0.016;
+            let accel = -state.omega * state.omega * state.symPos - 2 * state.gamma * state.symVel + state.force * Math.cos(state.omega * state.t) - state.lambda * Math.pow(state.symPos, 3);
+            state.symVel += accel * dt;
+            state.symPos += state.symVel * dt;
+
+            // Draw Phase Space Trajectory
+            const cx = w/2, cy = h/2;
+            ctx.strokeStyle = state.symRegime === 'duffing' ? '#f43f5e' : (state.symRegime === 'perfect' ? '#10b981' : '#f59e0b');
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx + state.symPos * 60, cy - state.symVel * 30, 4, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // 4. Render Realm 4 Emergence
+        function renderRealm4() {
+            const cMicro = document.getElementById('canvas-micro-ensemble');
+            const cMacro = document.getElementById('canvas-macro-order');
+            if (!cMicro || !cMacro) return;
+            const ctxMi = cMicro.getContext('2d'); const ctxMa = cMacro.getContext('2d');
+            const w = cMicro.width, h = cMicro.height;
+
+            ctxMi.clearRect(0, 0, w, h); ctxMa.clearRect(0, 0, w, h);
+
+            let sumX = 0;
+            ctxMi.fillStyle = 'rgba(56, 189, 248, 0.6)';
+            state.particles.forEach(p => {
+                let px = w/2 + Math.cos(p.freq * state.t + p.phase) * (w * 0.4);
+                let py = h/2 + Math.sin(p.freq * state.t + p.phase) * (h * 0.3);
+                sumX += Math.cos(p.freq * state.t + p.phase);
+                ctxMi.fillRect(px, py, 2, 2);
+            });
+
+            const macroU = sumX / state.particles.length;
+
+            // Macro Order Parameter Waveform
+            ctxMa.strokeStyle = '#10b981'; ctxMa.lineWidth = 3;
+            ctxMa.beginPath();
+            for (let px = 0; px < w; px += 3) {
+                let tVal = state.t - (w - px) * 0.02;
+                let uVal = h/2 - Math.cos(state.omega * tVal) * macroU * (h * 0.35);
+                if (px === 0) ctxMa.moveTo(px, uVal); else ctxMa.lineTo(px, uVal);
+            }
+            ctxMa.stroke();
+        }
+
+        // 5. Render Realm 5 Audio Beats & Lissajous
+        function renderRealm5() {
+            const cBeats = document.getElementById('canvas-audio-beats');
+            const cLiss = document.getElementById('canvas-lissajous');
+            if (!cBeats || !cLiss) return;
+            const ctxB = cBeats.getContext('2d'); const ctxL = cLiss.getContext('2d');
+            const w = cBeats.width, h = cBeats.height;
+
+            ctxB.clearRect(0, 0, w, h); ctxL.clearRect(0, 0, w, h);
+
+            // Beats Waveform
+            ctxB.strokeStyle = '#06b6d4'; ctxB.lineWidth = 2;
+            ctxB.beginPath();
+            for (let px = 0; px < w; px += 2) {
+                let tVal = state.t - (w - px) * 0.02;
+                let beatY = h/2 - (Math.cos(2.0 * tVal) + Math.cos(2.2 * tVal)) * (h * 0.2);
+                if (px === 0) ctxB.moveTo(px, beatY); else ctxB.lineTo(px, beatY);
+            }
+            ctxB.stroke();
+
+            // Lissajous Parametric Figure
+            ctxL.strokeStyle = '#a855f7'; ctxL.lineWidth = 2;
+            ctxL.beginPath();
+            for (let step = 0; step < 500; step++) {
+                let tVal = (step / 500) * Math.PI * 4;
+                let lx = w/2 + Math.sin(state.lissajousRatioX * tVal) * (w * 0.35);
+                let ly = h/2 + Math.sin(state.lissajousRatioY * tVal + state.t) * (h * 0.35);
+                if (step === 0) ctxL.moveTo(lx, ly); else ctxL.lineTo(lx, ly);
+            }
+            ctxL.stroke();
+        }
+
+        // 6. Render Realm 6 Fourier Lens & Eigenmodes
+        function renderRealm6() {
+            const cFour = document.getElementById('canvas-fourier-modes');
+            const cEigen = document.getElementById('canvas-spatial-eigenmodes');
+            if (!cFour || !cEigen) return;
+            const ctxF = cFour.getContext('2d'); const ctxE = cEigen.getContext('2d');
+            const w = cFour.width, h = cFour.height;
+
+            ctxF.clearRect(0, 0, w, h); ctxE.clearRect(0, 0, w, h);
+
+            // Fourier Decomposition Modes
+            ctxF.strokeStyle = '#f59e0b'; ctxF.lineWidth = 2;
+            ctxF.beginPath();
+            for (let px = 0; px < w; px += 2) {
+                let tVal = state.t - (w - px) * 0.02;
+                let fy = h/2;
+                if (state.fourierDecomposed) {
+                    fy -= (Math.sin(state.omega * tVal) + 0.33 * Math.sin(3 * state.omega * tVal) + 0.2 * Math.sin(5 * state.omega * tVal)) * (h * 0.3);
+                } else {
+                    fy -= Math.sin(state.omega * tVal) * (h * 0.3);
+                }
+                if (px === 0) ctxF.moveTo(px, fy); else ctxF.lineTo(px, fy);
+            }
+            ctxF.stroke();
+
+            // Spatial Eigenmode Across String/Pipe/Box
+            const n = state.eigenmodeN;
+            ctxE.strokeStyle = '#10b981'; ctxE.lineWidth = 3;
+            ctxE.beginPath();
+            for (let px = 0; px < w; px += 2) {
+                let xNorm = px / w;
+                let ey = h/2 - Math.sin(n * Math.PI * xNorm) * Math.cos(state.omega * state.t) * (h * 0.35);
+                if (px === 0) ctxE.moveTo(px, ey); else ctxE.lineTo(px, ey);
+            }
+            ctxE.stroke();
+        }
+
+        // 7. Render Realm 7 User World Simulation
+        function renderRealm7() {
+            const cWorld = document.getElementById('canvas-user-world');
+            if (!cWorld) return;
+            const ctxW = cWorld.getContext('2d');
+            const w = cWorld.width, h = cWorld.height;
+
+            ctxW.clearRect(0, 0, w, h);
+
+            ctxW.strokeStyle = '#a855f7'; ctxW.lineWidth = 3;
+            ctxW.beginPath();
+            for (let px = 0; px < w; px += 3) {
+                let tVal = state.t - (w - px) * 0.02;
+                let wy = h/2 - Math.cos(state.omega * tVal) * (h * 0.35);
+                if (px === 0) ctxW.moveTo(px, wy); else ctxW.lineTo(px, wy);
+            }
+            ctxW.stroke();
+        }
+
+        // --- Main Animation Loop ---
+        function animate() {
+            state.t += state.dt;
+
+            drawMatrix();
+            if (state.realm === 'representation') renderRealm1();
+            else if (state.realm === 'phase-space') renderRealm2();
+            else if (state.realm === 'symmetry-breaking') renderRealm3();
+            else if (state.realm === 'emergence') renderRealm4();
+            else if (state.realm === 'audio-visual') renderRealm5();
+            else if (state.realm === 'fourier-eigen') renderRealm6();
+            else if (state.realm === 'epistemology') renderRealm7();
+
+            requestAnimationFrame(animate);
+        }
+
+        window.onload = () => {
+            initMatrix();
+            initParticles();
+            resizeAllCanvases();
+            renderMath();
+            animate();
+        };
+    </script>
+</body>
+</html>

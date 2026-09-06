@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chaos as Music - Dynamical Synth</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #09090b;
+      --bg-panel: #18181b;
+      --accent: #3b82f6;
+      --text-main: #f4f4f5;
+      --text-muted: #a1a1aa;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    .panel {
+      background-color: var(--bg-panel);
+      border: 1px solid #333;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+      margin-top: -6px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: linear-gradient(90deg, #3b82f6, #10b981, #eab308, #ef4444);
+      border-radius: 2px;
+    }
+
+    .piano-container {
+      display: flex;
+      height: 80px;
+      width: 100%;
+      background: #111;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .piano-key {
+      flex: 1;
+      border-right: 1px solid #000;
+      background: #fff;
+      position: relative;
+      transition: all 0.1s ease;
+    }
+    .piano-key.black {
+      background: #111;
+      z-index: 10;
+      height: 60%;
+      margin-left: -1%;
+      margin-right: -1%;
+      border: 1px solid #000;
+      border-top: none;
+      border-bottom-left-radius: 3px;
+      border-bottom-right-radius: 3px;
+    }
+    .piano-key.active { box-shadow: 0 0 15px currentColor inset; }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 0.25rem;
+      background: #000;
+    }
+    .bifurcation-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    #start-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 9, 11, 0.9);
+      backdrop-filter: blur(5px);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .btn-start {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border: none;
+      padding: 1rem 3rem;
+      font-size: 1.5rem;
+      font-weight: 800;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-start:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
+    }
+
+    .ctrl-btn {
+      background: #27272a;
+      border: 1px solid #3f3f46;
+      color: #fff;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ctrl-btn:hover {
+      background: #3f3f46;
+      transform: scale(1.1);
+    }
+    .ctrl-btn.active {
+      background: #3b82f6;
+      border-color: #60a5fa;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+    }
+    .ctrl-btn.small {
+      width: 2.35rem;
+      height: 2.35rem;
+      border-radius: 0.55rem;
+    }
+
+    .select-custom {
+      background: #27272a;
+      border: 1px solid #3f3f46;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      outline: none;
+    }
+  </style>
+</head>
+<body class="text-sm">
+  <div id="start-overlay">
+    <h1 class="text-5xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">CHAOS AS MUSIC</h1>
+    <p class="text-xl text-gray-400 mb-2">Hear the Bifurcation Diagram</p>
+    <p class="text-xs text-gray-500 mb-8">Developed by Gauransh Bansal</p>
+    <button id="btn-init" class="btn-start text-white">INITIALIZE SYNTH</button>
+  </div>
+
+  <header class="p-4 flex flex-col md:flex-row justify-between items-center border-b border-zinc-800 bg-zinc-950/50 gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-full border-2 border-purple-500 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+        <svg class="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold tracking-wider">CHAOS AS MUSIC</h1>
+        <p class="text-purple-400 text-xs">Logistic Map: <span class="mono italic">x<sub>n+1</sub> = r x<sub>n</sub> (1 - x<sub>n</sub>)</span></p>
+        <p class="mt-1 text-[11px] text-zinc-500">
+          Developed by <span class="text-zinc-300 font-medium">Gauransh Bansal</span>
+          -
+          <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 transition">LinkedIn</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="flex-1 max-w-xl w-full md:mx-8">
+      <div class="flex justify-between text-xs mb-1">
+        <span class="text-gray-400">r (parameter)</span>
+        <span id="r-value-display" class="text-yellow-400 font-bold text-lg mono">3.679</span>
+      </div>
+      <input type="range" id="r-slider" min="2.5" max="4.0" step="0.001" value="3.679">
+      <div class="flex justify-between text-xs mt-1 text-gray-500 mono">
+        <span>2.5 (Stable)</span>
+        <span>4.0 (Chaos)</span>
+      </div>
+    </div>
+
+    <div class="flex gap-3">
+      <div class="flex flex-col items-center gap-1">
+        <button id="btn-play" class="ctrl-btn" title="Play/Pause">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <span class="text-[10px] text-gray-400">Play</span>
+      </div>
+      <div class="flex flex-col items-center gap-1">
+        <button id="btn-step" class="ctrl-btn" title="Step">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <span class="text-[10px] text-gray-400">Step</span>
+      </div>
+      <div class="flex flex-col items-center gap-1">
+        <button id="btn-sweep" class="ctrl-btn" title="Auto Sweep">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 7h11l-4-4 1.4-1.4L18.8 9l-7.4 7.4L10 15l4-4H3V7zm18 10H10l4 4-1.4 1.4L5.2 15l7.4-7.4L14 9l-4 4h11v4z"/></svg>
+        </button>
+        <span class="text-[10px] text-gray-400">Sweep</span>
+      </div>
+      <div class="flex flex-col items-center gap-1">
+        <button id="btn-reset" class="ctrl-btn" title="Reset State">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        </button>
+        <span class="text-[10px] text-gray-400">Reset</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4 p-4 overflow-hidden">
+    <aside class="md:col-span-3 flex flex-col gap-4">
+      <div class="panel flex-1">
+        <h2 class="text-sm font-semibold text-gray-300 mb-2 uppercase tracking-wide border-b border-gray-700 pb-2">What You Hear</h2>
+        <p class="text-xs text-gray-400 mb-4">As <span class="mono">r</span> increases, the system evolves from order to chaos. The musical structure directly reflects this mathematical truth.</p>
+
+        <div class="space-y-4">
+          <div class="flex gap-3 items-center" id="regime-stable">
+            <div class="w-8 h-8 rounded-full border border-blue-500 flex items-center justify-center"><div class="w-2 h-2 bg-blue-500 rounded-full"></div></div>
+            <div>
+              <p class="text-blue-400 font-semibold text-xs">Stable (r &lt; 3.0)</p>
+              <p class="text-gray-500 text-[10px]">Continuous single note.</p>
+            </div>
+          </div>
+          <div class="flex gap-3 items-center opacity-50" id="regime-p2">
+            <div class="w-8 h-8 rounded-full border border-green-500 flex justify-between px-1 items-center"><div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div><div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div></div>
+            <div>
+              <p class="text-green-400 font-semibold text-xs">Period-2 (3.0 &lt; r &lt; 3.45)</p>
+              <p class="text-gray-500 text-[10px]">Two-note alternating rhythm.</p>
+            </div>
+          </div>
+          <div class="flex gap-3 items-center opacity-50" id="regime-p4">
+            <div class="w-8 h-8 rounded-full border border-yellow-500 grid grid-cols-2 gap-1 p-1"><div class="bg-yellow-500 rounded-full"></div><div class="bg-yellow-500 rounded-full"></div><div class="bg-yellow-500 rounded-full"></div><div class="bg-yellow-500 rounded-full"></div></div>
+            <div>
+              <p class="text-yellow-400 font-semibold text-xs">Period-4 (3.45 &lt; r &lt; 3.54)</p>
+              <p class="text-gray-500 text-[10px]">Four-note repeating pattern.</p>
+            </div>
+          </div>
+          <div class="flex gap-3 items-center opacity-50" id="regime-chaos">
+            <div class="w-8 h-8 rounded-full border border-red-500 relative overflow-hidden">
+              <div class="absolute inset-0 border border-red-500 rounded-full transform rotate-45 scale-75"></div>
+              <div class="absolute inset-0 border border-red-500 rounded-full transform rotate-12 scale-50"></div>
+            </div>
+            <div>
+              <p class="text-red-400 font-semibold text-xs">Chaos (r &gt; 3.57)</p>
+              <p class="text-gray-500 text-[10px]">Aperiodic, complex texture.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="text-sm font-semibold text-gray-300 mb-2 uppercase tracking-wide border-b border-gray-700 pb-2">Mapping</h2>
+        <ul class="text-xs space-y-2 text-gray-400">
+          <li class="flex justify-between"><span>Value (<span class="mono">x<sub>n</sub></span>)</span> <span class="text-purple-400">-> Pitch</span></li>
+          <li class="flex justify-between"><span>Velocity (<span class="mono">|x<sub>n</sub>-x<sub>n-1</sub>|</span>)</span> <span class="text-orange-400">-> Filter</span></li>
+          <li class="flex justify-between"><span>Lyapunov (<span class="mono">lambda</span>)</span> <span class="text-red-400">-> Dissonance</span></li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <h2 class="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wide border-b border-gray-700 pb-2">Lyapunov</h2>
+        <div class="flex items-center justify-between mono">
+          <span class="text-gray-500">lambda</span>
+          <span id="lambda-display" class="text-orange-400 font-bold">0.0000</span>
+        </div>
+        <div class="mt-3 h-2 rounded-full bg-gradient-to-r from-blue-500 via-green-500 via-yellow-500 to-red-500 relative">
+          <div id="lambda-marker" class="absolute top-[-5px] w-[2px] h-4 bg-white shadow-[0_0_8px_white]" style="left:50%"></div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="md:col-span-6 flex flex-col gap-4">
+      <div class="panel flex-1 flex flex-col">
+        <h2 class="text-sm font-semibold text-gray-300 mb-2 uppercase tracking-wide flex justify-between">
+          <span>Bifurcation Diagram</span>
+          <span class="text-xs text-gray-500 mono">x vs r</span>
+        </h2>
+        <div class="canvas-container flex-1 min-h-[250px]" id="bifurcation-container">
+          <canvas id="bifurcation-canvas"></canvas>
+          <canvas id="bifurcation-overlay" class="bifurcation-overlay"></canvas>
+        </div>
+      </div>
+
+      <div class="panel h-32 flex flex-col">
+        <h2 class="text-sm font-semibold text-gray-300 mb-2 uppercase tracking-wide">Audio Output</h2>
+        <div class="canvas-container flex-1">
+          <canvas id="waveform-canvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <aside class="md:col-span-3 flex flex-col gap-4">
+      <div class="panel flex-1 flex flex-col">
+        <h2 class="text-sm font-semibold text-gray-300 mb-2 uppercase tracking-wide flex justify-between">
+          <span>Phase Space</span>
+          <span class="text-xs text-gray-500 mono">x<sub>n+1</sub> vs x<sub>n</sub></span>
+        </h2>
+        <div class="canvas-container flex-1 aspect-square md:aspect-auto">
+          <canvas id="phase-canvas"></canvas>
+        </div>
+        <div class="mt-2 text-center text-xs text-gray-500 mono">
+          x = <span id="current-x" class="text-white">0.500</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wide border-b border-gray-700 pb-2">Synth Settings</h2>
+        <div class="space-y-3 text-xs">
+          <div class="flex justify-between items-center">
+            <label class="text-gray-400">Scale</label>
+            <select id="setting-scale" class="select-custom">
+              <option value="chromatic">Chromatic</option>
+              <option value="pentatonic_minor" selected>Minor Pentatonic</option>
+              <option value="pentatonic_major">Major Pentatonic</option>
+              <option value="whole_tone">Whole Tone</option>
+            </select>
+          </div>
+          <div class="flex justify-between items-center">
+            <label class="text-gray-400">Waveform</label>
+            <select id="setting-wave" class="select-custom">
+              <option value="sine">Sine (Smooth)</option>
+              <option value="triangle">Triangle</option>
+              <option value="sawtooth" selected>Sawtooth (Rich)</option>
+              <option value="square">Square</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <div class="flex justify-between">
+              <label class="text-gray-400">Tempo (notes/sec)</label>
+              <span id="tempo-val" class="mono text-white">15</span>
+            </div>
+            <input type="range" id="setting-tempo" min="2" max="40" step="1" value="15">
+          </div>
+          <div class="flex flex-col gap-1">
+            <div class="flex justify-between">
+              <label class="text-gray-400">Decay/Release</label>
+              <span id="decay-val" class="mono text-white">40%</span>
+            </div>
+            <input type="range" id="setting-decay" min="0.05" max="1.0" step="0.05" value="0.4">
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="p-4 bg-zinc-950 border-t border-zinc-800">
+    <div class="flex justify-between items-end mb-2">
+      <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wide">Live Note Output</h2>
+      <span class="text-xs text-gray-500 mono">MIDI Range: 36 (C2) - 84 (C6)</span>
+    </div>
+    <div class="piano-container" id="piano-container"></div>
+  </footer>
+
+  <script>
+    const state = {
+      r: 3.679,
+      x: 0.5,
+      history: [],
+      maxHistory: 50,
+      isPlaying: false,
+      isSweeping: false,
+      sweepDirection: 1,
+      tempo: 15,
+      lastIterTime: 0,
+      scaleType: 'pentatonic_minor',
+      waveType: 'sawtooth',
+      decay: 0.4,
+      baseMidi: 36,
+      octaves: 4,
+      lambda: 0,
+      bifurcationRendered: false,
+    };
+
+    const SCALES = {
+      chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      pentatonic_minor: [0, 3, 5, 7, 10],
+      pentatonic_major: [0, 2, 4, 7, 9],
+      whole_tone: [0, 2, 4, 6, 8, 10]
+    };
+
+    const els = {
+      overlay: document.getElementById('start-overlay'),
+      btnInit: document.getElementById('btn-init'),
+      btnPlay: document.getElementById('btn-play'),
+      btnStep: document.getElementById('btn-step'),
+      btnSweep: document.getElementById('btn-sweep'),
+      btnReset: document.getElementById('btn-reset'),
+      rSlider: document.getElementById('r-slider'),
+      rDisplay: document.getElementById('r-value-display'),
+      xDisplay: document.getElementById('current-x'),
+      lambdaDisplay: document.getElementById('lambda-display'),
+      lambdaMarker: document.getElementById('lambda-marker'),
+      scaleSelect: document.getElementById('setting-scale'),
+      waveSelect: document.getElementById('setting-wave'),
+      tempoSlider: document.getElementById('setting-tempo'),
+      tempoVal: document.getElementById('tempo-val'),
+      decaySlider: document.getElementById('setting-decay'),
+      decayVal: document.getElementById('decay-val'),
+      pianoContainer: document.getElementById('piano-container'),
+      bifCtx: document.getElementById('bifurcation-canvas').getContext('2d'),
+      bifOverlayCtx: document.getElementById('bifurcation-overlay').getContext('2d'),
+      phaseCtx: document.getElementById('phase-canvas').getContext('2d'),
+      waveCtx: document.getElementById('waveform-canvas').getContext('2d'),
+      regimes: {
+        stable: document.getElementById('regime-stable'),
+        p2: document.getElementById('regime-p2'),
+        p4: document.getElementById('regime-p4'),
+        chaos: document.getElementById('regime-chaos')
+      }
+    };
+
+    let audioCtx, masterGain, analyser;
+
+    function initAudio() {
+      if (audioCtx) return;
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContext();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.45;
+      const delay = audioCtx.createDelay();
+      delay.delayTime.value = 0.33;
+      const feedback = audioCtx.createGain();
+      feedback.gain.value = 0.28;
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 2600;
+      masterGain.connect(filter);
+      filter.connect(audioCtx.destination);
+      masterGain.connect(delay);
+      delay.connect(feedback);
+      feedback.connect(delay);
+      delay.connect(filter);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      filter.connect(analyser);
+    }
+
+    function mtof(midi) {
+      return 440 * Math.pow(2, (midi - 69) / 12);
+    }
+
+    function logistic(x, r) {
+      return r * x * (1 - x);
+    }
+
+    function computeLyapunov(r) {
+      let x = 0.5;
+      let sum = 0;
+      let count = 0;
+      for (let i = 0; i < 900; i++) {
+        x = logistic(x, r);
+        if (i > 200) {
+          const d = Math.abs(r * (1 - 2 * x));
+          if (d > 1e-12) {
+            sum += Math.log(d);
+            count++;
+          }
+        }
+      }
+      return count ? sum / count : 0;
+    }
+
+    function mapXToMidi(x) {
+      const scale = SCALES[state.scaleType];
+      const totalNotes = scale.length * state.octaves;
+      const clampedX = Math.max(0, Math.min(0.999, x));
+      const noteIndex = Math.floor(clampedX * totalNotes);
+      const octaveOffset = Math.floor(noteIndex / scale.length);
+      const scaleNote = scale[noteIndex % scale.length];
+      return state.baseMidi + (octaveOffset * 12) + scaleNote;
+    }
+
+    function playDynamicNote(x, prevX) {
+      if (!audioCtx) return -1;
+      const midiNote = mapXToMidi(x);
+      const freq = mtof(midiNote);
+      const velocity = Math.abs(x - prevX);
+      const chaos = Math.max(0, state.lambda);
+      const osc = audioCtx.createOscillator();
+      const noteGain = audioCtx.createGain();
+      const noteFilter = audioCtx.createBiquadFilter();
+      osc.type = state.waveType;
+      osc.frequency.value = freq;
+      osc.detune.value = chaos * 90;
+      noteFilter.type = 'lowpass';
+      noteFilter.frequency.value = 450 + (velocity * 4200) + chaos * 1200;
+      noteFilter.Q.value = 4 + chaos * 8;
+      const now = audioCtx.currentTime;
+      const attack = 0.018;
+      const decayTime = state.decay;
+      noteGain.gain.setValueAtTime(0.0001, now);
+      noteGain.gain.exponentialRampToValueAtTime(0.22 + (velocity * 0.5), now + attack);
+      noteGain.gain.exponentialRampToValueAtTime(0.001, now + attack + decayTime);
+      osc.connect(noteFilter);
+      noteFilter.connect(noteGain);
+      noteGain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + attack + decayTime + 0.1);
+      return midiNote;
+    }
+
+    function dpr() {
+      return window.devicePixelRatio || 1;
+    }
+
+    function resizeOne(canvas) {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const ratio = dpr();
+      canvas.width = Math.max(1, Math.round(rect.width * ratio));
+      canvas.height = Math.max(1, Math.round(rect.height * ratio));
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      return { w: rect.width, h: rect.height };
+    }
+
+    function resizeCanvases() {
+      [els.bifCtx.canvas, els.bifOverlayCtx.canvas, els.phaseCtx.canvas, els.waveCtx.canvas].forEach(resizeOne);
+      state.bifurcationRendered = false;
+    }
+    window.addEventListener('resize', resizeCanvases);
+
+    function mapToCanvas(val, minVal, maxVal, minCoord, maxCoord) {
+      return minCoord + (val - minVal) / (maxVal - minVal) * (maxCoord - minCoord);
+    }
+
+    function getColorForValue(val) {
+      return `hsl(${val * 280}, 100%, 60%)`;
+    }
+
+    function drawBifurcationBackground() {
+      if (state.bifurcationRendered) return;
+      const cvs = els.bifCtx.canvas;
+      const ctx = els.bifCtx;
+      const width = cvs.width / dpr();
+      const height = cvs.height / dpr();
+      ctx.clearRect(0, 0, width, height);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, height); ctx.lineTo(width, height);
+      ctx.moveTo(0, 0); ctx.lineTo(0, height);
+      ctx.stroke();
+      const rMin = 2.5, rMax = 4.0;
+      for (let px = 0; px < width; px++) {
+        const r = rMin + (px / width) * (rMax - rMin);
+        let x = 0.5;
+        for (let i = 0; i < 220; i++) x = logistic(x, r);
+        const hue = mapToCanvas(r, 2.5, 4.0, 220, 0);
+        ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.18)`;
+        for (let i = 0; i < 110; i++) {
+          x = logistic(x, r);
+          ctx.fillRect(px, height - (x * height), 1, 1);
+        }
+      }
+      state.bifurcationRendered = true;
+    }
+
+    function drawBifurcationOverlay() {
+      const cvs = els.bifOverlayCtx.canvas;
+      const ctx = els.bifOverlayCtx;
+      const width = cvs.width / dpr();
+      const height = cvs.height / dpr();
+      ctx.clearRect(0, 0, width, height);
+      const px = mapToCanvas(state.r, 2.5, 4.0, 0, width);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(px, 0);
+      ctx.lineTo(px, height);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      const py = height - (state.x * height);
+      ctx.fillStyle = '#fff';
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#fff';
+      ctx.beginPath();
+      ctx.arc(px, py, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    function drawPhaseSpace() {
+      const cvs = els.phaseCtx.canvas;
+      const ctx = els.phaseCtx;
+      const w = cvs.width / dpr();
+      const h = cvs.height / dpr();
+      const padding = 20;
+      const plotW = w - padding * 2;
+      const plotH = h - padding * 2;
+      ctx.clearRect(0, 0, w, h);
+      const sx = (val) => padding + val * plotW;
+      const sy = (val) => padding + plotH - (val * plotH);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(sx(0), sy(0)); ctx.lineTo(sx(1), sy(1));
+      ctx.stroke();
+      ctx.strokeStyle = '#555';
+      ctx.beginPath();
+      for (let i = 0; i <= 120; i++) {
+        const px = i / 120;
+        const py = logistic(px, state.r);
+        if (i === 0) ctx.moveTo(sx(px), sy(py));
+        else ctx.lineTo(sx(px), sy(py));
+      }
+      ctx.stroke();
+      if (state.history.length > 1) {
+        ctx.lineWidth = 1.5;
+        let currX = state.history[0];
+        for (let i = 1; i < state.history.length; i++) {
+          const nextX = state.history[i];
+          const alpha = i / state.history.length;
+          ctx.strokeStyle = getColorForValue(nextX);
+          ctx.globalAlpha = alpha;
+          ctx.beginPath();
+          ctx.moveTo(sx(currX), sy(currX));
+          ctx.lineTo(sx(currX), sy(nextX));
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(sx(currX), sy(nextX));
+          ctx.lineTo(sx(nextX), sy(nextX));
+          ctx.stroke();
+          currX = nextX;
+        }
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = '#fff';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = getColorForValue(currX);
+        ctx.beginPath();
+        ctx.arc(sx(currX), sy(currX), 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    function drawWaveform() {
+      const cvs = els.waveCtx.canvas;
+      const ctx = els.waveCtx;
+      const w = cvs.width / dpr();
+      const h = cvs.height / dpr();
+      ctx.clearRect(0, 0, w, h);
+      if (!analyser) {
+        ctx.strokeStyle = '#3b82f6';
+        ctx.beginPath();
+        for (let i = 0; i < w; i++) {
+          const y = h / 2 + Math.sin(i * 0.06) * h * 0.18;
+          if (i === 0) ctx.moveTo(i, y); else ctx.lineTo(i, y);
+        }
+        ctx.stroke();
+        return;
+      }
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyser.getByteTimeDomainData(dataArray);
+      let color = '#3b82f6';
+      if (state.r >= 3.57) color = '#ef4444';
+      else if (state.r >= 3.45) color = '#eab308';
+      else if (state.r >= 3.0) color = '#10b981';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const sliceWidth = w / bufferLength;
+      let x = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * h / 2;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+        x += sliceWidth;
+      }
+      ctx.stroke();
+    }
+
+    function generatePiano() {
+      els.pianoContainer.innerHTML = '';
+      const totalKeys = state.octaves * 12;
+      let html = '';
+      for (let i = 0; i < totalKeys; i++) {
+        const midi = state.baseMidi + i;
+        const isBlack = [1, 3, 6, 8, 10].includes(midi % 12);
+        const color = getColorForValue(i / totalKeys);
+        html += `<div class="piano-key ${isBlack ? 'black' : 'white'}" id="key-${midi}" style="color: ${color}"></div>`;
+      }
+      els.pianoContainer.innerHTML = html;
+    }
+
+    function highlightKey(midiNote) {
+      document.querySelectorAll('.piano-key.active').forEach(k => k.classList.remove('active'));
+      const key = document.getElementById(`key-${midiNote}`);
+      if (key) {
+        key.classList.add('active');
+        setTimeout(() => key.classList.remove('active'), 100);
+      }
+    }
+
+    function updateUIIndicators() {
+      state.lambda = computeLyapunov(state.r);
+      els.rDisplay.innerText = state.r.toFixed(3);
+      els.xDisplay.innerText = state.x.toFixed(4);
+      els.lambdaDisplay.innerText = state.lambda.toFixed(4);
+      els.lambdaMarker.style.left = `${Math.max(0, Math.min(100, ((state.lambda + 1) / 2) * 100))}%`;
+      Object.values(els.regimes).forEach(el => el.style.opacity = '0.3');
+      if (state.r < 3.0) els.regimes.stable.style.opacity = '1';
+      else if (state.r < 3.449) els.regimes.p2.style.opacity = '1';
+      else if (state.r < 3.569) els.regimes.p4.style.opacity = '1';
+      else els.regimes.chaos.style.opacity = '1';
+      els.btnSweep.classList.toggle('active', state.isSweeping);
+      if (state.isPlaying) {
+        els.btnPlay.classList.add('active');
+        els.btnPlay.innerHTML = '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+      } else {
+        els.btnPlay.classList.remove('active');
+        els.btnPlay.innerHTML = '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+      }
+    }
+
+    function iterateSystem() {
+      const prevX = state.x;
+      state.x = logistic(state.x, state.r);
+      state.history.push(state.x);
+      if (state.history.length > state.maxHistory) state.history.shift();
+      const playedMidi = playDynamicNote(state.x, prevX);
+      if (playedMidi > 0) highlightKey(playedMidi);
+    }
+
+    function animationLoop(timestamp) {
+      if (state.isSweeping && state.isPlaying) {
+        state.r += state.sweepDirection * 0.0008;
+        if (state.r >= 4 || state.r <= 2.5) state.sweepDirection *= -1;
+        state.r = Math.max(2.5, Math.min(4, state.r));
+        els.rSlider.value = state.r;
+      }
+      if (state.isPlaying) {
+        const msPerBeat = 1000 / state.tempo;
+        if (timestamp - state.lastIterTime > msPerBeat) {
+          iterateSystem();
+          state.lastIterTime = timestamp;
+          updateUIIndicators();
+        }
+      }
+      drawBifurcationBackground();
+      drawBifurcationOverlay();
+      drawPhaseSpace();
+      drawWaveform();
+      requestAnimationFrame(animationLoop);
+    }
+
+    els.btnInit.addEventListener('click', () => {
+      initAudio();
+      audioCtx.resume();
+      els.overlay.style.display = 'none';
+      generatePiano();
+      resizeCanvases();
+      state.history = [state.x];
+      updateUIIndicators();
+      requestAnimationFrame(animationLoop);
+    });
+
+    els.btnPlay.addEventListener('click', () => {
+      if (audioCtx?.state === 'suspended') audioCtx.resume();
+      state.isPlaying = !state.isPlaying;
+      state.lastIterTime = performance.now();
+      updateUIIndicators();
+    });
+
+    els.btnStep.addEventListener('click', () => {
+      if (audioCtx?.state === 'suspended') audioCtx.resume();
+      state.isPlaying = false;
+      iterateSystem();
+      updateUIIndicators();
+    });
+
+    els.btnSweep.addEventListener('click', () => {
+      state.isSweeping = !state.isSweeping;
+      updateUIIndicators();
+    });
+
+    els.btnReset.addEventListener('click', () => {
+      state.x = 0.5;
+      state.history = [state.x];
+      updateUIIndicators();
+    });
+
+    els.rSlider.addEventListener('input', (e) => {
+      state.r = parseFloat(e.target.value);
+      updateUIIndicators();
+    });
+
+    els.scaleSelect.addEventListener('change', (e) => { state.scaleType = e.target.value; });
+    els.waveSelect.addEventListener('change', (e) => { state.waveType = e.target.value; });
+    els.tempoSlider.addEventListener('input', (e) => {
+      state.tempo = parseInt(e.target.value, 10);
+      els.tempoVal.innerText = state.tempo;
+    });
+    els.decaySlider.addEventListener('input', (e) => {
+      state.decay = parseFloat(e.target.value);
+      els.decayVal.innerText = Math.round(state.decay * 100) + '%';
+    });
+
+    resizeCanvases();
+    generatePiano();
+    state.history = [state.x];
+    updateUIIndicators();
+    drawBifurcationBackground();
+    drawBifurcationOverlay();
+    drawPhaseSpace();
+    drawWaveform();
+  </script>
+</body>
+</html>

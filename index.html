@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gauransh Bansal — Simulations Library</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif']
+          },
+          colors: {
+            brand: {
+              black: '#030305',
+              dark: '#0a0a0a',
+              gray: '#171717',
+              light: '#e5e5e5'
+            }
+          },
+          transitionTimingFunction: {
+            'tactile': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+            'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+          },
+          transitionDuration: {
+            'tactile': '400ms',
+            'spring': '600ms'
+          },
+          boxShadow: {
+            'glass-edge': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 4px 24px -8px rgba(0, 0, 0, 0.5)',
+            'glass-edge-subtle': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
+            'button-physical': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.8), 0 8px 16px -4px rgba(255, 255, 255, 0.1), 0 4px 8px -4px rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up { animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .delay-100 { animation-delay: 100ms; }
+    .delay-200 { animation-delay: 200ms; }
+    .delay-300 { animation-delay: 300ms; }
+    .delay-400 { animation-delay: 400ms; }
+    .delay-500 { animation-delay: 500ms; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(-50%); }
+      50% { transform: translateY(-10px) translateX(-50%); }
+    }
+
+    @keyframes ping {
+      75%, 100% { transform: scale(2); opacity: 0; }
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #030305; }
+    ::-webkit-scrollbar-thumb { background: #262626; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #404040; }
+    ::selection { background: rgba(99, 102, 241, 0.3); color: white; }
+
+    .bg-grain {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .hero-gradient {
+      background: linear-gradient(to top, #030305 0%, rgba(3,3,5,0.85) 30%, rgba(3,3,5,0.4) 60%, transparent 100%);
+    }
+    .hero-side-gradient {
+      background: linear-gradient(to right, #030305 0%, rgba(3,3,5,0.6) 40%, transparent 100%);
+    }
+
+    .hero-title {
+      background: linear-gradient(135deg, #ffffff 0%, #a3a3a3 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-image-mask {
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+      -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+    }
+
+    .sim-row {
+      scroll-behavior: smooth;
+    }
+
+    .card-overlay {
+      opacity: 0;
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sim-card:hover .card-overlay {
+      opacity: 1;
+    }
+
+    .sim-card:hover {
+      -translate-y: -4px;
+    }
+
+    .row-arrow {
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .row-container:hover .row-arrow {
+      opacity: 1;
+    }
+
+    .hero-image {
+      transition: transform 8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hero-image:hover {
+      transform: scale(1.03);
+    }
+
+    .tag-pill {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body class="bg-brand-black text-white font-sans antialiased">
+
+  <!-- Volumetric Background -->
+  <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full mix-blend-screen opacity-70" style="background: radial-gradient(circle, rgba(49, 46, 129, 0.4) 0%, transparent 70%);"></div>
+    <div class="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full mix-blend-screen opacity-60" style="background: radial-gradient(circle, rgba(76, 29, 149, 0.3) 0%, transparent 70%);"></div>
+    <div class="absolute top-[40%] left-[50%] -translate-x-1/2 w-[80vw] h-[40vw] rounded-full mix-blend-screen opacity-50" style="background: radial-gradient(circle, rgba(30, 58, 138, 0.3) 0%, transparent 70%);"></div>
+    <div class="bg-grain"></div>
+  </div>
+
+
+  <!-- ===================== NAVIGATION ===================== -->
+  <nav id="nav" class="fixed top-0 left-0 right-0 z-50 h-16 flex items-center px-6 bg-brand-black/60 backdrop-blur-2xl border-b border-white/5 shadow-glass-edge-subtle transition-all duration-300">
+    <div class="max-w-7xl w-full mx-auto flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+          <span class="text-black font-semibold text-sm">GB</span>
+        </div>
+        <span class="font-medium text-sm tracking-tight hidden md:block">Gauransh Bansal</span>
+      </a>
+
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#featured" class="text-sm font-medium tracking-wide text-neutral-400 hover:text-white transition-colors duration-300">Featured</a>
+        <a href="#library" class="text-sm font-medium tracking-wide text-neutral-400 hover:text-white transition-colors duration-300">Library</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full tag-pill">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" style="animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+          </span>
+          <span id="sim-count-badge" class="text-[10px] font-medium tracking-wider uppercase text-neutral-400"></span>
+        </div>
+        <button id="mobile-menu-btn" class="md:hidden w-9 h-9 rounded-full border border-white/10 flex items-center justify-center hover:border-neutral-600 transition-colors duration-300">
+          <iconify-icon icon="lucide:menu" width="15" class="text-neutral-400"></iconify-icon>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobile-menu" class="md:hidden hidden absolute top-16 left-0 right-0 bg-brand-black/95 backdrop-blur-2xl border-b border-white/5">
+      <div class="px-6 py-4 flex flex-col gap-3">
+        <a href="#featured" class="text-sm font-medium tracking-wide text-neutral-400 hover:text-white transition-colors py-2">Featured</a>
+        <a href="#library" class="text-sm font-medium tracking-wide text-neutral-400 hover:text-white transition-colors py-2">Library</a>
+      </div>
+    </div>
+  </nav>
+
+
+  <!-- ===================== HERO SECTION ===================== -->
+  <section id="featured" class="relative min-h-[90vh] flex items-end pb-16 pt-20">
+    <div id="hero-bg" class="absolute inset-0 z-0 overflow-hidden">
+      <img id="hero-image" src="" alt="" class="hero-image w-full h-full object-cover opacity-40 mix-blend-luminosity hero-image-mask">
+      <div class="hero-side-gradient absolute inset-0"></div>
+      <div class="hero-gradient absolute inset-0"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 w-full">
+      <div id="hero-content" class="max-w-2xl"></div>
+    </div>
+
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden md:block" style="animation: float 4s ease-in-out infinite;">
+      <iconify-icon icon="lucide:arrow-down" width="24" class="text-neutral-500"></iconify-icon>
+    </div>
+  </section>
+
+
+  <!-- ===================== LIBRARY ROW ===================== -->
+  <section id="library" class="relative z-10 py-20 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-6 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div>
+        <p class="text-[10px] font-bold tracking-[0.3em] uppercase text-indigo-400/80 mb-3 flex items-center gap-2 opacity-0 animate-fade-in-up" style="animation-delay:200ms;">
+          <hr class="w-8 border-white/10">
+          Collection
+        </p>
+        <h2 class="font-serif text-3xl md:text-4xl font-medium tracking-tight opacity-0 animate-fade-in-up delay-300">All Simulations</h2>
+      </div>
+      
+      <!-- Search Input and Controls -->
+      <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-stretch sm:items-center opacity-0 animate-fade-in-up delay-400">
+        <div class="relative flex-grow sm:w-64">
+          <input type="text" id="search-input" placeholder="Search simulations..." class="w-full bg-white/[0.03] border border-white/10 rounded-full px-5 py-2.5 pl-11 text-sm text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all duration-300 shadow-glass-edge-subtle">
+          <iconify-icon icon="lucide:search" width="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500"></iconify-icon>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- Grid/Row Toggle Button -->
+          <button id="view-toggle-btn" onclick="toggleViewMode()" class="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center hover:border-neutral-600 transition-colors duration-300 shadow-glass-edge-subtle" title="Toggle Grid/Row View">
+            <iconify-icon id="view-toggle-icon" icon="lucide:grid" width="15" class="text-neutral-400"></iconify-icon>
+          </button>
+          
+          <!-- Navigation Arrows for Row View -->
+          <button id="scroll-left-btn" onclick="scrollRow(-1)" class="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center hover:border-neutral-600 transition-colors duration-300 shadow-glass-edge-subtle">
+            <iconify-icon icon="lucide:chevron-left" width="15" class="text-neutral-400"></iconify-icon>
+          </button>
+          <button id="scroll-right-btn" onclick="scrollRow(1)" class="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center hover:border-neutral-600 transition-colors duration-300 shadow-glass-edge-subtle">
+            <iconify-icon icon="lucide:chevron-right" width="15" class="text-neutral-400"></iconify-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Filters -->
+    <div id="filter-tabs" class="max-w-7xl mx-auto px-6 mb-8 flex flex-wrap gap-2 items-center opacity-0 animate-fade-in-up delay-300">
+      <!-- Tabs will be rendered here dynamically -->
+    </div>
+
+    <div class="row-container relative">
+      <button id="row-arrow-left" onclick="scrollRow(-1)" class="row-arrow hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-brand-black/80 border border-white/10 items-center justify-center hover:border-neutral-600 transition-all duration-300 shadow-glass-edge -ml-2 backdrop-blur-xl">
+        <iconify-icon icon="lucide:chevron-left" width="18" class="text-neutral-300"></iconify-icon>
+      </button>
+      <button id="row-arrow-right" onclick="scrollRow(1)" class="row-arrow hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-brand-black/80 border border-white/10 items-center justify-center hover:border-neutral-600 transition-all duration-300 shadow-glass-edge -mr-2 backdrop-blur-xl">
+        <iconify-icon icon="lucide:chevron-right" width="18" class="text-neutral-300"></iconify-icon>
+      </button>
+
+      <div id="sim-row" class="sim-row scrollbar-hide flex gap-5 overflow-x-auto px-6"></div>
+    </div>
+  </section>
+
+
+  <!-- ===================== STATS BAR ===================== -->
+  <section class="relative z-10 px-6 py-12 border-t border-white/5 bg-brand-black">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+      <p class="text-[11px] font-semibold tracking-[0.2em] uppercase text-neutral-500"><span id="statSims" class="font-serif text-lg font-medium text-white italic normal-case mr-1.5">0</span> Simulations</p>
+      <p class="text-[11px] font-semibold tracking-[0.2em] uppercase text-neutral-500"><span id="statTopics" class="font-serif text-lg font-medium text-white italic normal-case mr-1.5">0</span> Topics Covered</p>
+      <p class="text-[11px] font-semibold tracking-[0.2em] uppercase text-neutral-500"><span id="statTech" class="font-serif text-lg font-medium text-white italic normal-case mr-1.5">0</span> Technologies</p>
+    </div>
+  </section>
+
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="px-6 py-12 border-t border-white/5 relative z-10 bg-brand-black">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center shadow-glass-edge-subtle">
+          <span class="text-white font-serif italic font-medium text-sm">GB</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-sm text-neutral-300 font-medium">Developed by Gauransh Bansal</span>
+          <span class="text-xs text-neutral-600 font-light">Simulations Library &copy; 2026. All rights reserved. (<a href="./LICENSE" class="underline hover:text-indigo-400">License</a>)</span>
+        </div>
+      </div>
+      <p class="text-[11px] font-semibold tracking-[0.2em] uppercase text-neutral-600">Crafted with precision</p>
+    </div>
+  </footer>
+
+
+  <!-- ===================== JAVASCRIPT ===================== -->
+  <script>
+    // ╔══════════════════════════════════════════════════════════════╗
+    // ║                                                              ║
+    // ║   SIMULATIONS LIBRARY — CONFIGURATION                        ║
+    // ║                                                              ║
+    // ║   To add a new simulation, just copy one of the objects      ║
+    // ║   below and fill in the fields. Everything else is           ║
+    // ║   automatic — the hero, the row, the stats, the count.       ║
+    // ║                                                              ║
+    // ╚══════════════════════════════════════════════════════════════╝
+
+    const CONFIG = {
+      developerName: "Gauransh Bansal",
+      initials: "GB",
+    };
+
+    const simulations = [
+      {
+        title: "SAME EQUATION, DIFFERENT REALITY",
+        subtitle: "One mathematical structure. Different physical realizations.",
+        badge: "Universal Systems Lab",
+        description: "An interactive laboratory demonstrating how mechanical, electrical, quantum, acoustic, biological, and economic systems share the exact same differential equation.",
+        image: "./same eqn difff reality.png",
+        url: "./same_equation_different_reality.html",
+        featured: false,
+        tags: ["Physics", "Harmonic Oscillator", "Multiverse", "Matrix Theme"],
+        category: "Universal Dynamics",
+        year: "2026"
+      },
+      {
+        title: "LANDSCAPE OF FUTURES",
+        subtitle: "Explore how initial conditions shape destiny",
+  	badge: "WebGL Ultra Edition",
+  	description: "A visual exploration of chaotic systems — watch how microscopic changes in starting conditions cascade into entirely different destinies.",
+  	image: "./Screenshot.png",
+  	url: "./lof.html",
+  	featured: false,
+  	tags: ["WebGL", "Chaos Theory", "Interactive"],
+  	category: "Non-linear Dynamics",
+  	year: "2025"
+      },
+      {
+        title: "PHASE SPACE LAB",
+        subtitle: "Interactive phase portraits, nullclines, equilibria, and RK4 trajectories",
+        badge: "Dynamical Systems Lab",
+        description: "A scientific 2D phase-plane simulator for exploring vector fields, trajectories, fixed points, trace-determinant analysis, and local linearization.",
+        image: "./phase_space_lab.png",
+        url: "./phase_space_lab.html",
+        featured: false,
+        tags: ["Dynamical Systems", "Phase Plane", "RK4"],
+        category: "Dynamical Systems",
+        year: "2026"
+      },
+      {
+        title: "CHAOS AS MUSIC",
+        subtitle: "Hear the logistic map become rhythm, melody, timbre, and dissonance",
+        badge: "Scientific Instrument",
+        description: "An interactive music-production instrument where the actual dynamics of the logistic map drive pitch, rhythm, timbre, waveform structure, and harmonic tension.",
+        image: "./chaos_as_music.png",
+        imageClass: "object-contain bg-[#05070d] p-3",
+        url: "./chaos_as_music.html",
+        featured: false,
+        tags: ["Chaos", "Music", "Sonification"],
+        category: "Non-linear Dynamics",
+        year: "2026"
+      },
+      {
+        title: "NEWTON-RAPHSON SIMULATOR",
+        subtitle: "Step through tangent-line root finding with live graph feedback",
+        badge: "Numerical Methods",
+        description: "An interactive Newton-Raphson lab for visualizing iterations, tangents, convergence, and how the initial guess shapes the path to a root.",
+        image: "./newton_raphson_simulator.png",
+        url: "./newton_raphson_simulator.html",
+        featured: false,
+        tags: ["Numerical Methods", "Root Finding", "Calculus"],
+        category: "Numerical Methods",
+        year: "2026"
+      },
+      {
+        title: "ODE METHODS SIMULATOR",
+        subtitle: "Step through Euler, Heun, and RK4 numerical solvers",
+        badge: "Numerical Methods",
+        description: "An interactive laboratory for comparing numerical methods (Euler, Heun, and RK4) for solving ordinary differential equations with step-by-step calculations.",
+        image: "./ode_methods_simulator.png",
+        url: "./ode_methods_simulator.html",
+        featured: false,
+        tags: ["Numerical Methods", "Calculus", "ODEs"],
+        category: "Numerical Methods",
+        year: "2026"
+      },
+      {
+        title: "GLACIAL OUTBURST SIMULATOR",
+        subtitle: "Interactive 3D simulation of a rock-ice avalanche and flood surge",
+        badge: "Environmental Geophysics",
+        description: "An interactive 3D laboratory simulating the impact of rock-ice avalanches on glacial lakes, triggering moraine dam breaches and downstream flooding surges.",
+        image: "./glacier_outburst_simulation.png",
+        url: "./glacier_outburst_simulation.html",
+        featured: true,
+        tags: ["Three.js", "Geohazards", "3D Simulation"],
+        category: "Environmental Physics",
+        year: "2026"
+      },
+      {
+        title: "GEIGER-MÜLLER VIRTUAL LABORATORY",
+        subtitle: "Coupled Electrostatics, Townsend Avalanches, Space Charge & Detection Physics",
+        badge: "Nuclear & Plasma Physics",
+        description: "An interactive laboratory demonstrating radiation detection, track primary ionization, Townsend avalanche multiplication, space charge dead time dynamics, oscilloscope pulse waveforms, and voltage plateau characteristics.",
+        image: "./geiger_muller_laboratory.jpeg",
+        url: "./geiger_muller_laboratory.html",
+        featured: false,
+        tags: ["Nuclear Physics", "Detector Physics", "Townsend Avalanche", "Space Charge"],
+        category: "Nuclear Physics",
+        year: "2026"
+      }
+    ];
+
+    // Setup state
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let viewMode = 'row'; // 'row' or 'grid'
+
+    const featured = simulations.find(s => s.featured) || simulations[0];
+
+    // Initial setup of static values
+    document.getElementById('sim-count-badge').textContent = `${simulations.length} Simulation${simulations.length !== 1 ? 's' : ''}`;
+
+    const allTags = new Set();
+    simulations.forEach(s => s.tags.forEach(t => allTags.add(t)));
+    const uniqueCategories = new Set(simulations.map(s => s.category).filter(Boolean));
+
+    document.getElementById('statSims').textContent = simulations.length;
+    document.getElementById('statTopics').textContent = uniqueCategories.size;
+    document.getElementById('statTech').textContent = allTags.size;
+
+    // Render Featured Hero
+    if (featured) {
+      document.getElementById('hero-image').src = featured.image;
+      document.getElementById('hero-image').alt = featured.title;
+
+      const tagsHtml = featured.tags.map(t =>
+        `<span class="tag-pill px-2.5 py-1 rounded-full text-[10px] font-medium tracking-wider uppercase text-neutral-300">${t}</span>`
+      ).join('');
+
+      document.getElementById('hero-content').innerHTML = `
+        <div class="opacity-0 animate-fade-in-up">
+          <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/[0.03] border border-white/10 shadow-glass-edge-subtle backdrop-blur-md mb-6">
+            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+            <p class="text-[10px] font-medium tracking-[0.2em] uppercase text-neutral-300">Featured Simulation</p>
+          </div>
+          <h1 class="font-serif hero-title text-5xl sm:text-6xl lg:text-7xl font-medium tracking-tight leading-[0.9] mb-5 opacity-0 animate-fade-in-up delay-100">${featured.title}</h1>
+          <p class="font-serif italic text-neutral-300 text-xl md:text-2xl max-w-2xl leading-relaxed mb-2 opacity-0 animate-fade-in-up delay-200">${featured.subtitle}</p>
+          <p class="text-sm text-neutral-500 font-light leading-relaxed mb-6 max-w-lg opacity-0 animate-fade-in-up delay-200">${featured.description}</p>
+          <div class="flex flex-wrap items-center gap-2 mb-8 opacity-0 animate-fade-in-up delay-300">
+            ${tagsHtml}
+            <span class="text-neutral-700 text-[10px]">·</span>
+            <span class="text-[10px] font-mono tracking-wider text-neutral-500">${featured.year}</span>
+          </div>
+          <div class="flex items-center gap-4 opacity-0 animate-fade-in-up delay-400">
+            <a href="${featured.url}" class="px-8 py-4 bg-white text-black text-sm font-semibold tracking-wide rounded-full shadow-button-physical hover:scale-105 hover:-translate-y-1 transition-all duration-spring inline-flex items-center gap-2.5">
+              <iconify-icon icon="lucide:play" width="16"></iconify-icon>
+              Launch Simulation
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    // Function to render category filter tabs
+    function renderFilterTabs() {
+      const tabsContainer = document.getElementById('filter-tabs');
+      const categories = ['all', ...uniqueCategories];
+      
+      tabsContainer.innerHTML = categories.map(cat => {
+        const isActive = activeCategory === cat;
+        const displayName = cat === 'all' ? 'All Topics' : cat;
+        const activeClass = isActive 
+          ? 'bg-white text-black font-semibold border-white' 
+          : 'text-neutral-400 hover:text-white border-white/5 hover:border-white/10 bg-white/[0.02]';
+          
+        return `
+          <button onclick="setCategory('${cat}')" class="px-4 py-2 text-xs rounded-full border transition-all duration-300 ${activeClass}">
+            ${displayName}
+          </button>
+        `;
+      }).join('');
+    }
+
+    // Function to change current category
+    window.setCategory = function(category) {
+      activeCategory = category;
+      renderFilterTabs();
+      renderSimulations();
+    };
+
+    // Function to toggle between horizontal row and grid layouts
+    window.toggleViewMode = function() {
+      viewMode = viewMode === 'row' ? 'grid' : 'row';
+      const icon = document.getElementById('view-toggle-icon');
+      if (viewMode === 'grid') {
+        icon.setAttribute('icon', 'lucide:list');
+      } else {
+        icon.setAttribute('icon', 'lucide:grid');
+      }
+      renderSimulations();
+    };
+
+    // Main render function for simulation cards
+    function renderSimulations() {
+      const row = document.getElementById('sim-row');
+      row.innerHTML = '';
+      
+      const filtered = simulations.filter(sim => {
+        const matchesCategory = activeCategory === 'all' || sim.category === activeCategory;
+        const matchesSearch = !searchQuery || 
+          sim.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          sim.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (sim.description && sim.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          sim.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+          
+        return matchesCategory && matchesSearch;
+      });
+
+      const isGrid = viewMode === 'grid';
+      
+      // Update visibility of navigation controls based on layout mode
+      const rowArrows = document.querySelectorAll('.row-arrow');
+      rowArrows.forEach(arrow => {
+        if (isGrid) {
+          arrow.classList.add('hidden');
+        } else {
+          arrow.classList.remove('hidden');
+        }
+      });
+      
+      const scrollLeftBtn = document.getElementById('scroll-left-btn');
+      const scrollRightBtn = document.getElementById('scroll-right-btn');
+      if (scrollLeftBtn && scrollRightBtn) {
+        if (isGrid) {
+          scrollLeftBtn.classList.add('hidden');
+          scrollRightBtn.classList.add('hidden');
+        } else {
+          scrollLeftBtn.classList.remove('hidden');
+          scrollRightBtn.classList.remove('hidden');
+        }
+      }
+
+      // Re-apply layout class
+      if (isGrid) {
+        row.className = 'sim-row grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-6 max-w-7xl mx-auto transition-all duration-500';
+      } else {
+        row.className = 'sim-row scrollbar-hide flex gap-5 overflow-x-auto px-6 transition-all duration-500';
+      }
+
+      if (filtered.length === 0) {
+        row.innerHTML = `
+          <div class="flex items-center justify-center w-full py-20 col-span-full">
+            <div class="text-center">
+              <iconify-icon icon="lucide:flask-conical" width="40" class="text-neutral-700 mb-4 mx-auto block"></iconify-icon>
+              <p class="text-sm text-neutral-500 font-light italic">No simulations found matching your criteria.</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach((sim, i) => {
+        const card = document.createElement('a');
+        card.href = sim.url;
+        
+        // Use full width in grid mode, fixed width in row mode
+        const widthClasses = isGrid ? 'w-full' : 'flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[380px]';
+        card.className = `sim-card relative ${widthClasses} rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 bg-white/[0.02] shadow-glass-edge-subtle cursor-pointer group transition-all duration-tactile opacity-0 animate-fade-in-up flex flex-col justify-between`;
+        card.style.animationDelay = `${100 + i * 50}ms`;
+
+        const isFeatured = sim === featured;
+
+        card.innerHTML = `
+          <div>
+            <div class="relative aspect-video overflow-hidden bg-brand-gray">
+              <img src="${sim.image}" alt="${sim.title}" class="w-full h-full ${sim.imageClass || 'object-cover'} transition-transform duration-700 group-hover:scale-105" loading="lazy">
+              ${isFeatured ? `<div class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-white text-black text-[9px] font-semibold tracking-wider uppercase shadow-button-physical">Featured</div>` : ''}
+              <div class="card-overlay absolute inset-0 bg-black/40 flex items-center justify-center">
+                <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-button-physical transform scale-75 group-hover:scale-100 transition-transform duration-tactile">
+                  <iconify-icon icon="lucide:play" width="22" class="text-black ml-0.5"></iconify-icon>
+                </div>
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-[9px] font-mono text-neutral-600 tracking-wider uppercase">${sim.badge}</span>
+                <span class="text-neutral-700">·</span>
+                <span class="text-[9px] font-mono text-neutral-600 tracking-wider">${sim.year}</span>
+                ${sim.category ? `<span class="text-neutral-700">·</span><span class="text-[9px] font-mono text-indigo-400/80 tracking-wider uppercase">${sim.category}</span>` : ''}
+              </div>
+              <h3 class="font-serif text-base font-medium tracking-tight mb-1.5 group-hover:text-white transition-colors text-neutral-200">${sim.title}</h3>
+              <p class="text-xs text-neutral-500 font-light leading-relaxed line-clamp-2">${sim.subtitle}</p>
+            </div>
+          </div>
+          <div class="p-5 pt-0">
+            <div class="flex flex-wrap gap-1.5 mt-3">
+              ${sim.tags.slice(0, 3).map((t, ti) => `<span class="text-[9px] font-medium tracking-wider uppercase text-neutral-600">${t}</span>${ti < Math.min(sim.tags.length, 3) - 1 ? '<span class="text-neutral-700 text-[9px]">·</span>' : ''}`).join('')}
+            </div>
+          </div>
+        `;
+
+        row.appendChild(card);
+      });
+    }
+
+    window.scrollRow = function(direction) {
+      const r = document.getElementById('sim-row');
+      r.scrollBy({ left: direction * 400, behavior: 'smooth' });
+    };
+
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Wire up search input listener
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderSimulations();
+    });
+
+    // Initial load
+    renderFilterTabs();
+    renderSimulations();
+  </script>
+
+</body>
+</html>

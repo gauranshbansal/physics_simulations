@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newton's Method Simulator</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Math.js for evaluating string equations and derivatives -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+    <!-- KaTeX for beautiful math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital@1&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505; /* Deep dark background matching the image */
+            color: #e5e5e5;
+            margin: 0;
+            overflow: hidden; /* Prevent scroll on main view */
+        }
+        .math-font {
+            font-family: 'Merriweather', serif;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none; /* Prevent browser handling of panning */
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        /* Custom scrollbar for history panel */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col md:flex-row">
+
+    <!-- Left Sidebar: Controls & Info -->
+    <div class="w-full md:w-[400px] h-full bg-[#111] border-r border-[#333] flex flex-col z-10 shadow-xl overflow-y-auto shrink-0 transition-all">
+        
+        <div class="p-6 border-b border-[#333]">
+            <h1 class="text-2xl font-semibold text-white mb-2 tracking-tight">Newton's Method</h1>
+            <p class="text-sm text-gray-400 mb-4">Interactive step-by-step simulator to visualize root-finding.</p>
+            
+                        <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mb-4 text-xs text-gray-400 hover:text-white transition">
+                <span>Developed by <strong class="font-semibold text-white">Gauransh Bansal</strong></span>
+                <span class="text-[#38bdf8]">LinkedIn</span>
+            </a><div id="formula-display" class="text-xl text-center py-3 bg-[#1a1a1a] rounded-lg border border-[#222] text-[#38bdf8] mb-4 overflow-x-auto">
+                <!-- KaTeX injected here -->
+            </div>
+
+            <!-- Inputs -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Function P(x)</label>
+                    <input type="text" id="input-fx" value="x^5 + x^2 - x - 0.2" class="w-full bg-[#222] border border-[#444] rounded p-2 text-white focus:outline-none focus:border-[#38bdf8] font-mono text-sm transition-colors">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Initial Guess</label>
+                        <input type="number" step="0.1" id="input-x0" value="1.3" class="w-full bg-[#222] border border-[#444] rounded p-2 text-white focus:outline-none focus:border-[#facc15] font-mono text-sm transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Viewport Scale</label>
+                        <select id="input-zoom" class="w-full bg-[#222] border border-[#444] rounded p-2 text-white focus:outline-none focus:border-[#38bdf8] text-sm">
+                            <option value="1">Zoom In (2x)</option>
+                            <option value="2" selected>Standard (Default)</option>
+                            <option value="5">Zoom Out (5x)</option>
+                            <option value="10">Wide (10x)</option>
+                            <option value="custom" hidden>Custom Zoom</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex space-x-2 pt-2">
+                    <button id="btn-reset" class="flex-1 bg-[#222] hover:bg-[#333] border border-[#444] text-white font-medium py-2 px-4 rounded transition-colors duration-200">
+                        Apply & Reset
+                    </button>
+                    <button id="btn-next" class="flex-1 bg-[#38bdf8] hover:bg-[#0ea5e9] text-[#050505] font-bold py-2 px-4 rounded transition-colors duration-200 shadow-[0_0_15px_rgba(56,189,248,0.3)]">
+                        Next Step
+                    </button>
+                </div>
+                <div id="error-msg" class="text-red-400 text-xs hidden font-medium bg-red-400/10 p-2 rounded"></div>
+            </div>
+        </div>
+
+        <!-- Math Step Readout -->
+        <div class="flex-1 overflow-y-auto p-6 bg-[#0a0a0a]">
+            <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Iteration History</h2>
+            <div id="history-container" class="space-y-3">
+                <!-- History items injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Area: Canvas -->
+    <div class="flex-1 relative h-[50vh] md:h-full w-full bg-black">
+        <canvas id="sim-canvas"></canvas>
+        
+        <!-- Interactive overlays (coords on hover, maybe mobile hint) -->
+        <div class="absolute bottom-4 right-4 pointer-events-none">
+            <div id="status-overlay" class="bg-black/50 backdrop-blur-sm text-gray-300 px-3 py-1.5 rounded-lg text-sm border border-white/10 math-font mb-2">
+                Ready to start
+            </div>
+            <div class="text-xs text-gray-500 text-right">
+                Hint: Click & drag to pan, scroll to zoom
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Core Application State ---
+        const state = {
+            exprStr: 'x^5 + x^2 - x - 0.2',
+            x0: 1.3,
+            fn: null,       // Compiled math.js function
+            dfn: null,      // Compiled derivative function
+            
+            history: [],    // Array of computed points {xn, fxn, dfxn, xnext}
+            currentIter: 0,
+            
+            // Viewport mapping (World Coordinates to Screen Coordinates)
+            view: {
+                xCenter: 0,
+                yCenter: 2,
+                xRange: 4,  // Default shows from -2 to 2 roughly
+                yRange: 8,  // Default shows from -2 to 6 roughly
+                isDragging: false,
+                lastPx: 0,
+                lastPy: 0
+            },
+
+            // Animation State Machine
+            anim: {
+                active: false,
+                stage: 'IDLE', // IDLE, DRAW_VERT, DRAW_TAN
+                progress: 0,
+                startTime: 0,
+                duration: 800, // ms per stage
+                targetX: 0,
+                targetY: 0
+            }
+        };
+
+        // DOM Elements
+        const canvas = document.getElementById('sim-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Optimize for solid black background
+        
+        const inputs = {
+            fx: document.getElementById('input-fx'),
+            x0: document.getElementById('input-x0'),
+            zoom: document.getElementById('input-zoom')
+        };
+        const btns = {
+            reset: document.getElementById('btn-reset'),
+            next: document.getElementById('btn-next')
+        };
+        const displays = {
+            formula: document.getElementById('formula-display'),
+            history: document.getElementById('history-container'),
+            error: document.getElementById('error-msg'),
+            status: document.getElementById('status-overlay')
+        };
+        function mathHtml(tex) {
+            const span = document.createElement('span');
+            katex.render(tex, span, { throwOnError: false });
+            return span.innerHTML;
+        }
+
+        function setMathStatus(prefix, tex, suffix = '') {
+            displays.status.innerHTML = `${prefix}${mathHtml(tex)}${suffix}`;
+        }
+
+        // --- Viewport & Coordinate Mapping ---
+        function updateViewportDimensions() {
+            // Handle high-DPI displays (Retina) for crisp lines
+            const dpr = window.devicePixelRatio || 1;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            
+            if (width === 0 || height === 0) return;
+
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+
+            // Maintain aspect ratio in world coordinates
+            const aspect = width / height;
+            // We lock the X range based on current zoom, and adjust Y to fit the screen physical aspect ratio
+            state.view.yRange = state.view.xRange / aspect;
+        }
+
+        function toScreen(wx, wy) {
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            const xMin = state.view.xCenter - state.view.xRange / 2;
+            const xMax = state.view.xCenter + state.view.xRange / 2;
+            const yMin = state.view.yCenter - state.view.yRange / 2;
+            const yMax = state.view.yCenter + state.view.yRange / 2;
+
+            return {
+                x: ((wx - xMin) / (xMax - xMin)) * w,
+                y: h - ((wy - yMin) / (yMax - yMin)) * h // Y axis is inverted on screen
+            };
+        }
+
+        function toWorld(sx, sy) {
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            const xMin = state.view.xCenter - state.view.xRange / 2;
+            const xMax = state.view.xCenter + state.view.xRange / 2;
+            const yMin = state.view.yCenter - state.view.yRange / 2;
+            const yMax = state.view.yCenter + state.view.yRange / 2;
+
+            return {
+                x: xMin + (sx / w) * (xMax - xMin),
+                y: yMin + ((h - sy) / h) * (yMax - yMin)
+            };
+        }
+
+        // --- STREAMING_CHUNK:Math and Logic evaluation... ---
+        function compileMath() {
+            try {
+                const expr = inputs.fx.value;
+                state.exprStr = expr;
+                state.x0 = parseFloat(inputs.x0.value);
+
+                // Compile function
+                const node = math.parse(expr);
+                state.fn = node.compile();
+
+                // Compute and compile derivative
+                const dNode = math.derivative(node, 'x');
+                state.dfn = dNode.compile();
+
+                // Clear errors
+                displays.error.classList.add('hidden');
+                
+                // Render KaTeX
+                const latexStr = `P(x) = ${node.toTex()} = 0`;
+                katex.render(latexStr, displays.formula, { throwOnError: false, displayMode: true });
+
+                return true;
+            } catch (err) {
+                displays.error.textContent = "Error in equation: " + err.message;
+                displays.error.classList.remove('hidden');
+                return false;
+            }
+        }
+
+        function f(x) { return state.fn.evaluate({ x: x }); }
+        function df(x) { return state.dfn.evaluate({ x: x }); }
+
+        function resetSimulation() {
+            if (!compileMath()) return;
+            
+            state.history = [];
+            state.currentIter = 0;
+            state.anim.active = false;
+            state.anim.stage = 'IDLE';
+            
+            // Add initial point as step 0
+            const initialFx = f(state.x0);
+            const initialDfx = df(state.x0);
+            const nextX = initialDfx === 0 ? state.x0 : state.x0 - (initialFx / initialDfx);
+
+            state.history.push({
+                xn: state.x0,
+                fxn: initialFx,
+                dfxn: initialDfx,
+                xnext: nextX
+            });
+
+            // Smart viewport auto-adjust based on x0, nextX, initialFx
+            const xMinVal = Math.min(0, state.x0, nextX);
+            const xMaxVal = Math.max(0, state.x0, nextX);
+            const yMinVal = Math.min(0, initialFx);
+            const yMaxVal = Math.max(0, initialFx);
+
+            state.view.xCenter = (xMinVal + xMaxVal) / 2;
+            state.view.yCenter = (yMinVal + yMaxVal) / 2;
+
+            let aspect = canvas.clientWidth / canvas.clientHeight;
+            if (isNaN(aspect) || !isFinite(aspect) || aspect === 0) {
+                aspect = 1.333; // Default aspect ratio fallback
+            }
+
+            // Margin padding of 60% (1.6 factor)
+            const dx = Math.max(1.0, (xMaxVal - xMinVal) * 1.6);
+            const dy = Math.max(1.0, (yMaxVal - yMinVal) * 1.6);
+
+            // Maintain 1:1 aspect ratio on screen
+            state.view.xRange = Math.max(dx, dy * aspect);
+            state.view.yRange = state.view.xRange / aspect;
+
+            // Reset zoom dropdown to show custom zoom since it is auto-fitted
+            inputs.zoom.value = "custom";
+
+            displays.history.innerHTML = '';
+            setMathStatus("Guess: ", `x_0 = ${state.x0.toFixed(3)}`);
+            
+            updateViewportDimensions();
+            drawFrame();
+        }
+
+        function stepNext() {
+            if (state.anim.active) return; // Prevent clicking while animating
+            
+            const curr = state.history[state.currentIter];
+            
+            if (Math.abs(curr.fxn) < 1e-7) {
+                setMathStatus("Root found at ", `x = ${curr.xn.toFixed(6)}`);
+                return; // Root found
+            }
+            if (curr.dfxn === 0) {
+                displays.error.textContent = "Derivative is zero. Method fails.";
+                displays.error.classList.remove('hidden');
+                return;
+            }
+
+            // Start animation sequence
+            state.anim.active = true;
+            state.anim.stage = 'DRAW_VERT';
+            state.anim.progress = 0;
+            state.anim.startTime = performance.now();
+            requestAnimationFrame(animationLoop);
+        }
+
+        // --- STREAMING_CHUNK:Canvas Drawing Primitives... ---
+        function drawLine(wx1, wy1, wx2, wy2, color, width, dash = []) {
+            const p1 = toScreen(wx1, wy1);
+            const p2 = toScreen(wx2, wy2);
+            ctx.beginPath();
+            ctx.setLineDash(dash);
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawPoint(wx, wy, color, radius = 5, isTriangle = false) {
+            const p = toScreen(wx, wy);
+            ctx.beginPath();
+            ctx.fillStyle = color;
+            if (isTriangle) {
+                // Draw a small upward triangle
+                ctx.moveTo(p.x, p.y - radius);
+                ctx.lineTo(p.x + radius, p.y + radius);
+                ctx.lineTo(p.x - radius, p.y + radius);
+                ctx.closePath();
+            } else {
+                ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+            }
+            ctx.fill();
+        }
+
+        function calculateTickStep(range) {
+            if (range <= 0 || isNaN(range) || !isFinite(range)) return 1;
+            const targetTicks = 6;
+            const rawStep = range / targetTicks;
+            const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+            const normalized = rawStep / magnitude;
+            
+            let step;
+            if (normalized < 1.5) {
+                step = 1;
+            } else if (normalized < 3.5) {
+                step = 2;
+            } else if (normalized < 7.5) {
+                step = 5;
+            } else {
+                step = 10;
+            }
+            
+            return step * magnitude;
+        }
+
+        function drawAxes() {
+            const gridColor = '#333333';
+            const axisColor = '#888888';
+            const textColor = '#aaaaaa';
+
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            
+            const xMin = state.view.xCenter - state.view.xRange / 2;
+            const xMax = state.view.xCenter + state.view.xRange / 2;
+            const yMin = state.view.yCenter - state.view.yRange / 2;
+            const yMax = state.view.yCenter + state.view.yRange / 2;
+
+            ctx.font = '12px Inter';
+            ctx.fillStyle = textColor;
+
+            // X-axis
+            drawLine(xMin, 0, xMax, 0, axisColor, 1.5);
+            // Y-axis
+            drawLine(0, yMin, 0, yMax, axisColor, 1.5);
+
+            // X-axis ticks (smart dynamic grid)
+            const xStep = calculateTickStep(state.view.xRange);
+            const xPrecision = Math.max(0, -Math.floor(Math.log10(xStep)));
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            for (let i = Math.ceil(xMin / xStep) * xStep; i <= xMax; i += xStep) {
+                if (Math.abs(i) > 1e-9) {
+                    const p = toScreen(i, 0);
+                    // Draw a 8px tick mark
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y - 4);
+                    ctx.lineTo(p.x, p.y + 4);
+                    ctx.strokeStyle = axisColor;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    // Print label slightly below
+                    ctx.fillText(i.toFixed(xPrecision), p.x, p.y + 6);
+                }
+            }
+
+            // Y-axis ticks (smart dynamic grid)
+            const yStep = calculateTickStep(state.view.yRange);
+            const yPrecision = Math.max(0, -Math.floor(Math.log10(yStep)));
+
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            for (let i = Math.ceil(yMin / yStep) * yStep; i <= yMax; i += yStep) {
+                if (Math.abs(i) > 1e-9) {
+                    const p = toScreen(0, i);
+                    // Draw a 8px tick mark
+                    ctx.beginPath();
+                    ctx.moveTo(p.x - 4, p.y);
+                    ctx.lineTo(p.x + 4, p.y);
+                    ctx.strokeStyle = axisColor;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    // Print label slightly left
+                    ctx.fillText(i.toFixed(yPrecision), p.x - 6, p.y);
+                }
+            }
+        }
+
+        function drawCurve() {
+            const w = canvas.clientWidth;
+            ctx.beginPath();
+            let first = true;
+            
+            // Evaluate function across the screen width for smooth rendering
+            for (let px = 0; px <= w; px += 2) {
+                const wx = toWorld(px, 0).x;
+                try {
+                    const wy = f(wx);
+                    const p = toScreen(wx, wy);
+                    if (first) {
+                        ctx.moveTo(p.x, p.y);
+                        first = false;
+                    } else {
+                        ctx.lineTo(p.x, p.y);
+                    }
+                } catch (e) {
+                    // ignore math evaluation errors for out-of-domain rendering
+                }
+            }
+            
+            ctx.strokeStyle = '#38bdf8'; // Tailwind light blue (matches reference image cyan)
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+        }
+
+        // --- STREAMING_CHUNK:Animation Engine... ---
+        // Easing function (ease out cubic)
+        const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+        function animationLoop(timestamp) {
+            if (!state.anim.active) return;
+            
+            if (!state.anim.startTime) state.anim.startTime = timestamp;
+            let elapsed = timestamp - state.anim.startTime;
+            let rawProgress = elapsed / state.anim.duration;
+            
+            if (rawProgress > 1) rawProgress = 1;
+            
+            state.anim.progress = easeOut(rawProgress);
+            
+            drawFrame(); // Draw current state of animation
+
+            if (rawProgress < 1) {
+                requestAnimationFrame(animationLoop);
+            } else {
+                // Transition states
+                if (state.anim.stage === 'DRAW_VERT') {
+                    // Finished vertical line, move to tangent line
+                    state.anim.stage = 'DRAW_TAN';
+                    state.anim.startTime = timestamp;
+                    requestAnimationFrame(animationLoop);
+                } 
+                else if (state.anim.stage === 'DRAW_TAN') {
+                    // Finished step. Finalize data.
+                    completeStep();
+                }
+            }
+        }
+
+        function drawFrame() {
+            // Fill background of the entire physical canvas
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.restore();
+
+            drawAxes();
+            drawCurve();
+
+            // Draw Historical Iterations (faint lines)
+            for (let i = 0; i < state.currentIter; i++) {
+                const h = state.history[i];
+                // Faint vertical line
+                drawLine(h.xn, 0, h.xn, h.fxn, 'rgba(255, 255, 255, 0.1)', 1, [4, 4]);
+                // Faint tangent
+                drawLine(h.xn, h.fxn, h.xnext, 0, 'rgba(255, 255, 255, 0.15)', 1);
+                // Faint point on axis
+                drawPoint(h.xn, 0, 'rgba(250, 204, 21, 0.3)', 4, true); // Triangle for guess
+            }
+
+            // Current Iteration Rendering
+            const curr = state.history[state.currentIter];
+            const pX = curr.xn;
+            const pY = curr.fxn;
+            const nX = curr.xnext;
+
+            // Draw initial guess triangle
+            drawPoint(pX, 0, '#facc15', 6, true);
+            
+            // Label current guess
+            const labelPos = toScreen(pX, -0.4);
+            ctx.font = '14px Inter';
+            ctx.fillStyle = '#facc15';
+            ctx.textAlign = 'center';
+            ctx.fillText(pX.toFixed(3), labelPos.x, labelPos.y);
+
+            if (!state.anim.active) {
+                // Just display the current idle point waiting to animate
+                return;
+            }
+
+            if (state.anim.stage === 'DRAW_VERT' || state.anim.stage === 'DRAW_TAN') {
+                // Animate vertical line going from y=0 to y=pY
+                let currentY = state.anim.stage === 'DRAW_VERT' ? pY * state.anim.progress : pY;
+                drawLine(pX, 0, pX, currentY, 'rgba(255,255,255,0.7)', 2, [5, 5]);
+                
+                if (state.anim.stage === 'DRAW_TAN') {
+                    drawPoint(pX, pY, '#0ea5e9', 5); // Dot on the curve
+
+                    // Animate tangent from (pX, pY) to (nX, 0)
+                    // Extending slightly past x-axis for visual flair
+                    let dx = (nX - pX);
+                    let dy = (0 - pY);
+                    
+                    let animDX = dx * state.anim.progress;
+                    let animDY = dy * state.anim.progress;
+
+                    let curTanX = pX + animDX;
+                    let curTanY = pY + animDY;
+
+                    // Draw the yellow tangent line
+                    drawLine(pX, pY, curTanX, curTanY, '#facc15', 2);
+                    
+                    // Draw moving point along tangent
+                    drawPoint(curTanX, curTanY, '#facc15', 4);
+                }
+            }
+        }
+
+        // --- STREAMING_CHUNK:UI Updates & Event Binding... ---
+        function completeStep() {
+            state.anim.active = false;
+            state.anim.stage = 'IDLE';
+
+            const curr = state.history[state.currentIter];
+            
+            // Prepare next state
+            const nextFx = f(curr.xnext);
+            const nextDfx = df(curr.xnext);
+            const nextNextX = nextDfx === 0 ? curr.xnext : curr.xnext - (nextFx / nextDfx);
+
+            state.history.push({
+                xn: curr.xnext,
+                fxn: nextFx,
+                dfxn: nextDfx,
+                xnext: nextNextX
+            });
+
+            // Update DOM
+            addHistoryCard(state.currentIter, curr);
+            state.currentIter++;
+            
+            setMathStatus(`Iteration ${state.currentIter}: `, `x = ${curr.xnext.toFixed(6)}`);
+            
+            // Redraw final static frame
+            drawFrame();
+        }
+
+        function addHistoryCard(iter, data) {
+            const card = document.createElement('div');
+            card.className = "bg-[#161616] border border-[#2a2a2a] rounded-lg p-4 animate-[fadeIn_0.3s_ease-out]";
+            card.innerHTML = `
+                <div class="flex justify-between items-center border-b border-[#333] pb-2 mb-2">
+                    <span class="text-sm font-bold text-gray-300">Step ${iter}</span>
+                    <span class="text-xs text-[#facc15] bg-[#facc15]/10 px-2 py-1 rounded">x = ${data.xn.toFixed(4)}</span>
+                </div>
+                <div class="space-y-1 text-sm math-font tracking-wide">
+                    <div class="flex justify-between text-gray-400">
+                        <span class="math-token">${mathHtml("P(x)")}</span> <span class="text-white">${data.fxn.toFixed(4)}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-400">
+                        <span class="math-token">${mathHtml("P'(x)")}</span> <span class="text-white">${data.dfxn.toFixed(4)}</span>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-[#333] flex justify-between font-semibold">
+                        <span class="text-gray-400 text-xs mt-1">${mathHtml("x_{n+1} = x_n - \\frac{P(x_n)}{P'(x_n)}")}</span>
+                        <span class="text-[#38bdf8]">${data.xnext.toFixed(6)}</span>
+                    </div>
+                </div>
+            `;
+            displays.history.insertBefore(card, displays.history.firstChild);
+        }
+
+        // Event Listeners
+        const resizeObserver = new ResizeObserver(() => {
+            updateViewportDimensions();
+            drawFrame();
+        });
+        resizeObserver.observe(canvas);
+
+        canvas.addEventListener('pointerdown', (e) => {
+            state.view.isDragging = true;
+            state.view.lastPx = e.clientX;
+            state.view.lastPy = e.clientY;
+            canvas.setPointerCapture(e.pointerId);
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            if (!state.view.isDragging) return;
+            
+            const dx = e.clientX - state.view.lastPx;
+            const dy = e.clientY - state.view.lastPy;
+            state.view.lastPx = e.clientX;
+            state.view.lastPy = e.clientY;
+
+            // Convert pixel delta to world coordinate delta
+            const worldDx = (dx / canvas.clientWidth) * state.view.xRange;
+            const worldDy = (dy / canvas.clientHeight) * state.view.yRange;
+
+            state.view.xCenter -= worldDx;
+            state.view.yCenter += worldDy; // Y is inverted
+
+            drawFrame();
+        });
+
+        canvas.addEventListener('pointerup', (e) => {
+            state.view.isDragging = false;
+            canvas.releasePointerCapture(e.pointerId);
+        });
+        
+        canvas.addEventListener('pointercancel', (e) => {
+            state.view.isDragging = false;
+        });
+
+        // Add scroll wheel listener for zooming in and out seamlessly
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+
+            const rect = canvas.getBoundingClientRect();
+            const px = e.clientX - rect.left;
+            const py = e.clientY - rect.top;
+
+            // Get world coordinate of the mouse before zoom
+            const wxBefore = toWorld(px, py).x;
+            const wyBefore = toWorld(px, py).y;
+
+            // Determine zoom factor (1.1 for zoom out, 0.9 for zoom in)
+            const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
+
+            // Apply zoom
+            state.view.xRange *= zoomFactor;
+            
+            // Enforce sensible zoom limits
+            if (state.view.xRange < 0.05) state.view.xRange = 0.05;
+            if (state.view.xRange > 5000) state.view.xRange = 5000;
+
+            updateViewportDimensions();
+
+            // Adjust center so the point under the mouse stays fixed
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            
+            const newXMin = wxBefore - (px / w) * state.view.xRange;
+            state.view.xCenter = newXMin + state.view.xRange / 2;
+
+            const newYMin = wyBefore - ((h - py) / h) * state.view.yRange;
+            state.view.yCenter = newYMin + state.view.yRange / 2;
+
+            // Update dropdown to show it's in a custom zoom state
+            inputs.zoom.value = "custom";
+
+            drawFrame();
+        }, { passive: false });
+
+        btns.reset.addEventListener('click', resetSimulation);
+        btns.next.addEventListener('click', stepNext);
+        inputs.zoom.addEventListener('change', () => {
+            if (inputs.zoom.value !== "custom") {
+                const scale = parseFloat(inputs.zoom.value);
+                state.view.xRange = 2 * scale;
+            }
+            updateViewportDimensions();
+            drawFrame();
+        });
+
+        // Initialize App
+        window.onload = () => {
+            // Tailwind adds custom keyframes easily if configured, but inline style works too:
+            const style = document.createElement('style');
+            style.innerHTML = `@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }`;
+            document.head.appendChild(style);
+            
+            resetSimulation();
+        };
+
+    </script></body>
+</html>
+

@@ -1,0 +1,2596 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase Space Lab - Interactive Phase Portrait & Vector Field Generator</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            dark: {
+              bg: '#090D16',
+              surface: '#111827',
+              card: '#182234',
+              border: '#243248',
+              hover: '#1F2C42',
+            },
+            accent: {
+              blue: '#3B82F6',
+              cyan: '#06B6D4',
+              pink: '#EC4899',
+              emerald: '#10B981',
+              amber: '#F59E0B',
+              rose: '#F43F5E',
+              purple: '#8B5CF6'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090D16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #243248;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3B82F6;
+    }
+
+    .glow-border-blue {
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+    
+    .glow-border-cyan {
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+      border-color: rgba(6, 182, 212, 0.4);
+    }
+
+    .canvas-container {
+      position: relative;
+      user-select: none;
+    }
+
+    /* Range slider styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: #243248;
+      border-radius: 4px;
+      height: 6px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #3B82F6;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+      transition: transform 0.1s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* Tab switching animation */
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body class="bg-[#090D16] text-slate-200 font-sans antialiased min-h-screen flex flex-col selection:bg-blue-500/30 selection:text-blue-200">
+
+  <!-- HEADER BAR -->
+  <header class="border-b border-dark-border bg-dark-surface/90 backdrop-blur sticky top-0 z-50 px-4 py-2.5 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 via-cyan-500 to-emerald-400 p-[1px] flex items-center justify-center shadow-lg shadow-blue-500/20">
+        <div class="w-full h-full bg-dark-bg rounded-[7px] flex items-center justify-center">
+          <i class="fa-solid fa-compass-drafting text-cyan-400 text-sm"></i>
+        </div>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-sm font-bold tracking-wider text-slate-100 font-mono uppercase">PHASE SPACE LAB</h1>
+          <span class="text-[10px] px-1.5 py-0.5 rounded font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">v2.4 Autonomous</span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-medium">Interactive Dynamical Systems & Vector Field Simulator</p>
+        <p class="mt-1 text-[11px] text-slate-500">
+          Developed by
+          <span class="text-slate-300 font-medium">Gauransh Bansal</span>
+          ·
+          <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="text-blue-400 hover:text-blue-300 transition">
+            LinkedIn
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <!-- MAIN TABS -->
+    <nav class="flex items-center bg-dark-bg/80 p-1 rounded-lg border border-dark-border space-x-1">
+      <button id="tab-btn-explore" onclick="switchTab('explore')" class="px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 flex items-center space-x-2 bg-blue-600 text-white shadow-sm">
+        <i class="fa-solid fa-chart-line text-[11px]"></i>
+        <span>Explore</span>
+      </button>
+      <button id="tab-btn-presets" onclick="switchTab('presets')" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-dark-card transition-all duration-150 flex items-center space-x-2">
+        <i class="fa-solid fa-sliders text-[11px]"></i>
+        <span>Presets</span>
+      </button>
+      <button id="tab-btn-analysis" onclick="switchTab('analysis')" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-dark-card transition-all duration-150 flex items-center space-x-2">
+        <i class="fa-solid fa-microscope text-[11px]"></i>
+        <span>Analysis</span>
+      </button>
+      <button id="tab-btn-about" onclick="switchTab('about')" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-dark-card transition-all duration-150 flex items-center space-x-2">
+        <i class="fa-solid fa-book-open text-[11px]"></i>
+        <span>About</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 flex flex-col p-3 md:p-4 gap-4 overflow-x-hidden">
+
+    <!-- ==================== EXPLORE TAB ==================== -->
+    <div id="tab-explore" class="tab-content active flex-1">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full items-start">
+        
+        <!-- LEFT: PHASE SPACE CANVAS AREA (68% width on desktop) -->
+        <div class="lg:col-span-9 flex flex-col gap-3 h-full">
+          <!-- Canvas Frame Container -->
+          <div class="relative bg-dark-surface border border-dark-border rounded-xl overflow-hidden shadow-xl flex-1 flex flex-col min-h-[500px] md:min-h-[620px] group">
+            
+            <!-- Canvas Quick Overlay Toolbar -->
+            <div class="absolute top-3 left-3 z-20 flex flex-wrap items-center gap-1.5 bg-dark-bg/90 backdrop-blur border border-dark-border/80 p-1.5 rounded-lg shadow-lg text-xs">
+              <button onclick="toggleQuickSetting('vectors')" id="quick-btn-vectors" class="px-2.5 py-1 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center space-x-1.5 transition" title="Toggle Vector Field">
+                <i class="fa-solid fa-arrows-up-down-left-right text-[10px]"></i>
+                <span class="font-mono text-[11px]">Vectors</span>
+              </button>
+              <button onclick="toggleQuickSetting('nullclines')" id="quick-btn-nullclines" class="px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center space-x-1.5 transition" title="Toggle Nullclines">
+                <i class="fa-solid fa-wave-square text-[10px]"></i>
+                <span class="font-mono text-[11px]">Nullclines</span>
+              </button>
+              <button onclick="toggleQuickSetting('fixedPoints')" id="quick-btn-fixedPoints" class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center space-x-1.5 transition" title="Toggle Fixed Points">
+                <i class="fa-solid fa-circle-dot text-[10px]"></i>
+                <span class="font-mono text-[11px]">Equilibria</span>
+              </button>
+              <button onclick="toggleQuickSetting('streamlines')" id="quick-btn-streamlines" class="px-2.5 py-1 rounded bg-dark-card text-slate-400 border border-dark-border hover:text-slate-200 flex items-center space-x-1.5 transition" title="Toggle Streamlines">
+                <i class="fa-solid fa-water text-[10px]"></i>
+                <span class="font-mono text-[11px]">Streamlines</span>
+              </button>
+              <div class="h-4 w-[1px] bg-dark-border mx-1"></div>
+              <button onclick="zoomView(0.8)" class="p-1 px-2 rounded bg-dark-card text-slate-300 hover:bg-dark-hover hover:text-white transition" title="Zoom In (+)">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+              </button>
+              <button onclick="zoomView(1.25)" class="p-1 px-2 rounded bg-dark-card text-slate-300 hover:bg-dark-hover hover:text-white transition" title="Zoom Out (-)">
+                <i class="fa-solid fa-minus text-[10px]"></i>
+              </button>
+              <button onclick="resetViewBounds()" class="p-1 px-2 rounded bg-dark-card text-slate-300 hover:bg-dark-hover hover:text-white transition" title="Home: reset to system bounds">
+                <i class="fa-solid fa-rotate-left text-[10px]"></i>
+              </button>
+              <button onclick="fitSystemView()" class="p-1 px-2 rounded bg-dark-card text-slate-300 hover:bg-dark-hover hover:text-white transition" title="Fit system, equilibria, and trajectories">
+                <i class="fa-solid fa-expand text-[10px]"></i>
+              </button>
+              <button onclick="zoomToEquilibria()" class="p-1 px-2 rounded bg-dark-card text-slate-300 hover:bg-dark-hover hover:text-white transition" title="Zoom to equilibria">
+                <i class="fa-solid fa-crosshairs text-[10px]"></i>
+              </button>
+              <button onclick="zoomToTrajectories()" class="p-1 px-2 rounded bg-dark-card text-slate-300 hover:bg-dark-hover hover:text-white transition" title="Zoom to trajectories">
+                <i class="fa-solid fa-route text-[10px]"></i>
+              </button>
+            </div>
+
+            <!-- Canvas Action Overlay Right -->
+            <div class="absolute top-3 right-3 z-20 flex items-center space-x-2">
+              <button onclick="clearAllTrajectories()" class="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-medium flex items-center space-x-1.5 transition backdrop-blur shadow-lg">
+                <i class="fa-solid fa-trash-can text-[11px]"></i>
+                <span>Clear Trajectories</span>
+              </button>
+            </div>
+
+            <!-- Main Interactive Canvas -->
+            <div class="flex-1 w-full h-full relative cursor-crosshair">
+              <canvas id="phaseCanvas" class="w-full h-full block"></canvas>
+              
+              <!-- Hover Coordinates Tooltip -->
+              <div id="hoverTooltip" class="pointer-events-none absolute hidden z-30 bg-dark-bg/95 backdrop-blur border border-blue-500/40 rounded-lg p-2.5 text-xs font-mono shadow-2xl space-y-1 min-w-[150px]">
+                <div class="text-[10px] text-blue-400 font-bold tracking-wider uppercase border-b border-dark-border pb-1">PHASE POINT</div>
+                <div class="flex justify-between gap-3 text-slate-300">
+                  <span>x:</span> <span id="tooltip-x" class="text-white font-semibold">0.000</span>
+                </div>
+                <div class="flex justify-between gap-3 text-slate-300">
+                  <span>y:</span> <span id="tooltip-y" class="text-white font-semibold">0.000</span>
+                </div>
+                <div class="flex justify-between gap-3 text-cyan-400 pt-1 border-t border-dark-border/50">
+                  <span>dx/dt:</span> <span id="tooltip-dxdt" class="font-semibold">+0.000</span>
+                </div>
+                <div class="flex justify-between gap-3 text-pink-400">
+                  <span>dy/dt:</span> <span id="tooltip-dydt" class="font-semibold">+0.000</span>
+                </div>
+                <div class="flex justify-between gap-3 text-amber-300 pt-1 border-t border-dark-border/50">
+                  <span>|F|:</span> <span id="tooltip-speed" class="font-semibold">0.000</span>
+                </div>
+              </div>
+
+              <!-- Initial Instruction Overlay -->
+              <div id="canvas-hint" class="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none bg-dark-bg/80 backdrop-blur border border-blue-500/30 px-3 py-1.5 rounded-full text-xs font-mono text-blue-300 flex items-center space-x-2 shadow-lg animate-pulse">
+                <i class="fa-solid fa-hand-pointer text-xs"></i>
+                <span>Click anywhere on phase plane to release trajectory</span>
+              </div>
+            </div>
+
+            <!-- Bottom Status Strip -->
+            <div class="bg-dark-bg/90 border-t border-dark-border px-3 py-2 text-[11px] font-mono text-slate-400 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span class="text-slate-300 font-semibold" id="status-system">System: 2D Autonomous</span>
+                </div>
+                <div>Equilibria: <span class="text-emerald-400 font-bold" id="status-equilibria">0</span></div>
+                <div>Trajectories: <span class="text-blue-400 font-bold" id="status-trajectories">0</span></div>
+                <div>Integrator: <span class="text-purple-400 font-bold">RK4</span></div>
+              </div>
+              <div class="flex items-center space-x-4 text-slate-400">
+                <div>Step: <span id="status-step" class="text-slate-200">0.01</span></div>
+                <div>Domain: <span id="status-domain" class="text-slate-200">[-5.0, 5.0] × [-5.0, 5.0]</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: CONTROL & ANALYSIS PANEL (32% width on desktop) -->
+        <div class="lg:col-span-3 flex flex-col gap-3 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1">
+          
+          <!-- EQUATION PANEL -->
+          <div class="bg-dark-surface border border-dark-border rounded-xl p-4 shadow-xl space-y-3 glow-border-blue">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xs font-bold font-mono uppercase tracking-wider text-blue-400 flex items-center space-x-2">
+                <i class="fa-solid fa-square-root-variable"></i>
+                <span>Dynamical System</span>
+              </h2>
+              <span class="text-[10px] text-slate-400 font-mono">dx/dt, dy/dt</span>
+            </div>
+
+            <form id="equationForm" onsubmit="applyCustomEquations(event)" class="space-y-2.5">
+              <!-- dx/dt Field -->
+              <div class="space-y-1">
+                <label class="text-[11px] font-mono text-slate-300 flex justify-between">
+                  <span>dx/dt = f(x,y)</span>
+                  <span class="text-slate-500">Horizontal Velocity</span>
+                </label>
+                <div class="relative">
+                  <input type="text" id="input-dxdt" value="y" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-1.5 text-xs font-mono text-cyan-300 focus:outline-none focus:border-blue-500 transition shadow-inner" placeholder="e.g. y" />
+                </div>
+              </div>
+
+              <!-- dy/dt Field -->
+              <div class="space-y-1">
+                <label class="text-[11px] font-mono text-slate-300 flex justify-between">
+                  <span>dy/dt = g(x,y)</span>
+                  <span class="text-slate-500">Vertical Velocity</span>
+                </label>
+                <div class="relative">
+                  <input type="text" id="input-dydt" value="-sin(x)" class="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-1.5 text-xs font-mono text-pink-300 focus:outline-none focus:border-blue-500 transition shadow-inner" placeholder="e.g. -sin(x)" />
+                </div>
+              </div>
+
+              <!-- Error Box -->
+              <div id="equation-error" class="hidden bg-rose-500/10 border border-rose-500/30 text-rose-300 p-2 rounded-lg text-[11px] font-mono leading-snug">
+              </div>
+
+              <div class="text-[10px] text-slate-500 font-mono leading-snug bg-dark-bg/50 border border-dark-border/60 rounded-lg p-2">
+                Supports x, y, pi, e, +, -, *, /, ^, implicit multiplication, sin, cos, tan, exp, log, sqrt, abs, sinh, cosh, tanh, floor, ceil, sign, min(a,b), max(a,b).
+              </div>
+
+              <div class="flex items-center space-x-2 pt-1">
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-medium px-3 py-2 rounded-lg text-xs transition shadow-lg shadow-blue-600/20 flex items-center justify-center space-x-1.5">
+                  <i class="fa-solid fa-play text-[10px]"></i>
+                  <span>Apply System</span>
+                </button>
+                <button type="button" onclick="resetToDefaultPendulum()" class="bg-dark-card hover:bg-dark-hover text-slate-300 border border-dark-border px-3 py-2 rounded-lg text-xs transition flex items-center justify-center space-x-1" title="Reset to Pendulum">
+                  <i class="fa-solid fa-rotate-left text-[11px]"></i>
+                  <span>Reset</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- DISPLAY & INTEGRATION PARAMETERS PANEL -->
+          <div class="bg-dark-surface border border-dark-border rounded-xl p-4 shadow-xl space-y-4">
+            
+            <!-- Accordion Header Display Controls -->
+            <div class="space-y-3 border-b border-dark-border pb-3">
+              <h3 class="text-xs font-bold font-mono uppercase tracking-wider text-slate-300 flex items-center space-x-2">
+                <i class="fa-solid fa-eye text-blue-400"></i>
+                <span>Display Toggles</span>
+              </h3>
+
+              <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                <label class="flex items-center space-x-2 bg-dark-bg/60 p-2 rounded border border-dark-border/50 cursor-pointer hover:bg-dark-card">
+                  <input type="checkbox" id="chk-vectorfield" checked onchange="updateDisplayOptions()" class="rounded bg-dark-bg border-dark-border text-blue-600 focus:ring-0">
+                  <span class="text-slate-300">Vector Field</span>
+                </label>
+                <label class="flex items-center space-x-2 bg-dark-bg/60 p-2 rounded border border-dark-border/50 cursor-pointer hover:bg-dark-card">
+                  <input type="checkbox" id="chk-arrows" checked onchange="updateDisplayOptions()" class="rounded bg-dark-bg border-dark-border text-blue-600 focus:ring-0">
+                  <span class="text-slate-300">Arrowheads</span>
+                </label>
+                <label class="flex items-center space-x-2 bg-dark-bg/60 p-2 rounded border border-dark-border/50 cursor-pointer hover:bg-dark-card">
+                  <input type="checkbox" id="chk-nullclines" checked onchange="updateDisplayOptions()" class="rounded bg-dark-bg border-dark-border text-blue-600 focus:ring-0">
+                  <span class="text-slate-300">Nullclines</span>
+                </label>
+                <label class="flex items-center space-x-2 bg-dark-bg/60 p-2 rounded border border-dark-border/50 cursor-pointer hover:bg-dark-card">
+                  <input type="checkbox" id="chk-fixedpoints" checked onchange="updateDisplayOptions()" class="rounded bg-dark-bg border-dark-border text-blue-600 focus:ring-0">
+                  <span class="text-slate-300">Equilibria</span>
+                </label>
+                <label class="flex items-center space-x-2 bg-dark-bg/60 p-2 rounded border border-dark-border/50 cursor-pointer hover:bg-dark-card">
+                  <input type="checkbox" id="chk-trajectories" checked onchange="updateDisplayOptions()" class="rounded bg-dark-bg border-dark-border text-blue-600 focus:ring-0">
+                  <span class="text-slate-300">Trajectories</span>
+                </label>
+                <label class="flex items-center space-x-2 bg-dark-bg/60 p-2 rounded border border-dark-border/50 cursor-pointer hover:bg-dark-card">
+                  <input type="checkbox" id="chk-grid" checked onchange="updateDisplayOptions()" class="rounded bg-dark-bg border-dark-border text-blue-600 focus:ring-0">
+                  <span class="text-slate-300">Coordinate Grid</span>
+                </label>
+              </div>
+
+              <!-- Sliders: Vector Density & Vector Scale -->
+              <div class="grid grid-cols-2 gap-3 pt-1">
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[11px] font-mono text-slate-400">
+                    <span>Density</span>
+                    <span id="lbl-density">24x24</span>
+                  </div>
+                  <input type="range" id="slider-density" min="12" max="40" value="24" oninput="updateVectorParams()" class="w-full" />
+                </div>
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[11px] font-mono text-slate-400">
+                    <span>Arrow Scale</span>
+                    <span id="lbl-scale">1.0x</span>
+                  </div>
+                  <input type="range" id="slider-scale" min="0.4" max="2.0" step="0.1" value="1.0" oninput="updateVectorParams()" class="w-full" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Integration Controls -->
+            <div class="space-y-3">
+              <h3 class="text-xs font-bold font-mono uppercase tracking-wider text-slate-300 flex items-center space-x-2">
+                <i class="fa-solid fa-calculator text-purple-400"></i>
+                <span>RK4 Numerical Integration</span>
+              </h3>
+
+              <div class="space-y-2.5 text-xs font-mono">
+                <div class="space-y-1">
+                  <div class="flex justify-between text-slate-400">
+                    <span>Step Size (h):</span>
+                    <span id="lbl-step" class="text-blue-300 font-semibold">0.010</span>
+                  </div>
+                  <input type="range" id="slider-step" min="0.001" max="0.05" step="0.001" value="0.01" oninput="updateIntegrationParams()" class="w-full" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="space-y-1">
+                    <div class="flex justify-between text-slate-400 text-[10px]">
+                      <span>Fwd Time (+T):</span>
+                      <span id="lbl-tfwd" class="text-emerald-400 font-semibold">20s</span>
+                    </div>
+                    <input type="range" id="slider-tfwd" min="5" max="60" step="5" value="20" oninput="updateIntegrationParams()" class="w-full" />
+                  </div>
+                  <div class="space-y-1">
+                    <div class="flex justify-between text-slate-400 text-[10px]">
+                      <span>Bwd Time (-T):</span>
+                      <span id="lbl-tbwd" class="text-purple-400 font-semibold">20s</span>
+                    </div>
+                    <input type="range" id="slider-tbwd" min="5" max="60" step="5" value="20" oninput="updateIntegrationParams()" class="w-full" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ANIMATION PLAYBACK CONTROLS -->
+            <div class="bg-dark-bg border border-dark-border rounded-lg p-2.5 space-y-2">
+              <div class="flex items-center justify-between text-xs font-mono">
+                <span class="text-slate-300 font-bold flex items-center space-x-1.5">
+                  <i class="fa-solid fa-person-running text-amber-400"></i>
+                  <span>Time Animation</span>
+                </span>
+                <span id="lbl-anim-status" class="text-[10px] text-slate-500">Stopped</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button id="btn-anim-play" onclick="toggleTrajectoryAnimation()" class="flex-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 py-1.5 rounded text-xs font-medium transition flex items-center justify-center space-x-1">
+                  <i id="anim-icon" class="fa-solid fa-play text-[10px]"></i>
+                  <span id="anim-text">Animate Time</span>
+                </button>
+                <!-- Speed selector -->
+                <div class="flex items-center bg-dark-card border border-dark-border rounded text-[11px] font-mono">
+                  <button onclick="setAnimSpeed(0.25)" class="px-1.5 py-1 hover:text-amber-400 border-r border-dark-border">0.25x</button>
+                  <button onclick="setAnimSpeed(0.5)" class="px-1.5 py-1 hover:text-amber-400 border-r border-dark-border">0.5x</button>
+                  <button onclick="setAnimSpeed(1.0)" class="px-1.5 py-1 text-amber-300 font-bold border-r border-dark-border">1x</button>
+                  <button onclick="setAnimSpeed(2.0)" class="px-1.5 py-1 hover:text-amber-400 border-r border-dark-border">2x</button>
+                  <button onclick="setAnimSpeed(4.0)" class="px-1.5 py-1 hover:text-amber-400">4x</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FIXED POINT / EQUILIBRIA SIDEBAR LIST -->
+          <div class="bg-dark-surface border border-dark-border rounded-xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between border-b border-dark-border pb-2">
+              <h3 class="text-xs font-bold font-mono uppercase tracking-wider text-emerald-400 flex items-center space-x-2">
+                <i class="fa-solid fa-crosshairs"></i>
+                <span>Detected Equilibria</span>
+              </h3>
+              <button onclick="recalculateEquilibria()" class="text-[11px] text-slate-400 hover:text-emerald-400 transition" title="Refresh Search">
+                <i class="fa-solid fa-arrows-rotate"></i>
+              </button>
+            </div>
+
+            <div id="equilibria-list" class="space-y-1.5 max-h-[180px] overflow-y-auto pr-1">
+              <!-- Dynamically populated equilibria cards -->
+              <div class="text-xs text-slate-500 font-mono italic py-2 text-center">Searching phase plane for fixed points...</div>
+            </div>
+          </div>
+
+          <!-- TRAJECTORY INSPECTOR -->
+          <div class="bg-dark-surface border border-dark-border rounded-xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between border-b border-dark-border pb-2">
+              <h3 class="text-xs font-bold font-mono uppercase tracking-wider text-sky-400 flex items-center space-x-2">
+                <i class="fa-solid fa-route"></i>
+                <span>Initial Conditions</span>
+              </h3>
+              <button onclick="zoomToTrajectories()" class="text-[11px] text-slate-400 hover:text-sky-400 transition" title="Zoom to trajectories">
+                <i class="fa-solid fa-expand"></i>
+              </button>
+            </div>
+
+            <div id="trajectory-list" class="space-y-1.5 max-h-[180px] overflow-y-auto pr-1">
+              <div class="text-xs text-slate-500 font-mono italic py-2 text-center">Click the phase plane to add trajectories</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PRESETS TAB ==================== -->
+    <div id="tab-presets" class="tab-content flex-1 space-y-4">
+      <div class="bg-dark-surface border border-dark-border rounded-xl p-5 shadow-xl space-y-2">
+        <h2 class="text-lg font-bold text-slate-100 flex items-center space-x-2">
+          <i class="fa-solid fa-book-bookmark text-blue-400"></i>
+          <span>Classical Dynamical Systems Gallery</span>
+        </h2>
+        <p class="text-xs text-slate-400 max-w-3xl">
+          Select any classic 2D nonlinear system to immediately simulate its vector field, nullclines, equilibrium points, and limit cycles.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="preset-cards-container">
+        <!-- Preset cards dynamically generated or pre-built -->
+      </div>
+    </div>
+
+    <!-- ==================== ANALYSIS TAB ==================== -->
+    <div id="tab-analysis" class="tab-content flex-1 space-y-4">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        
+        <!-- Left: Selected Fixed Point Linearization Analysis -->
+        <div class="lg:col-span-7 bg-dark-surface border border-dark-border rounded-xl p-5 shadow-xl space-y-5">
+          <div class="flex items-center justify-between border-b border-dark-border pb-3">
+            <div>
+              <h2 class="text-base font-bold text-slate-100 flex items-center space-x-2">
+                <i class="fa-solid fa-atom text-cyan-400"></i>
+                <span>Jacobian Linearization Analysis</span>
+              </h2>
+              <p class="text-xs text-slate-400">Detailed linear stability spectrum around selected equilibrium point</p>
+            </div>
+            <span id="analysis-fp-badge" class="px-3 py-1 rounded-full text-xs font-mono bg-blue-500/20 text-blue-300 border border-blue-500/30">
+              No Selection
+            </span>
+          </div>
+
+          <div id="analysis-content" class="space-y-5 font-mono text-xs">
+            <!-- Coordinates & Classification Banner -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-dark-bg border border-dark-border p-3.5 rounded-lg space-y-1">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider">Fixed Point (x*, y*)</span>
+                <div id="ana-coords" class="text-lg font-bold text-white">(0.000, 0.000)</div>
+              </div>
+              <div class="bg-dark-bg border border-dark-border p-3.5 rounded-lg space-y-1">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider">Stability Classification</span>
+                <div id="ana-class" class="text-lg font-bold text-emerald-400">Select Equilibrium</div>
+              </div>
+            </div>
+
+            <!-- Jacobian Matrix Display -->
+            <div class="space-y-2">
+              <h4 class="text-slate-300 font-bold uppercase text-[11px] tracking-wider">Jacobian Matrix J = ∂(f,g)/∂(x,y)</h4>
+              <div class="bg-dark-bg border border-dark-border p-4 rounded-lg flex items-center justify-center">
+                <div class="flex items-center space-x-3 text-sm">
+                  <span class="text-2xl text-slate-500">[</span>
+                  <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-center">
+                    <span id="j-00" class="text-cyan-300 font-semibold">+0.0000</span>
+                    <span id="j-01" class="text-cyan-300 font-semibold">+0.0000</span>
+                    <span id="j-10" class="text-pink-300 font-semibold">+0.0000</span>
+                    <span id="j-11" class="text-pink-300 font-semibold">+0.0000</span>
+                  </div>
+                  <span class="text-2xl text-slate-500">]</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Spectral Properties (Trace, Det, Eigenvalues) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="bg-dark-bg border border-dark-border p-3 rounded-lg space-y-1">
+                <span class="text-[10px] text-slate-400">Trace τ = Tr(J)</span>
+                <div id="ana-trace" class="text-sm font-bold text-purple-300">0.0000</div>
+              </div>
+              <div class="bg-dark-bg border border-dark-border p-3 rounded-lg space-y-1">
+                <span class="text-[10px] text-slate-400">Determinant Δ = det(J)</span>
+                <div id="ana-det" class="text-sm font-bold text-amber-300">0.0000</div>
+              </div>
+              <div class="bg-dark-bg border border-dark-border p-3 rounded-lg space-y-1">
+                <span class="text-[10px] text-slate-400">Discriminant (τ² - 4Δ)</span>
+                <div id="ana-disc" class="text-sm font-bold text-cyan-300">0.0000</div>
+              </div>
+            </div>
+
+            <!-- Eigenvalue Expansion -->
+            <div class="bg-dark-bg border border-dark-border p-3.5 rounded-lg space-y-2">
+              <span class="text-[10px] text-slate-400 uppercase tracking-wider">Eigenvalues λ₁, λ₂</span>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-200">
+                <div>λ₁ = <span id="ana-e1" class="text-emerald-400 font-bold">0.0000</span></div>
+                <div>λ₂ = <span id="ana-e2" class="text-emerald-400 font-bold">0.0000</span></div>
+              </div>
+            </div>
+
+            <div class="bg-dark-bg border border-dark-border p-3.5 rounded-lg space-y-2">
+              <span class="text-[10px] text-slate-400 uppercase tracking-wider">Eigenvectors</span>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-200">
+                <div>v1 = <span id="ana-v1" class="text-cyan-300 font-bold">--</span></div>
+                <div>v2 = <span id="ana-v2" class="text-pink-300 font-bold">--</span></div>
+              </div>
+            </div>
+
+            <div class="bg-dark-bg border border-dark-border p-3.5 rounded-lg space-y-2">
+              <span class="text-[10px] text-slate-400 uppercase tracking-wider">Local Linearization</span>
+              <div id="ana-local-equation" class="text-slate-200 leading-relaxed">u_dot = J u</div>
+              <div id="ana-nonhyperbolic" class="hidden text-amber-300 leading-relaxed">Non-hyperbolic point: linearization alone is inconclusive.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Trace-Determinant Diagram -->
+        <div class="lg:col-span-5 bg-dark-surface border border-dark-border rounded-xl p-5 shadow-xl space-y-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-100 flex items-center space-x-2">
+              <i class="fa-solid fa-chart-area text-purple-400"></i>
+              <span>Trace–Determinant Diagram</span>
+            </h3>
+            <p class="text-xs text-slate-400">Bifurcation and stability classification plane (τ vs Δ)</p>
+          </div>
+
+          <!-- Trace-Det Canvas -->
+          <div class="relative bg-dark-bg border border-dark-border rounded-lg overflow-hidden h-[340px]">
+            <canvas id="traceDetCanvas" class="w-full h-full block"></canvas>
+          </div>
+
+          <div class="text-[11px] text-slate-400 font-mono leading-relaxed space-y-1 bg-dark-bg/50 p-2.5 rounded border border-dark-border">
+            <div class="text-blue-300 font-bold">Diagnostic Guide:</div>
+            <div>• <strong class="text-emerald-400">Δ &gt; 0, τ &lt; 0</strong>: stable node or spiral</div>
+            <div>• <strong class="text-rose-400">Δ &gt; 0, τ &gt; 0</strong>: unstable node or spiral</div>
+            <div>• <strong class="text-amber-400">Δ &lt; 0</strong>: saddle point</div>
+            <div>• <strong class="text-purple-300">Δ = τ²/4</strong>: repeated eigenvalues; <strong class="text-amber-300">Δ = 0</strong>: non-hyperbolic.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ABOUT TAB ==================== -->
+    <div id="tab-about" class="tab-content flex-1 max-w-4xl mx-auto space-y-6">
+      <div class="bg-dark-surface border border-dark-border rounded-xl p-6 shadow-xl space-y-4">
+        <h2 class="text-xl font-bold text-slate-100 flex items-center space-x-2 border-b border-dark-border pb-3">
+          <i class="fa-solid fa-graduation-cap text-blue-400"></i>
+          <span>Theory & Mathematics of 2D Phase Space</span>
+        </h2>
+
+        <div class="space-y-4 text-xs md:text-sm text-slate-300 leading-relaxed font-sans">
+          <p>
+            A <strong>2D Autonomous Dynamical System</strong> is governed by a set of ordinary differential equations without explicit time dependence:
+          </p>
+          
+          <div class="bg-dark-bg border border-dark-border p-3 rounded-lg font-mono text-center text-cyan-300 text-sm">
+            dx/dt = f(x, y), &nbsp;&nbsp;&nbsp;&nbsp; dy/dt = g(x, y)
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div class="bg-dark-bg/60 border border-dark-border p-3.5 rounded-lg space-y-2">
+              <h4 class="font-bold text-blue-400 font-mono text-xs uppercase">1. Vector Field & Velocity</h4>
+              <p class="text-xs text-slate-400">
+                At every point (x, y) in state space, the function vector <strong>F(x, y) = [f(x,y), g(x,y)]ᵀ</strong> specifies the instantaneous velocity of motion.
+              </p>
+            </div>
+
+            <div class="bg-dark-bg/60 border border-dark-border p-3.5 rounded-lg space-y-2">
+              <h4 class="font-bold text-cyan-400 font-mono text-xs uppercase">2. Phase Trajectories (RK4)</h4>
+              <p class="text-xs text-slate-400">
+                Solutions (x(t), y(t)) trace curves in phase space called trajectories. Integrations run both forward in time (+T) and backward in time (-T) using 4th-order Runge–Kutta.
+              </p>
+            </div>
+
+            <div class="bg-dark-bg/60 border border-dark-border p-3.5 rounded-lg space-y-2">
+              <h4 class="font-bold text-pink-400 font-mono text-xs uppercase">3. Nullclines</h4>
+              <p class="text-xs text-slate-400">
+                Curves where motion is strictly vertical (<strong>f(x,y)=0</strong>) or horizontal (<strong>g(x,y)=0</strong>). Their intersections mark equilibrium points.
+              </p>
+            </div>
+
+            <div class="bg-dark-bg/60 border border-dark-border p-3.5 rounded-lg space-y-2">
+              <h4 class="font-bold text-emerald-400 font-mono text-xs uppercase">4. Fixed Points & Stability</h4>
+              <p class="text-xs text-slate-400">
+                Equilibria satisfy <strong>f(x*, y*) = 0</strong> and <strong>g(x*, y*) = 0</strong>. Linearization via the Jacobian matrix determines local behavior.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    /* =========================================================================
+       MATH EXPRESSION PARSER & EVALUATOR
+       Supports: x, y, numbers, + - * / ^, sin, cos, tan, exp, log, sqrt, abs
+       ========================================================================= */
+    class MathParser {
+      static compile(exprStr) {
+        const FUNCTIONS = {
+          sin: 1, cos: 1, tan: 1, exp: 1, log: 1, ln: 1, sqrt: 1, abs: 1,
+          asin: 1, acos: 1, atan: 1, sinh: 1, cosh: 1, tanh: 1,
+          floor: 1, ceil: 1, sign: 1, min: 2, max: 2
+        };
+
+        let s = String(exprStr ?? "").trim().toLowerCase();
+        if (!s) throw new Error("Empty equation string");
+        s = s.replace(/π/g, "pi")
+             .replace(/[−–—]/g, "-")
+             .replace(/[×·]/g, "*")
+             .replace(/÷/g, "/");
+
+        const tokens = [];
+        let i = 0;
+
+        while (i < s.length) {
+          const ch = s[i];
+          if (/\s/.test(ch)) { i++; continue; }
+
+          const numberMatch = s.slice(i).match(/^(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/);
+          if (numberMatch) {
+            tokens.push({ type: 'NUM', val: Number(numberMatch[0]) });
+            i += numberMatch[0].length;
+            continue;
+          }
+
+          if (/[a-z]/.test(ch)) {
+            let str = "";
+            while (i < s.length && /[a-z0-9_]/.test(s[i])) {
+              str += s[i];
+              i++;
+            }
+
+            if (str === 'pi') tokens.push({ type: 'NUM', val: Math.PI });
+            else if (str === 'e') tokens.push({ type: 'NUM', val: Math.E });
+            else if (str === 'x' || str === 'y') tokens.push({ type: 'VAR', val: str });
+            else if (Object.prototype.hasOwnProperty.call(FUNCTIONS, str)) tokens.push({ type: 'FUNC', val: str });
+            else throw new Error(`Unknown function or variable '${str}'`);
+            continue;
+          }
+
+          if ('+-*/^(),'.includes(ch)) {
+            tokens.push({ type: 'OP', val: ch });
+            i++;
+            continue;
+          }
+
+          throw new Error(`Invalid symbol '${ch}'`);
+        }
+
+        const norm = [];
+        for (let j = 0; j < tokens.length; j++) {
+          const curr = tokens[j];
+          norm.push(curr);
+
+          if (j < tokens.length - 1) {
+            const next = tokens[j + 1];
+            const currEndsValue = curr.type === 'NUM' || curr.type === 'VAR' || (curr.type === 'OP' && curr.val === ')');
+            const nextStartsValue = next.type === 'NUM' || next.type === 'VAR' || next.type === 'FUNC' || (next.type === 'OP' && next.val === '(');
+            if (currEndsValue && nextStartsValue) norm.push({ type: 'OP', val: '*' });
+          }
+        }
+
+        const output = [];
+        const opStack = [];
+        const precedence = { '+': 1, '-': 1, '*': 2, '/': 2, 'u+': 3, 'u-': 3, '^': 4 };
+        const assoc = { '+': 'L', '-': 'L', '*': 'L', '/': 'L', '^': 'R', 'u+': 'R', 'u-': 'R' };
+        let previous = null;
+
+        for (let k = 0; k < norm.length; k++) {
+          const token = norm[k];
+
+          if (token.type === 'NUM' || token.type === 'VAR') {
+            output.push(token);
+            previous = token;
+            continue;
+          }
+
+          if (token.type === 'FUNC') {
+            opStack.push(token);
+            previous = token;
+            continue;
+          }
+
+          let op = token.val;
+          if (op === ',') {
+            if (!previous || (previous.type === 'OP' && previous.val !== ')')) {
+              throw new Error("Missing function argument");
+            }
+            let foundParen = false;
+            while (opStack.length > 0) {
+              const top = opStack[opStack.length - 1];
+              if (top.val === '(') { foundParen = true; break; }
+              output.push(opStack.pop());
+            }
+            if (!foundParen) throw new Error("Comma found outside a function call");
+            previous = token;
+            continue;
+          }
+
+          if (op === '(') {
+            opStack.push({ type: 'OP', val: '(' });
+            previous = token;
+            continue;
+          }
+
+          if (op === ')') {
+            if (!previous || (previous.type === 'OP' && previous.val !== ')')) {
+              throw new Error("Empty parentheses or missing argument");
+            }
+            while (opStack.length > 0 && opStack[opStack.length - 1].val !== '(') {
+              output.push(opStack.pop());
+            }
+            if (opStack.length === 0) throw new Error("Unbalanced parentheses");
+            opStack.pop();
+            if (opStack.length > 0 && opStack[opStack.length - 1].type === 'FUNC') {
+              output.push(opStack.pop());
+            }
+            previous = token;
+            continue;
+          }
+
+          const isUnary = (op === '+' || op === '-') && (!previous || (previous.type === 'OP' && previous.val !== ')') || previous.type === 'FUNC');
+          if (isUnary) {
+            opStack.push({ type: 'OP', val: op === '-' ? 'u-' : 'u+' });
+            previous = { type: 'OP', val: op === '-' ? 'u-' : 'u+' };
+            continue;
+          }
+
+          if (!previous || (previous.type === 'OP' && previous.val !== ')') || previous.type === 'FUNC') {
+            throw new Error(`Missing left operand for '${op}'`);
+          }
+
+          const p1 = precedence[op];
+          if (!p1) throw new Error(`Unknown operator '${op}'`);
+          while (opStack.length > 0) {
+            const top = opStack[opStack.length - 1];
+            if (top.val === '(') break;
+
+            const p2 = top.type === 'FUNC' ? 5 : precedence[top.val];
+            if ((assoc[op] === 'L' && p1 <= p2) || (assoc[op] === 'R' && p1 < p2)) {
+              output.push(opStack.pop());
+            } else {
+              break;
+            }
+          }
+          opStack.push({ type: 'OP', val: op });
+          previous = token;
+        }
+
+        while (opStack.length > 0) {
+          const top = opStack.pop();
+          if (top.val === '(' || top.val === ')') throw new Error("Unbalanced parentheses");
+          output.push(top);
+        }
+
+        const evaluator = function(x, y) {
+          const stack = [];
+          for (let m = 0; m < output.length; m++) {
+            const item = output[m];
+            if (item.type === 'NUM') {
+              stack.push(item.val);
+            } else if (item.type === 'VAR') {
+              stack.push(item.val === 'x' ? x : y);
+            } else if (item.type === 'FUNC') {
+              const arity = FUNCTIONS[item.val];
+              if (stack.length < arity) throw new Error(`Function '${item.val}' is missing an argument`);
+              const args = stack.splice(stack.length - arity, arity);
+              const a = args[0];
+              let result = NaN;
+              switch (item.val) {
+                case 'sin': result = Math.sin(a); break;
+                case 'cos': result = Math.cos(a); break;
+                case 'tan': result = Math.tan(a); break;
+                case 'exp': result = Math.exp(a); break;
+                case 'log':
+                case 'ln': result = Math.log(a); break;
+                case 'sqrt': result = Math.sqrt(a); break;
+                case 'abs': result = Math.abs(a); break;
+                case 'asin': result = Math.asin(a); break;
+                case 'acos': result = Math.acos(a); break;
+                case 'atan': result = Math.atan(a); break;
+                case 'sinh': result = Math.sinh(a); break;
+                case 'cosh': result = Math.cosh(a); break;
+                case 'tanh': result = Math.tanh(a); break;
+                case 'floor': result = Math.floor(a); break;
+                case 'ceil': result = Math.ceil(a); break;
+                case 'sign': result = Math.sign(a); break;
+                case 'min': result = Math.min(args[0], args[1]); break;
+                case 'max': result = Math.max(args[0], args[1]); break;
+              }
+              stack.push(Number.isFinite(result) ? result : NaN);
+            } else if (item.type === 'OP') {
+              if (item.val === 'u-' || item.val === 'u+') {
+                if (stack.length < 1) throw new Error(`Missing operand for '${item.val === 'u-' ? '-' : '+'}'`);
+                const a = stack.pop();
+                stack.push(item.val === 'u-' ? -a : a);
+              } else {
+                if (stack.length < 2) throw new Error(`Missing operand for '${item.val}'`);
+                const b = stack.pop();
+                const a = stack.pop();
+                let result = NaN;
+                switch (item.val) {
+                  case '+': result = a + b; break;
+                  case '-': result = a - b; break;
+                  case '*': result = a * b; break;
+                  case '/': result = b === 0 ? NaN : a / b; break;
+                  case '^': result = Math.pow(a, b); break;
+                }
+                stack.push(Number.isFinite(result) ? result : NaN);
+              }
+            }
+          }
+          if (stack.length !== 1) throw new Error("Invalid expression");
+          return Number.isFinite(stack[0]) ? stack[0] : NaN;
+        };
+
+        evaluator(1.234, -0.987);
+        return evaluator;
+      }
+    }
+
+    /* =========================================================================
+       GLOBAL APP STATE & DEFAULT CONFIGURATION
+       ========================================================================= */
+    const state = {
+      // Functions
+      dxdtExpr: "y",
+      dydtExpr: "-sin(x)",
+      f: (x, y) => y,
+      g: (x, y) => -Math.sin(x),
+
+      // View domain bounds
+      xmin: -6.28,
+      xmax: 6.28,
+      ymin: -4.0,
+      ymax: 4.0,
+      defaultBounds: { xmin: -6.28, xmax: 6.28, ymin: -4.0, ymax: 4.0 },
+
+      // Display settings
+      showVectorField: true,
+      showArrows: true,
+      showNullclines: true,
+      showFixedPoints: true,
+      showTrajectories: true,
+      showStreamlines: false,
+      showGrid: true,
+
+      // Vector parameters
+      density: 24,
+      scale: 1.0,
+
+      // Integrator parameters
+      dt: 0.01,
+      tFwd: 20,
+      tBwd: 20,
+
+      // Stored simulated objects
+      trajectories: [], // Array of trajectory objects { id, fwd, bwd, full, x0, y0, visible }
+      equilibria: [],   // Array of fixed points { x, y, trace, det, type, jacobian }
+      selectedEquilibrium: null,
+      selectedTrajectoryId: null,
+      nextTrajectoryId: 1,
+
+      // Animation state
+      isAnimating: false,
+      animSpeed: 1.0,
+      animTime: 0,
+      lastAnimTimestamp: null,
+      animFrameId: null,
+
+      // Mouse drag state
+      isDragging: false,
+      didPan: false,
+      dragStart: { x: 0, y: 0 },
+      domainStart: { xmin: 0, xmax: 0, ymin: 0, ymax: 0 }
+    };
+
+    // CLASSIC PRESET GALLERY DATA
+    const PRESETS = [
+      {
+        id: "pendulum",
+        name: "Simple Undamped Pendulum",
+        dxdt: "y",
+        dydt: "-sin(x)",
+        desc: "Classic nonlinear oscillator showing centers (laminar orbits) and saddle points at ±π with heteroclinic orbits.",
+        bounds: { xmin: -6.28, xmax: 6.28, ymin: -4, ymax: 4 }
+      },
+      {
+        id: "damped-pendulum",
+        name: "Damped Pendulum",
+        dxdt: "y",
+        dydt: "-sin(x) - 0.25*y",
+        desc: "Energy dissipation causes centers to transform into stable spirals attracting phase trajectories.",
+        bounds: { xmin: -6.28, xmax: 6.28, ymin: -4, ymax: 4 }
+      },
+      {
+        id: "harmonic",
+        name: "Linear Harmonic Oscillator",
+        dxdt: "y",
+        dydt: "-x",
+        desc: "Conservative system with purely imaginary eigenvalues resulting in concentric circular orbits.",
+        bounds: { xmin: -4, xmax: 4, ymin: -4, ymax: 4 }
+      },
+      {
+        id: "lotka-volterra",
+        name: "Lotka–Volterra (Predator-Prey)",
+        dxdt: "x*(1 - 0.5*y)",
+        dydt: "y*(-0.75 + 0.25*x)",
+        desc: "Ecological population dynamics displaying a center equilibrium surrounded by closed periodic cycles.",
+        bounds: { xmin: -0.5, xmax: 6.0, ymin: -0.5, ymax: 4.5 }
+      },
+      {
+        id: "vanderpol",
+        name: "Van der Pol Oscillator",
+        dxdt: "y",
+        dydt: "1*(1 - x^2)*y - x",
+        desc: "Nonlinear oscillator with non-conservative damping exhibiting a strongly stable limit cycle attractor.",
+        bounds: { xmin: -4, xmax: 4, ymin: -4, ymax: 4 }
+      },
+      {
+        id: "saddle",
+        name: "Linear Saddle Point",
+        dxdt: "x",
+        dydt: "-y",
+        desc: "One stable eigenvector direction along y and one unstable direction along x creating a hyperbolic pass.",
+        bounds: { xmin: -4, xmax: 4, ymin: -4, ymax: 4 }
+      },
+      {
+        id: "duffing",
+        name: "Duffing Double-Well Oscillator",
+        dxdt: "y",
+        dydt: "x - x^3 - 0.2*y",
+        desc: "Double-well potential featuring two stable spiral sinks separated by a central saddle point.",
+        bounds: { xmin: -2.5, xmax: 2.5, ymin: -2.0, ymax: 2.0 }
+      },
+      {
+        id: "competitor",
+        name: "Competitive Species Model",
+        dxdt: "x*(2 - x - y)",
+        dydt: "y*(3 - 2*x - y)",
+        desc: "Two biological species competing for common resources showing bistability and competitive exclusion.",
+        bounds: { xmin: -0.5, xmax: 3.0, ymin: -0.5, ymax: 3.5 }
+      }
+    ];
+
+    /* =========================================================================
+       NUMERICAL INTEGRATION (CLASSICAL RK4)
+       ========================================================================= */
+    function isFiniteNumber(value) {
+      return Number.isFinite(value);
+    }
+
+    function isFinitePoint(point) {
+      return point && isFiniteNumber(point.x) && isFiniteNumber(point.y);
+    }
+
+    function copyBounds(bounds) {
+      return {
+        xmin: bounds.xmin,
+        xmax: bounds.xmax,
+        ymin: bounds.ymin,
+        ymax: bounds.ymax
+      };
+    }
+
+    function setViewBounds(bounds) {
+      const minSpan = 1e-3;
+      let xmin = Number(bounds.xmin);
+      let xmax = Number(bounds.xmax);
+      let ymin = Number(bounds.ymin);
+      let ymax = Number(bounds.ymax);
+
+      if (![xmin, xmax, ymin, ymax].every(Number.isFinite)) return;
+      if (xmax - xmin < minSpan) {
+        const cx = (xmin + xmax) / 2;
+        xmin = cx - 1;
+        xmax = cx + 1;
+      }
+      if (ymax - ymin < minSpan) {
+        const cy = (ymin + ymax) / 2;
+        ymin = cy - 1;
+        ymax = cy + 1;
+      }
+
+      state.xmin = xmin;
+      state.xmax = xmax;
+      state.ymin = ymin;
+      state.ymax = ymax;
+    }
+
+    function fieldAt(x, y) {
+      const vx = state.f(x, y);
+      const vy = state.g(x, y);
+      return Number.isFinite(vx) && Number.isFinite(vy) ? { vx, vy } : null;
+    }
+
+    function rk4Step(x, y, dt, f, g) {
+      const k1x = f(x, y);
+      const k1y = g(x, y);
+      if (!Number.isFinite(k1x) || !Number.isFinite(k1y)) return { x: NaN, y: NaN };
+
+      const k2x = f(x + 0.5 * dt * k1x, y + 0.5 * dt * k1y);
+      const k2y = g(x + 0.5 * dt * k1x, y + 0.5 * dt * k1y);
+      if (!Number.isFinite(k2x) || !Number.isFinite(k2y)) return { x: NaN, y: NaN };
+
+      const k3x = f(x + 0.5 * dt * k2x, y + 0.5 * dt * k2y);
+      const k3y = g(x + 0.5 * dt * k2x, y + 0.5 * dt * k2y);
+      if (!Number.isFinite(k3x) || !Number.isFinite(k3y)) return { x: NaN, y: NaN };
+
+      const k4x = f(x + dt * k3x, y + dt * k3y);
+      const k4y = g(x + dt * k3x, y + dt * k3y);
+      if (!Number.isFinite(k4x) || !Number.isFinite(k4y)) return { x: NaN, y: NaN };
+
+      const xNext = x + (dt / 6.0) * (k1x + 2*k2x + 2*k3x + k4x);
+      const yNext = y + (dt / 6.0) * (k1y + 2*k2y + 2*k3y + k4y);
+
+      return { x: xNext, y: yNext };
+    }
+
+    function generateTrajectory(x0, y0, id = null, visible = true) {
+      const forwardPts = [];
+      const backwardPts = [];
+
+      const maxMag = 1000; // Limit escape runaway
+      const stepsFwd = Math.min(3000, Math.floor(state.tFwd / state.dt));
+      const stepsBwd = Math.min(3000, Math.floor(state.tBwd / state.dt));
+
+      // Forward integration (+T)
+      let cx = x0, cy = y0;
+      forwardPts.push({ x: cx, y: cy, t: 0 });
+      for (let i = 0; i < stepsFwd; i++) {
+        const next = rk4Step(cx, cy, state.dt, state.f, state.g);
+        if (!isFinitePoint(next) || Math.abs(next.x) > maxMag || Math.abs(next.y) > maxMag) break;
+        forwardPts.push({ x: next.x, y: next.y, t: (i + 1) * state.dt });
+        cx = next.x; cy = next.y;
+      }
+
+      // Backward integration (-T)
+      cx = x0; cy = y0;
+      for (let i = 0; i < stepsBwd; i++) {
+        const next = rk4Step(cx, cy, -state.dt, state.f, state.g);
+        if (!isFinitePoint(next) || Math.abs(next.x) > maxMag || Math.abs(next.y) > maxMag) break;
+        backwardPts.unshift({ x: next.x, y: next.y, t: -(i + 1) * state.dt });
+        cx = next.x; cy = next.y;
+      }
+
+      return {
+        id: id ?? state.nextTrajectoryId++,
+        x0, y0,
+        fwd: forwardPts,
+        bwd: backwardPts,
+        full: backwardPts.concat(forwardPts),
+        visible
+      };
+    }
+
+    function interpolateTrajectory(traj, time) {
+      const pts = traj.full;
+      if (!pts || pts.length === 0) return null;
+      if (pts.length === 1) return pts[0];
+
+      const tMin = pts[0].t;
+      const tMax = pts[pts.length - 1].t;
+      const duration = tMax - tMin;
+      if (duration <= 0) return pts[0];
+
+      let wrappedTime = ((time - tMin) % duration + duration) % duration + tMin;
+      for (let i = 1; i < pts.length; i++) {
+        if (pts[i].t >= wrappedTime) {
+          const a = pts[i - 1];
+          const b = pts[i];
+          const span = b.t - a.t || state.dt;
+          const u = Math.max(0, Math.min(1, (wrappedTime - a.t) / span));
+          return {
+            x: a.x + (b.x - a.x) * u,
+            y: a.y + (b.y - a.y) * u,
+            t: wrappedTime
+          };
+        }
+      }
+      return pts[pts.length - 1];
+    }
+
+    /* =========================================================================
+       FIXED POINT FINDER & JACOBIAN STABILITY ANALYSIS
+       ========================================================================= */
+    function formatNumber(value, digits = 3) {
+      return Number.isFinite(value) ? value.toFixed(digits) : "NaN";
+    }
+
+    function formatSignedNumber(value, digits = 3) {
+      if (!Number.isFinite(value)) return "NaN";
+      return `${value >= 0 ? "+" : ""}${value.toFixed(digits)}`;
+    }
+
+    function formatVector(vec) {
+      if (!vec) return "--";
+      return `(${formatSignedNumber(vec[0])}, ${formatSignedNumber(vec[1])})`;
+    }
+
+    function eigenvectorFor(jacobian, lambda) {
+      const [[a, b], [c, d]] = jacobian;
+      let vx;
+      let vy;
+
+      if (Math.abs(b) > Math.abs(c)) {
+        vx = b;
+        vy = lambda - a;
+      } else {
+        vx = lambda - d;
+        vy = c;
+      }
+
+      const norm = Math.hypot(vx, vy);
+      if (!Number.isFinite(norm) || norm < 1e-10) return null;
+      return [vx / norm, vy / norm];
+    }
+
+    function analyzeJacobianAt(x, y) {
+      const eps = 1e-6;
+      const fpx = state.f(x + eps, y);
+      const fmx = state.f(x - eps, y);
+      const fpy = state.f(x, y + eps);
+      const fmy = state.f(x, y - eps);
+      const gpx = state.g(x + eps, y);
+      const gmx = state.g(x - eps, y);
+      const gpy = state.g(x, y + eps);
+      const gmy = state.g(x, y - eps);
+
+      const dfdx = (fpx - fmx) / (2 * eps);
+      const dfdy = (fpy - fmy) / (2 * eps);
+      const dgdx = (gpx - gmx) / (2 * eps);
+      const dgdy = (gpy - gmy) / (2 * eps);
+      const jacobian = [[dfdx, dfdy], [dgdx, dgdy]];
+
+      const tr = dfdx + dgdy;
+      const det = (dfdx * dgdy) - (dfdy * dgdx);
+      const disc = tr * tr - 4 * det;
+      const finiteLinearization = [dfdx, dfdy, dgdx, dgdy, tr, det, disc].every(Number.isFinite);
+
+      let type = "Invalid linearization";
+      let e1Str = "NaN";
+      let e2Str = "NaN";
+      let eigenvectors = [null, null];
+      let hyperbolic = false;
+
+      if (finiteLinearization) {
+        if (Math.abs(det) < 1e-6 || Math.abs(disc) < 1e-6) {
+          type = "Non-hyperbolic - linearization inconclusive";
+          if (Math.abs(det) < 1e-6) {
+            e1Str = formatNumber(tr);
+            e2Str = "0.000";
+            eigenvectors = [eigenvectorFor(jacobian, tr), eigenvectorFor(jacobian, 0)];
+          } else {
+            const root = tr / 2;
+            e1Str = formatNumber(root);
+            e2Str = formatNumber(root);
+            eigenvectors = [eigenvectorFor(jacobian, root), eigenvectorFor(jacobian, root)];
+          }
+        } else if (det < 0) {
+          type = "Saddle Point";
+          hyperbolic = true;
+          const l1 = (tr + Math.sqrt(disc)) / 2;
+          const l2 = (tr - Math.sqrt(disc)) / 2;
+          e1Str = formatNumber(l1);
+          e2Str = formatNumber(l2);
+          eigenvectors = [eigenvectorFor(jacobian, l1), eigenvectorFor(jacobian, l2)];
+        } else if (disc > 0) {
+          hyperbolic = Math.abs(tr) > 1e-6;
+          const l1 = (tr + Math.sqrt(disc)) / 2;
+          const l2 = (tr - Math.sqrt(disc)) / 2;
+          e1Str = formatNumber(l1);
+          e2Str = formatNumber(l2);
+          type = tr < 0 ? "Stable Node" : "Unstable Node";
+          eigenvectors = [eigenvectorFor(jacobian, l1), eigenvectorFor(jacobian, l2)];
+        } else {
+          const alpha = tr / 2;
+          const beta = Math.sqrt(-disc) / 2;
+          e1Str = `${formatNumber(alpha)} + ${formatNumber(beta)}i`;
+          e2Str = `${formatNumber(alpha)} - ${formatNumber(beta)}i`;
+          if (Math.abs(tr) < 1e-6) {
+            type = "Center";
+          } else {
+            hyperbolic = true;
+            type = tr < 0 ? "Stable Spiral" : "Unstable Spiral";
+          }
+        }
+      }
+
+      return {
+        x, y,
+        jacobian,
+        trace: tr,
+        det,
+        disc,
+        type,
+        e1: e1Str,
+        e2: e2Str,
+        eigenvectors,
+        hyperbolic
+      };
+    }
+
+    function refineEquilibriumSeed(x, y) {
+      let cx = x;
+      let cy = y;
+      const xPad = (state.xmax - state.xmin) * 0.5;
+      const yPad = (state.ymax - state.ymin) * 0.5;
+
+      for (let iter = 0; iter < 20; iter++) {
+        const fVal = state.f(cx, cy);
+        const gVal = state.g(cx, cy);
+        if (!Number.isFinite(fVal) || !Number.isFinite(gVal)) return null;
+        if (Math.hypot(fVal, gVal) < 1e-8) return { x: cx, y: cy };
+
+        const eps = 1e-6 * Math.max(1, Math.abs(cx), Math.abs(cy));
+        const dfdx = (state.f(cx + eps, cy) - state.f(cx - eps, cy)) / (2 * eps);
+        const dfdy = (state.f(cx, cy + eps) - state.f(cx, cy - eps)) / (2 * eps);
+        const dgdx = (state.g(cx + eps, cy) - state.g(cx - eps, cy)) / (2 * eps);
+        const dgdy = (state.g(cx, cy + eps) - state.g(cx, cy - eps)) / (2 * eps);
+        if (![dfdx, dfdy, dgdx, dgdy].every(Number.isFinite)) return null;
+
+        const detJ = dfdx * dgdy - dfdy * dgdx;
+        if (Math.abs(detJ) < 1e-10) return null;
+
+        const stepX = (gVal * dfdy - fVal * dgdy) / detJ;
+        const stepY = (fVal * dgdx - gVal * dfdx) / detJ;
+        if (!Number.isFinite(stepX) || !Number.isFinite(stepY)) return null;
+
+        cx += stepX;
+        cy += stepY;
+        if (Math.hypot(stepX, stepY) < 1e-9) break;
+        if (cx < state.xmin - xPad || cx > state.xmax + xPad || cy < state.ymin - yPad || cy > state.ymax + yPad) return null;
+      }
+
+      const fv = state.f(cx, cy);
+      const gv = state.g(cx, cy);
+      return Number.isFinite(fv) && Number.isFinite(gv) && Math.hypot(fv, gv) < 1e-5 ? { x: cx, y: cy } : null;
+    }
+
+    function segmentIntersection(a, b, c, d) {
+      const r = { x: b.x - a.x, y: b.y - a.y };
+      const s = { x: d.x - c.x, y: d.y - c.y };
+      const denom = r.x * s.y - r.y * s.x;
+      if (Math.abs(denom) < 1e-12) return null;
+
+      const uNum = (c.x - a.x) * r.y - (c.y - a.y) * r.x;
+      const tNum = (c.x - a.x) * s.y - (c.y - a.y) * s.x;
+      const u = uNum / denom;
+      const t = tNum / denom;
+      if (t < -1e-6 || t > 1 + 1e-6 || u < -1e-6 || u > 1 + 1e-6) return null;
+      return { x: a.x + t * r.x, y: a.y + t * r.y };
+    }
+
+    function segmentBoxesOverlap(segA, segB) {
+      const axMin = Math.min(segA[0].x, segA[1].x);
+      const axMax = Math.max(segA[0].x, segA[1].x);
+      const ayMin = Math.min(segA[0].y, segA[1].y);
+      const ayMax = Math.max(segA[0].y, segA[1].y);
+      const bxMin = Math.min(segB[0].x, segB[1].x);
+      const bxMax = Math.max(segB[0].x, segB[1].x);
+      const byMin = Math.min(segB[0].y, segB[1].y);
+      const byMax = Math.max(segB[0].y, segB[1].y);
+      return axMin <= bxMax && axMax >= bxMin && ayMin <= byMax && ayMax >= byMin;
+    }
+
+    function findEquilibria() {
+      const candidates = [];
+      const N = 24;
+      const dx = (state.xmax - state.xmin) / N;
+      const dy = (state.ymax - state.ymin) / N;
+      const dedupeRadius = Math.max(0.03, Math.hypot(state.xmax - state.xmin, state.ymax - state.ymin) * 0.004);
+
+      function addCandidate(seedX, seedY) {
+        const root = refineEquilibriumSeed(seedX, seedY);
+        if (!root) return;
+        if (root.x < state.xmin - dx || root.x > state.xmax + dx || root.y < state.ymin - dy || root.y > state.ymax + dy) return;
+        if (candidates.some(p => Math.hypot(p.x - root.x, p.y - root.y) < dedupeRadius)) return;
+        candidates.push(analyzeJacobianAt(root.x, root.y));
+      }
+
+      for (let i = 0; i <= N; i++) {
+        for (let j = 0; j <= N; j++) {
+          addCandidate(state.xmin + i * dx, state.ymin + j * dy);
+        }
+      }
+
+      const fNullclines = extractNullclineSegments(state.f);
+      const gNullclines = extractNullclineSegments(state.g);
+      for (const fSeg of fNullclines) {
+        for (const gSeg of gNullclines) {
+          if (!segmentBoxesOverlap(fSeg, gSeg)) continue;
+          const hit = segmentIntersection(fSeg[0], fSeg[1], gSeg[0], gSeg[1]);
+          if (hit) addCandidate(hit.x, hit.y);
+        }
+      }
+
+      candidates.sort((a, b) => (a.x - b.x) || (a.y - b.y));
+      const previousSelection = state.selectedEquilibrium;
+      state.equilibria = candidates;
+
+      if (candidates.length > 0) {
+        const selected = previousSelection
+          ? candidates.find(p => Math.hypot(p.x - previousSelection.x, p.y - previousSelection.y) < dedupeRadius)
+          : null;
+        selectEquilibrium(selected || candidates[0], false);
+      } else {
+        state.selectedEquilibrium = null;
+        updateEquilibriaListUI();
+        clearAnalysisSelection();
+      }
+    }
+
+    /* =========================================================================
+       NULLCLINE CONTOUR EXTRACTION (MARCHING SQUARES)
+       ========================================================================= */
+    function extractNullclineSegments(func) {
+      const segments = [];
+      const cols = 70;
+      const rows = 70;
+      const dx = (state.xmax - state.xmin) / cols;
+      const dy = (state.ymax - state.ymin) / rows;
+
+      // Evaluate field on grid
+      const grid = new Float32Array((cols + 1) * (rows + 1));
+      for (let r = 0; r <= rows; r++) {
+        const y = state.ymin + r * dy;
+        for (let c = 0; c <= cols; c++) {
+          const x = state.xmin + c * dx;
+          const value = func(x, y);
+          grid[r * (cols + 1) + c] = Number.isFinite(value) ? value : NaN;
+        }
+      }
+
+      // March through cells
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const v0 = grid[r * (cols + 1) + c];
+          const v1 = grid[r * (cols + 1) + c + 1];
+          const v2 = grid[(r + 1) * (cols + 1) + c + 1];
+          const v3 = grid[(r + 1) * (cols + 1) + c];
+          if (![v0, v1, v2, v3].every(Number.isFinite)) continue;
+
+          const cellCode = (v0 > 0 ? 1 : 0) | (v1 > 0 ? 2 : 0) | (v2 > 0 ? 4 : 0) | (v3 > 0 ? 8 : 0);
+          if (cellCode === 0 || cellCode === 15) continue;
+
+          const x0 = state.xmin + c * dx;
+          const y0 = state.ymin + r * dy;
+
+          const interp = (a, b) => {
+            const denom = b - a;
+            return Math.abs(denom) < 1e-12 ? 0.5 : Math.max(0, Math.min(1, -a / denom));
+          };
+          const getBot = () => ({ x: x0 + dx * interp(v0, v1), y: y0 });
+          const getRight = () => ({ x: x0 + dx, y: y0 + dy * interp(v1, v2) });
+          const getTop = () => ({ x: x0 + dx * interp(v3, v2), y: y0 + dy });
+          const getLeft = () => ({ x: x0, y: y0 + dy * interp(v0, v3) });
+
+          switch (cellCode) {
+            case 1: case 14: segments.push([getLeft(), getBot()]); break;
+            case 2: case 13: segments.push([getBot(), getRight()]); break;
+            case 3: case 12: segments.push([getLeft(), getRight()]); break;
+            case 4: case 11: segments.push([getRight(), getTop()]); break;
+            case 5: segments.push([getLeft(), getTop()]); segments.push([getBot(), getRight()]); break;
+            case 6: case 9:  segments.push([getBot(), getTop()]); break;
+            case 7: case 8:  segments.push([getLeft(), getTop()]); break;
+            case 10: segments.push([getLeft(), getBot()]); segments.push([getRight(), getTop()]); break;
+          }
+        }
+      }
+
+      return segments;
+    }
+
+    /* =========================================================================
+       CANVAS GRAPHICS RENDER ENGINE
+       ========================================================================= */
+    const canvas = document.getElementById('phaseCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function getDpr() {
+      return window.devicePixelRatio || 1;
+    }
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = getDpr();
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      renderPhasePlane();
+    }
+
+    // Coordinate conversion utilities
+    function toScreenX(x) {
+      const width = canvas.width / getDpr();
+      return ((x - state.xmin) / (state.xmax - state.xmin)) * width;
+    }
+
+    function toScreenY(y) {
+      const height = canvas.height / getDpr();
+      return height - ((y - state.ymin) / (state.ymax - state.ymin)) * height;
+    }
+
+    function toWorldX(sx) {
+      const width = canvas.width / getDpr();
+      return state.xmin + (sx / width) * (state.xmax - state.xmin);
+    }
+
+    function toWorldY(sy) {
+      const height = canvas.height / getDpr();
+      return state.ymin + ((height - sy) / height) * (state.ymax - state.ymin);
+    }
+
+    function getTrajectoryColor(traj, selected = false) {
+      const colors = ["#38BDF8", "#A78BFA", "#34D399", "#F472B6", "#FBBF24", "#22D3EE"];
+      return selected ? "#F59E0B" : colors[(traj.id - 1) % colors.length];
+    }
+
+    function getEquilibriumColor(fp) {
+      if (!fp || fp.type.includes("Invalid") || fp.type.includes("Non-hyperbolic")) return "#F59E0B";
+      if (fp.type.includes("Unstable")) return "#F43F5E";
+      if (fp.type.includes("Saddle")) return "#F59E0B";
+      if (fp.type.includes("Center")) return "#06B6D4";
+      return "#10B981";
+    }
+
+    function drawPolyline(points, color, options = {}) {
+      if (!points || points.length < 2) return;
+      ctx.save();
+      ctx.lineWidth = options.lineWidth ?? 2;
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = options.alpha ?? 1;
+      ctx.shadowColor = options.shadowColor ?? color;
+      ctx.shadowBlur = options.shadowBlur ?? 0;
+      if (options.dash) ctx.setLineDash(options.dash);
+
+      ctx.beginPath();
+      let started = false;
+      for (const p of points) {
+        if (!isFinitePoint(p)) {
+          started = false;
+          continue;
+        }
+        const sx = toScreenX(p.x);
+        const sy = toScreenY(p.y);
+        if (!started) {
+          ctx.moveTo(sx, sy);
+          started = true;
+        } else {
+          ctx.lineTo(sx, sy);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawTrajectoryArrowheads(points, color, alpha = 0.85) {
+      if (!points || points.length < 12) return;
+      const arrows = Math.min(5, Math.max(1, Math.floor(points.length / 160)));
+      const spacing = Math.floor(points.length / (arrows + 1));
+
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.globalAlpha = alpha;
+      ctx.shadowBlur = 0;
+      for (let n = 1; n <= arrows; n++) {
+        const idx = Math.min(points.length - 2, Math.max(1, n * spacing));
+        const prev = points[idx - 1];
+        const next = points[idx + 1];
+        if (!isFinitePoint(prev) || !isFinitePoint(next)) continue;
+
+        const sx = toScreenX(points[idx].x);
+        const sy = toScreenY(points[idx].y);
+        const angle = Math.atan2(toScreenY(next.y) - toScreenY(prev.y), toScreenX(next.x) - toScreenX(prev.x));
+        const len = 6;
+
+        ctx.beginPath();
+        ctx.moveTo(sx + len * Math.cos(angle), sy + len * Math.sin(angle));
+        ctx.lineTo(sx - len * Math.cos(angle - Math.PI / 6), sy - len * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(sx - len * Math.cos(angle + Math.PI / 6), sy - len * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawCanvasLegend(w, h) {
+      const items = [
+        { type: "dot", color: "#10B981", label: "Stable" },
+        { type: "dot", color: "#F43F5E", label: "Unstable" },
+        { type: "dot", color: "#F59E0B", label: "Saddle / non-hyperbolic" },
+        { type: "dot", color: "#06B6D4", label: "Center" },
+        { type: "line", color: "#06B6D4", label: "f = 0" },
+        { type: "line", color: "#EC4899", label: "g = 0" },
+        { type: "arrow", color: "#60A5FA", label: "Vector field" }
+      ];
+      const rowH = 16;
+      const boxW = 182;
+      const boxH = items.length * rowH + 16;
+      const x = Math.max(12, w - boxW - 14);
+      const y = Math.max(54, h - boxH - 14);
+
+      ctx.save();
+      ctx.fillStyle = "rgba(9, 13, 22, 0.82)";
+      ctx.strokeStyle = "rgba(36, 50, 72, 0.85)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, y, boxW, boxH, 8);
+      else ctx.rect(x, y, boxW, boxH);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.font = "10px 'JetBrains Mono', monospace";
+      ctx.textBaseline = "middle";
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const rowY = y + 12 + i * rowH;
+        ctx.fillStyle = item.color;
+        ctx.strokeStyle = item.color;
+        ctx.lineWidth = 2;
+        if (item.type === "dot") {
+          ctx.beginPath();
+          ctx.arc(x + 13, rowY, 4, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (item.type === "line") {
+          ctx.beginPath();
+          ctx.moveTo(x + 7, rowY);
+          ctx.lineTo(x + 22, rowY);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(x + 7, rowY);
+          ctx.lineTo(x + 22, rowY);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x + 22, rowY);
+          ctx.lineTo(x + 16, rowY - 4);
+          ctx.lineTo(x + 16, rowY + 4);
+          ctx.fill();
+        }
+        ctx.fillStyle = "#CBD5E1";
+        ctx.fillText(item.label, x + 30, rowY);
+      }
+      ctx.restore();
+    }
+
+    function renderPhasePlane() {
+      const w = canvas.width / getDpr();
+      const h = canvas.height / getDpr();
+
+      // Clear background
+      ctx.fillStyle = "#090D16";
+      ctx.fillRect(0, 0, w, h);
+
+      // 1. Grid & Axes
+      if (state.showGrid) {
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#172033";
+        ctx.fillStyle = "#64748B";
+        ctx.font = "10px 'JetBrains Mono', monospace";
+
+        // Vertical Grid lines
+        const stepX = getNiceStep(state.xmax - state.xmin);
+        const firstX = Math.ceil(state.xmin / stepX) * stepX;
+        for (let x = firstX; x <= state.xmax; x += stepX) {
+          const sx = toScreenX(x);
+          ctx.beginPath();
+          ctx.moveTo(sx, 0);
+          ctx.lineTo(sx, h);
+          ctx.stroke();
+
+          if (Math.abs(x) > 1e-4) {
+            ctx.fillText(x.toFixed(1), sx + 3, h - 6);
+          }
+        }
+
+        // Horizontal Grid lines
+        const stepY = getNiceStep(state.ymax - state.ymin);
+        const firstY = Math.ceil(state.ymin / stepY) * stepY;
+        for (let y = firstY; y <= state.ymax; y += stepY) {
+          const sy = toScreenY(y);
+          ctx.beginPath();
+          ctx.moveTo(0, sy);
+          ctx.lineTo(w, sy);
+          ctx.stroke();
+
+          if (Math.abs(y) > 1e-4) {
+            ctx.fillText(y.toFixed(1), 6, sy - 4);
+          }
+        }
+
+        // Main Axes
+        const originX = toScreenX(0);
+        const originY = toScreenY(0);
+
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = "#334155";
+        ctx.beginPath();
+        ctx.moveTo(0, originY); ctx.lineTo(w, originY);
+        ctx.moveTo(originX, 0); ctx.lineTo(originX, h);
+        ctx.stroke();
+      }
+
+      // 2. Vector Field Arrows
+      if (state.showVectorField) {
+        const nx = state.density;
+        const ny = Math.round(state.density * (h / w));
+        const dx = (state.xmax - state.xmin) / nx;
+        const dy = (state.ymax - state.ymin) / ny;
+
+        for (let i = 0; i <= nx; i++) {
+          for (let j = 0; j <= ny; j++) {
+            const wx = state.xmin + i * dx;
+            const wy = state.ymin + j * dy;
+
+            const vx = state.f(wx, wy);
+            const vy = state.g(wx, wy);
+            const mag = Math.hypot(vx, vy);
+            if (!Number.isFinite(mag) || mag < 1e-8) continue;
+
+            const sx = toScreenX(wx);
+            const sy = toScreenY(wy);
+
+            // Normalized arrow length
+            const arrowLen = Math.min(dx * 35, 18) * state.scale;
+            const dirX = (vx / mag);
+            const dirY = (vy / mag);
+
+            const ex = sx + dirX * arrowLen;
+            const ey = sy - dirY * arrowLen; // Flip y for canvas coords
+
+            // Color coding by velocity magnitude
+            const normVel = Math.min(1.0, mag / 3.0);
+            const r = Math.round(59 + normVel * (236 - 59));
+            const g = Math.round(130 + normVel * (72 - 130));
+            const b = Math.round(246 + normVel * (153 - 246));
+
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.45)`;
+            ctx.lineWidth = 1.2;
+
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(ex, ey);
+            ctx.stroke();
+
+            // Arrow head
+            if (state.showArrows) {
+              const headLen = 4 * state.scale;
+              const angle = Math.atan2(-dirY, dirX);
+              ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.75)`;
+              ctx.beginPath();
+              ctx.moveTo(ex, ey);
+              ctx.lineTo(ex - headLen * Math.cos(angle - Math.PI / 6), ey - headLen * Math.sin(angle - Math.PI / 6));
+              ctx.lineTo(ex - headLen * Math.cos(angle + Math.PI / 6), ey - headLen * Math.sin(angle + Math.PI / 6));
+              ctx.fill();
+            }
+          }
+        }
+      }
+
+      // 3. Nullclines
+      if (state.showNullclines) {
+        // x-nullcline (f=0) in Cyan
+        const xSegs = extractNullclineSegments(state.f);
+        ctx.strokeStyle = "#06B6D4";
+        ctx.lineWidth = 2.0;
+        ctx.shadowColor = "rgba(6, 182, 212, 0.5)";
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        for (const seg of xSegs) {
+          ctx.moveTo(toScreenX(seg[0].x), toScreenY(seg[0].y));
+          ctx.lineTo(toScreenX(seg[1].x), toScreenY(seg[1].y));
+        }
+        ctx.stroke();
+
+        // y-nullcline (g=0) in Pink
+        const ySegs = extractNullclineSegments(state.g);
+        ctx.strokeStyle = "#EC4899";
+        ctx.shadowColor = "rgba(236, 72, 153, 0.5)";
+        ctx.beginPath();
+        for (const seg of ySegs) {
+          ctx.moveTo(toScreenX(seg[0].x), toScreenY(seg[0].y));
+          ctx.lineTo(toScreenX(seg[1].x), toScreenY(seg[1].y));
+        }
+        ctx.stroke();
+
+        ctx.shadowBlur = 0; // Reset shadow
+      }
+
+      // 4. Trajectories
+      if (state.showTrajectories) {
+        for (let tIdx = 0; tIdx < state.trajectories.length; tIdx++) {
+          const traj = state.trajectories[tIdx];
+          if (traj.visible === false) continue;
+          const isSelected = traj.id === state.selectedTrajectoryId;
+          const color = getTrajectoryColor(traj, isSelected);
+          const origin = { x: traj.x0, y: traj.y0, t: 0 };
+          const pastPts = traj.bwd.concat([origin]);
+          const futurePts = traj.fwd;
+
+          drawPolyline(pastPts, color, {
+            lineWidth: isSelected ? 2.5 : 1.7,
+            alpha: isSelected ? 0.55 : 0.32,
+            dash: [6, 5],
+            shadowBlur: isSelected ? 7 : 0
+          });
+          drawPolyline(futurePts, color, {
+            lineWidth: isSelected ? 3.0 : 2.1,
+            alpha: isSelected ? 1 : 0.85,
+            shadowBlur: isSelected ? 12 : 5
+          });
+          drawTrajectoryArrowheads(pastPts, color, isSelected ? 0.75 : 0.45);
+          drawTrajectoryArrowheads(futurePts, color, isSelected ? 0.95 : 0.75);
+
+          // Initial condition marker (x0, y0)
+          const sX0 = toScreenX(traj.x0);
+          const sY0 = toScreenY(traj.y0);
+          ctx.fillStyle = isSelected ? "#F59E0B" : "#FFFFFF";
+          ctx.shadowColor = color;
+          ctx.shadowBlur = isSelected ? 14 : 8;
+          ctx.beginPath();
+          ctx.arc(sX0, sY0, isSelected ? 5.5 : 4, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Animated particle traveling through physical simulation time
+          if (state.isAnimating && traj.full.length > 0) {
+            const p = interpolateTrajectory(traj, state.animTime);
+            if (!p) continue;
+            const px = toScreenX(p.x);
+            const py = toScreenY(p.y);
+
+            ctx.fillStyle = "#F59E0B";
+            ctx.shadowColor = "#F59E0B";
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.arc(px, py, 6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        ctx.shadowBlur = 0;
+      }
+
+      // 5. Fixed Points / Equilibria
+      if (state.showFixedPoints) {
+        for (const fp of state.equilibria) {
+          const sx = toScreenX(fp.x);
+          const sy = toScreenY(fp.y);
+
+          const isSelected = state.selectedEquilibrium && Math.hypot(state.selectedEquilibrium.x - fp.x, state.selectedEquilibrium.y - fp.y) < 1e-3;
+
+          const color = getEquilibriumColor(fp);
+
+          ctx.fillStyle = color;
+          ctx.shadowColor = color;
+          ctx.shadowBlur = isSelected ? 18 : 8;
+
+          ctx.beginPath();
+          ctx.arc(sx, sy, isSelected ? 8 : 6, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = isSelected ? 2.5 : 1.5;
+          ctx.stroke();
+
+          // Text label
+          ctx.fillStyle = "#E2E8F0";
+          ctx.font = "11px 'JetBrains Mono', monospace";
+          ctx.shadowBlur = 0;
+          ctx.fillText(`(${fp.x.toFixed(2)}, ${fp.y.toFixed(2)})`, sx + 10, sy - 10);
+        }
+      }
+
+      drawCanvasLegend(w, h);
+    }
+
+    function getNiceStep(range) {
+      const raw = range / 8;
+      const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+      const residual = raw / mag;
+      if (residual < 1.5) return mag;
+      if (residual < 3.5) return 2 * mag;
+      if (residual < 7.5) return 5 * mag;
+      return 10 * mag;
+    }
+
+    /* =========================================================================
+       TRACE-DETERMINANT DIAGRAM RENDERER
+       ========================================================================= */
+    const tdCanvas = document.getElementById('traceDetCanvas');
+    const tdCtx = tdCanvas.getContext('2d');
+
+    function renderTraceDetDiagram() {
+      const rect = tdCanvas.parentElement.getBoundingClientRect();
+      const dpr = getDpr();
+      tdCanvas.width = Math.round(rect.width * dpr);
+      tdCanvas.height = Math.round(rect.height * dpr);
+      tdCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const w = rect.width;
+      const h = rect.height;
+
+      // Domain: Tau in [-4, 4], Det in [-3, 5]
+      const tMin = -4, tMax = 4;
+      const dMin = -3, dMax = 5;
+
+      const toSx = (t) => ((t - tMin) / (tMax - tMin)) * w;
+      const toSy = (d) => h - ((d - dMin) / (dMax - dMin)) * h;
+
+      // Background
+      tdCtx.fillStyle = "#090D16";
+      tdCtx.fillRect(0, 0, w, h);
+
+      // Shaded Regions
+      // 1. Saddles (Det < 0)
+      tdCtx.fillStyle = "rgba(244, 63, 94, 0.1)";
+      tdCtx.fillRect(0, toSy(0), w, h - toSy(0));
+
+      // 2. Stable Spirals/Nodes (Tau < 0, Det > 0)
+      tdCtx.fillStyle = "rgba(16, 185, 129, 0.08)";
+      tdCtx.fillRect(0, 0, toSx(0), toSy(0));
+
+      // 3. Unstable Spirals/Nodes (Tau > 0, Det > 0)
+      tdCtx.fillStyle = "rgba(245, 158, 11, 0.08)";
+      tdCtx.fillRect(toSx(0), 0, w - toSx(0), toSy(0));
+
+      // Axes
+      tdCtx.lineWidth = 1;
+      tdCtx.strokeStyle = "#334155";
+      tdCtx.beginPath();
+      tdCtx.moveTo(0, toSy(0)); tdCtx.lineTo(w, toSy(0));
+      tdCtx.moveTo(toSx(0), 0); tdCtx.lineTo(toSx(0), h);
+      tdCtx.stroke();
+
+      // Parabola: Det = Tau^2 / 4
+      tdCtx.strokeStyle = "#8B5CF6";
+      tdCtx.lineWidth = 2;
+      tdCtx.beginPath();
+      for (let t = tMin; t <= tMax; t += 0.05) {
+        const d = (t * t) / 4.0;
+        const sx = toSx(t);
+        const sy = toSy(d);
+        if (t === tMin) tdCtx.moveTo(sx, sy);
+        else tdCtx.lineTo(sx, sy);
+      }
+      tdCtx.stroke();
+
+      // Text labels
+      tdCtx.fillStyle = "#94A3B8";
+      tdCtx.font = "10px 'JetBrains Mono', monospace";
+      tdCtx.fillText("Saddles (Delta < 0)", toSx(1.0), toSy(-1.5));
+      tdCtx.fillText("Stable spirals", toSx(-3.6), toSy(2.8));
+      tdCtx.fillText("Stable nodes", toSx(-3.6), toSy(4.6));
+      tdCtx.fillText("Unstable spirals", toSx(0.8), toSy(2.8));
+      tdCtx.fillText("Unstable nodes", toSx(1.0), toSy(4.6));
+      tdCtx.fillText("Delta = tau^2 / 4", toSx(-3.8), toSy(4.2));
+      tdCtx.fillText("Non-hyperbolic", toSx(-0.9), toSy(-0.25));
+
+      // Plot current selected equilibrium point
+      if (state.selectedEquilibrium) {
+        const fp = state.selectedEquilibrium;
+        const sx = toSx(fp.trace);
+        const sy = toSy(fp.det);
+
+        tdCtx.fillStyle = "#38BDF8";
+        tdCtx.shadowColor = "#38BDF8";
+        tdCtx.shadowBlur = 12;
+        tdCtx.beginPath();
+        tdCtx.arc(sx, sy, 7, 0, Math.PI * 2);
+        tdCtx.fill();
+
+        tdCtx.strokeStyle = "#FFFFFF";
+        tdCtx.lineWidth = 2;
+        tdCtx.stroke();
+        tdCtx.shadowBlur = 0;
+      }
+    }
+
+    /* =========================================================================
+       USER INTERACTION & EVENT LISTENERS
+       ========================================================================= */
+    function neutralBounds() {
+      return { xmin: -5, xmax: 5, ymin: -5, ymax: 5 };
+    }
+
+    function functionHasFiniteSamples(fn, bounds) {
+      const xs = [bounds.xmin, (bounds.xmin + bounds.xmax) / 2, bounds.xmax, -1, 0, 1];
+      const ys = [bounds.ymin, (bounds.ymin + bounds.ymax) / 2, bounds.ymax, -1, 0, 1];
+      for (const x of xs) {
+        for (const y of ys) {
+          try {
+            if (Number.isFinite(fn(x, y))) return true;
+          } catch {
+            return false;
+          }
+        }
+      }
+      return false;
+    }
+
+    function validateCompiledSystem(f, g, bounds) {
+      if (!functionHasFiniteSamples(f, bounds)) {
+        throw new Error("dx/dt is undefined throughout the sampled domain");
+      }
+      if (!functionHasFiniteSamples(g, bounds)) {
+        throw new Error("dy/dt is undefined throughout the sampled domain");
+      }
+    }
+
+    function expandBounds(bounds, paddingRatio = 0.18) {
+      let xmin = bounds.xmin;
+      let xmax = bounds.xmax;
+      let ymin = bounds.ymin;
+      let ymax = bounds.ymax;
+      if (![xmin, xmax, ymin, ymax].every(Number.isFinite)) return copyBounds(state.defaultBounds);
+
+      let width = xmax - xmin;
+      let height = ymax - ymin;
+      if (width < 1e-6) {
+        xmin -= 1;
+        xmax += 1;
+        width = xmax - xmin;
+      }
+      if (height < 1e-6) {
+        ymin -= 1;
+        ymax += 1;
+        height = ymax - ymin;
+      }
+
+      const minSpan = 2;
+      if (width < minSpan) {
+        const cx = (xmin + xmax) / 2;
+        xmin = cx - minSpan / 2;
+        xmax = cx + minSpan / 2;
+        width = minSpan;
+      }
+      if (height < minSpan) {
+        const cy = (ymin + ymax) / 2;
+        ymin = cy - minSpan / 2;
+        ymax = cy + minSpan / 2;
+        height = minSpan;
+      }
+
+      const padX = width * paddingRatio;
+      const padY = height * paddingRatio;
+      xmin -= padX;
+      xmax += padX;
+      ymin -= padY;
+      ymax += padY;
+
+      const canvasW = Math.max(1, canvas.width / getDpr());
+      const canvasH = Math.max(1, canvas.height / getDpr());
+      const canvasAspect = canvasW / canvasH;
+      const viewAspect = (xmax - xmin) / (ymax - ymin);
+      if (Number.isFinite(canvasAspect) && canvasAspect > 0) {
+        if (viewAspect > canvasAspect) {
+          const targetH = (xmax - xmin) / canvasAspect;
+          const cy = (ymin + ymax) / 2;
+          ymin = cy - targetH / 2;
+          ymax = cy + targetH / 2;
+        } else {
+          const targetW = (ymax - ymin) * canvasAspect;
+          const cx = (xmin + xmax) / 2;
+          xmin = cx - targetW / 2;
+          xmax = cx + targetW / 2;
+        }
+      }
+
+      return { xmin, xmax, ymin, ymax };
+    }
+
+    function boundsFromPoints(points) {
+      const finite = points.filter(isFinitePoint);
+      if (finite.length === 0) return null;
+      return finite.reduce((acc, p) => ({
+        xmin: Math.min(acc.xmin, p.x),
+        xmax: Math.max(acc.xmax, p.x),
+        ymin: Math.min(acc.ymin, p.y),
+        ymax: Math.max(acc.ymax, p.y)
+      }), { xmin: finite[0].x, xmax: finite[0].x, ymin: finite[0].y, ymax: finite[0].y });
+    }
+
+    function applyBoundsAndRefresh(bounds) {
+      setViewBounds(expandBounds(bounds));
+      findEquilibria();
+      renderPhasePlane();
+      updateStatus();
+    }
+
+    function fitSystemView() {
+      const points = [];
+      for (const fp of state.equilibria) points.push(fp);
+      for (const traj of state.trajectories) {
+        if (traj.visible === false) continue;
+        points.push(...traj.full);
+      }
+      const bounds = boundsFromPoints(points) || copyBounds(state.defaultBounds);
+      applyBoundsAndRefresh(bounds);
+    }
+
+    function zoomToEquilibria() {
+      const bounds = boundsFromPoints(state.equilibria);
+      if (bounds) applyBoundsAndRefresh(bounds);
+    }
+
+    function zoomToTrajectories() {
+      const points = [];
+      for (const traj of state.trajectories) {
+        if (traj.visible === false) continue;
+        points.push(...traj.full);
+      }
+      const bounds = boundsFromPoints(points);
+      if (bounds) applyBoundsAndRefresh(bounds);
+    }
+
+    function applyCustomEquations(e, options = {}) {
+      if (e) e.preventDefault();
+      const errBox = document.getElementById('equation-error');
+      errBox.classList.add('hidden');
+
+      const dxdtStr = document.getElementById('input-dxdt').value;
+      const dydtStr = document.getElementById('input-dydt').value;
+
+      try {
+        const newF = MathParser.compile(dxdtStr);
+        const newG = MathParser.compile(dydtStr);
+        const targetBounds = options.bounds ? copyBounds(options.bounds) : (e ? neutralBounds() : copyBounds(state.defaultBounds));
+        validateCompiledSystem(newF, newG, targetBounds);
+
+        state.dxdtExpr = dxdtStr;
+        state.dydtExpr = dydtStr;
+        state.f = newF;
+        state.g = newG;
+        state.defaultBounds = copyBounds(targetBounds);
+        setViewBounds(targetBounds);
+
+        // Clear existing trajectories and update
+        state.trajectories = [];
+        state.selectedTrajectoryId = null;
+        state.animTime = 0;
+        state.lastAnimTimestamp = null;
+        findEquilibria();
+        renderPhasePlane();
+        updateTrajectoryListUI();
+        updateStatus();
+      } catch (err) {
+        errBox.textContent = "Equation Parsing Error: " + err.message;
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    function resetToDefaultPendulum() {
+      document.getElementById('input-dxdt').value = "y";
+      document.getElementById('input-dydt').value = "-sin(x)";
+      applyCustomEquations(null, { bounds: PRESETS[0].bounds });
+    }
+
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Canvas click spawning trajectory
+    canvas.addEventListener('click', (e) => {
+      if (state.didPan || e.shiftKey || e.button !== 0) {
+        state.didPan = false;
+        return;
+      }
+
+      const rect = canvas.getBoundingClientRect();
+      const sx = (e.clientX - rect.left);
+      const sy = (e.clientY - rect.top);
+
+      const wx = toWorldX(sx);
+      const wy = toWorldY(sy);
+
+      // Check if clicked near an equilibrium
+      const clickedFp = state.equilibria.find(fp => Math.hypot(fp.x - wx, fp.y - wy) < 0.2);
+      if (clickedFp) {
+        selectEquilibrium(clickedFp, true);
+        return;
+      }
+
+      // Otherwise spawn trajectory
+      const traj = generateTrajectory(wx, wy);
+      state.trajectories.push(traj);
+      state.selectedTrajectoryId = traj.id;
+
+      // Hide instruction hint
+      document.getElementById('canvas-hint').classList.add('hidden');
+
+      renderPhasePlane();
+      updateTrajectoryListUI();
+      updateStatus();
+    });
+
+    // Hover inspection tooltip
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const sx = (e.clientX - rect.left);
+      const sy = (e.clientY - rect.top);
+
+      const wx = toWorldX(sx);
+      const wy = toWorldY(sy);
+
+      const field = fieldAt(wx, wy);
+      const vx = field ? field.vx : NaN;
+      const vy = field ? field.vy : NaN;
+      const speed = field ? Math.hypot(vx, vy) : NaN;
+
+      const tooltip = document.getElementById('hoverTooltip');
+      tooltip.style.left = `${sx + 15}px`;
+      tooltip.style.top = `${sy + 15}px`;
+      tooltip.classList.remove('hidden');
+
+      document.getElementById('tooltip-x').textContent = wx.toFixed(3);
+      document.getElementById('tooltip-y').textContent = wy.toFixed(3);
+      document.getElementById('tooltip-dxdt').textContent = Number.isFinite(vx) ? (vx >= 0 ? "+" : "") + vx.toFixed(3) : "invalid";
+      document.getElementById('tooltip-dydt').textContent = Number.isFinite(vy) ? (vy >= 0 ? "+" : "") + vy.toFixed(3) : "invalid";
+      document.getElementById('tooltip-speed').textContent = Number.isFinite(speed) ? speed.toFixed(3) : "invalid";
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      document.getElementById('hoverTooltip').classList.add('hidden');
+    });
+
+    // Canvas Pan & Drag Controls
+    canvas.addEventListener('mousedown', (e) => {
+      state.didPan = false;
+      if (e.button === 2 || e.shiftKey) { // Right click or Shift+drag
+        e.preventDefault();
+        state.isDragging = true;
+        state.dragStart = { x: e.clientX, y: e.clientY };
+        state.domainStart = { xmin: state.xmin, xmax: state.xmax, ymin: state.ymin, ymax: state.ymax };
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (state.isDragging) {
+        const dx = e.clientX - state.dragStart.x;
+        const dy = e.clientY - state.dragStart.y;
+        if (Math.abs(dx) + Math.abs(dy) > 2) state.didPan = true;
+
+        const w = canvas.width / getDpr();
+        const h = canvas.height / getDpr();
+
+        const worldDx = (dx / w) * (state.domainStart.xmax - state.domainStart.xmin);
+        const worldDy = (dy / h) * (state.domainStart.ymax - state.domainStart.ymin);
+
+        state.xmin = state.domainStart.xmin - worldDx;
+        state.xmax = state.domainStart.xmax - worldDx;
+        state.ymin = state.domainStart.ymin + worldDy;
+        state.ymax = state.domainStart.ymax + worldDy;
+
+        renderPhasePlane();
+        updateStatus();
+      }
+    });
+
+    window.addEventListener('mouseup', () => { state.isDragging = false; });
+
+    // Wheel Zooming
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      const zoomFactor = e.deltaY > 0 ? 1.15 : 0.85;
+      zoomView(zoomFactor, { x: toWorldX(sx), y: toWorldY(sy) });
+    }, { passive: false });
+
+    function zoomView(factor, anchor = null) {
+      const width = state.xmax - state.xmin;
+      const height = state.ymax - state.ymin;
+      const ax = anchor?.x ?? (state.xmin + state.xmax) / 2;
+      const ay = anchor?.y ?? (state.ymin + state.ymax) / 2;
+      const xRatio = Number.isFinite(ax) ? (ax - state.xmin) / width : 0.5;
+      const yRatio = Number.isFinite(ay) ? (ay - state.ymin) / height : 0.5;
+      const nextWidth = width * factor;
+      const nextHeight = height * factor;
+
+      state.xmin = ax - xRatio * nextWidth;
+      state.xmax = state.xmin + nextWidth;
+      state.ymin = ay - yRatio * nextHeight;
+      state.ymax = state.ymin + nextHeight;
+
+      findEquilibria();
+      renderPhasePlane();
+      updateStatus();
+    }
+
+    function resetViewBounds() {
+      setViewBounds(state.defaultBounds);
+      findEquilibria();
+      renderPhasePlane();
+      updateStatus();
+    }
+
+    function updateDisplayOptions() {
+      state.showVectorField = document.getElementById('chk-vectorfield').checked;
+      state.showArrows = document.getElementById('chk-arrows').checked;
+      state.showNullclines = document.getElementById('chk-nullclines').checked;
+      state.showFixedPoints = document.getElementById('chk-fixedpoints').checked;
+      state.showTrajectories = document.getElementById('chk-trajectories').checked;
+      state.showGrid = document.getElementById('chk-grid').checked;
+      renderPhasePlane();
+    }
+
+    function toggleQuickSetting(setting) {
+      if (setting === 'vectors') state.showVectorField = !state.showVectorField;
+      if (setting === 'nullclines') state.showNullclines = !state.showNullclines;
+      if (setting === 'fixedPoints') state.showFixedPoints = !state.showFixedPoints;
+      if (setting === 'streamlines') state.showStreamlines = !state.showStreamlines;
+
+      document.getElementById('chk-vectorfield').checked = state.showVectorField;
+      document.getElementById('chk-nullclines').checked = state.showNullclines;
+      document.getElementById('chk-fixedpoints').checked = state.showFixedPoints;
+
+      renderPhasePlane();
+    }
+
+    function updateVectorParams() {
+      state.density = parseInt(document.getElementById('slider-density').value);
+      state.scale = parseFloat(document.getElementById('slider-scale').value);
+      document.getElementById('lbl-density').textContent = `${state.density}x${state.density}`;
+      document.getElementById('lbl-scale').textContent = `${state.scale.toFixed(1)}x`;
+      renderPhasePlane();
+    }
+
+    function updateIntegrationParams() {
+      state.dt = parseFloat(document.getElementById('slider-step').value);
+      state.tFwd = parseInt(document.getElementById('slider-tfwd').value);
+      state.tBwd = parseInt(document.getElementById('slider-tbwd').value);
+
+      document.getElementById('lbl-step').textContent = state.dt.toFixed(3);
+      document.getElementById('lbl-tfwd').textContent = `${state.tFwd}s`;
+      document.getElementById('lbl-tbwd').textContent = `${state.tBwd}s`;
+
+      // Re-integrate existing trajectories while preserving identities and visibility.
+      state.trajectories = state.trajectories.map(t => generateTrajectory(t.x0, t.y0, t.id, t.visible !== false));
+      renderPhasePlane();
+      updateTrajectoryListUI();
+      updateStatus();
+    }
+
+    function clearAllTrajectories() {
+      state.trajectories = [];
+      state.selectedTrajectoryId = null;
+      renderPhasePlane();
+      updateTrajectoryListUI();
+      updateStatus();
+    }
+
+    // Animation loop
+    function toggleTrajectoryAnimation() {
+      state.isAnimating = !state.isAnimating;
+      const btnText = document.getElementById('anim-text');
+      const btnIcon = document.getElementById('anim-icon');
+      const btnStatus = document.getElementById('lbl-anim-status');
+
+      if (state.isAnimating) {
+        btnText.textContent = "Pause Animation";
+        btnIcon.className = "fa-solid fa-pause text-[10px]";
+        btnStatus.textContent = "Running";
+        btnStatus.className = "text-[10px] text-amber-400 animate-pulse";
+        state.lastAnimTimestamp = null;
+        runAnimationLoop();
+      } else {
+        btnText.textContent = "Animate Time";
+        btnIcon.className = "fa-solid fa-play text-[10px]";
+        btnStatus.textContent = "Paused";
+        btnStatus.className = "text-[10px] text-slate-500";
+        cancelAnimationFrame(state.animFrameId);
+      }
+    }
+
+    function setAnimSpeed(speed) {
+      state.animSpeed = speed;
+    }
+
+    function runAnimationLoop(timestamp) {
+      if (!state.isAnimating) return;
+      if (state.lastAnimTimestamp == null) state.lastAnimTimestamp = timestamp ?? performance.now();
+      const now = timestamp ?? performance.now();
+      const elapsed = Math.min(0.1, (now - state.lastAnimTimestamp) / 1000);
+      state.lastAnimTimestamp = now;
+      state.animTime += elapsed * state.animSpeed;
+      renderPhasePlane();
+      state.animFrameId = requestAnimationFrame(runAnimationLoop);
+    }
+
+    function clearAnalysisSelection() {
+      document.getElementById('analysis-fp-badge').textContent = "No Selection";
+      document.getElementById('ana-coords').textContent = "(--, --)";
+      document.getElementById('ana-class').textContent = "Select Equilibrium";
+      ['j-00', 'j-01', 'j-10', 'j-11', 'ana-trace', 'ana-det', 'ana-disc'].forEach(id => {
+        document.getElementById(id).textContent = "0.0000";
+      });
+      document.getElementById('ana-e1').textContent = "--";
+      document.getElementById('ana-e2').textContent = "--";
+      document.getElementById('ana-v1').textContent = "--";
+      document.getElementById('ana-v2').textContent = "--";
+      document.getElementById('ana-local-equation').textContent = "u_dot = J u";
+      document.getElementById('ana-nonhyperbolic').classList.add('hidden');
+      renderTraceDetDiagram();
+    }
+
+    function updateEquilibriaListUI() {
+      const container = document.getElementById('equilibria-list');
+      container.innerHTML = "";
+
+      if (state.equilibria.length === 0) {
+        container.innerHTML = `<div class="text-xs text-slate-500 font-mono italic py-2 text-center">No fixed points in current domain</div>`;
+        return;
+      }
+
+      state.equilibria.forEach(fp => {
+        const item = document.createElement('div');
+        const isSelected = state.selectedEquilibrium && Math.hypot(state.selectedEquilibrium.x - fp.x, state.selectedEquilibrium.y - fp.y) < 1e-3;
+
+        item.className = `p-2 rounded-lg border text-xs font-mono flex items-center justify-between cursor-pointer transition ${
+          isSelected ? 'bg-blue-500/20 border-blue-500/40 text-white shadow' : 'bg-dark-bg/60 border-dark-border/60 text-slate-300 hover:bg-dark-card'
+        }`;
+
+        let badgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+        if (fp.type.includes("Unstable")) badgeColor = "bg-rose-500/10 text-rose-400 border-rose-500/30";
+        else if (fp.type.includes("Saddle") || fp.type.includes("Non-hyperbolic")) badgeColor = "bg-amber-500/10 text-amber-400 border-amber-500/30";
+        else if (fp.type.includes("Center")) badgeColor = "bg-cyan-500/10 text-cyan-400 border-cyan-500/30";
+        const shortType = fp.type.replace(" - linearization inconclusive", "");
+
+        item.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-circle text-[8px] ${badgeColor.split(' ')[1]}"></i>
+            <span class="font-bold">(${fp.x.toFixed(3)}, ${fp.y.toFixed(3)})</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] border ${badgeColor} text-right">${shortType}</span>
+        `;
+
+        item.onclick = () => { selectEquilibrium(fp); };
+        container.appendChild(item);
+      });
+    }
+
+    function updateTrajectoryListUI() {
+      const container = document.getElementById('trajectory-list');
+      if (!container) return;
+      container.innerHTML = "";
+
+      if (state.trajectories.length === 0) {
+        container.innerHTML = `<div class="text-xs text-slate-500 font-mono italic py-2 text-center">Click the phase plane to add trajectories</div>`;
+        return;
+      }
+
+      state.trajectories.forEach(traj => {
+        const isSelected = traj.id === state.selectedTrajectoryId;
+        const isVisible = traj.visible !== false;
+        const item = document.createElement('div');
+        item.className = `p-2 rounded-lg border text-xs font-mono flex items-center justify-between gap-2 cursor-pointer transition ${
+          isSelected ? 'bg-sky-500/20 border-sky-500/40 text-white shadow' : 'bg-dark-bg/60 border-dark-border/60 text-slate-300 hover:bg-dark-card'
+        } ${isVisible ? '' : 'opacity-50'}`;
+        item.onclick = () => selectTrajectory(traj.id);
+        item.innerHTML = `
+          <div class="min-w-0">
+            <div class="font-bold text-sky-300">IC #${traj.id}</div>
+            <div class="text-[10px] text-slate-400 truncate">(${traj.x0.toFixed(3)}, ${traj.y0.toFixed(3)})</div>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="event.stopPropagation(); toggleTrajectoryVisibility(${traj.id})" class="w-6 h-6 rounded bg-dark-card border border-dark-border text-slate-300 hover:text-sky-300 transition" title="${isVisible ? 'Hide trajectory' : 'Show trajectory'}">
+              <i class="fa-solid ${isVisible ? 'fa-eye' : 'fa-eye-slash'} text-[10px]"></i>
+            </button>
+            <button onclick="event.stopPropagation(); deleteTrajectory(${traj.id})" class="w-6 h-6 rounded bg-dark-card border border-dark-border text-slate-300 hover:text-rose-300 transition" title="Delete trajectory">
+              <i class="fa-solid fa-xmark text-[10px]"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function selectTrajectory(id) {
+      state.selectedTrajectoryId = id;
+      updateTrajectoryListUI();
+      renderPhasePlane();
+    }
+
+    function toggleTrajectoryVisibility(id) {
+      const traj = state.trajectories.find(t => t.id === id);
+      if (!traj) return;
+      traj.visible = traj.visible === false;
+      updateTrajectoryListUI();
+      renderPhasePlane();
+    }
+
+    function deleteTrajectory(id) {
+      state.trajectories = state.trajectories.filter(t => t.id !== id);
+      if (state.selectedTrajectoryId === id) state.selectedTrajectoryId = state.trajectories[0]?.id ?? null;
+      updateTrajectoryListUI();
+      renderPhasePlane();
+      updateStatus();
+    }
+
+    function selectEquilibrium(fp, openAnalysis = false) {
+      state.selectedEquilibrium = fp;
+      updateEquilibriaListUI();
+      renderPhasePlane();
+
+      // Populate Analysis Tab UI
+      document.getElementById('analysis-fp-badge').textContent = `Fixed Point (${fp.x.toFixed(3)}, ${fp.y.toFixed(3)})`;
+      document.getElementById('ana-coords').textContent = `(${fp.x.toFixed(4)}, ${fp.y.toFixed(4)})`;
+      document.getElementById('ana-class').textContent = fp.type;
+
+      document.getElementById('j-00').textContent = formatSignedNumber(fp.jacobian[0][0], 4);
+      document.getElementById('j-01').textContent = formatSignedNumber(fp.jacobian[0][1], 4);
+      document.getElementById('j-10').textContent = formatSignedNumber(fp.jacobian[1][0], 4);
+      document.getElementById('j-11').textContent = formatSignedNumber(fp.jacobian[1][1], 4);
+
+      document.getElementById('ana-trace').textContent = formatNumber(fp.trace, 4);
+      document.getElementById('ana-det').textContent = formatNumber(fp.det, 4);
+      document.getElementById('ana-disc').textContent = formatNumber(fp.disc, 4);
+
+      document.getElementById('ana-e1').textContent = fp.e1;
+      document.getElementById('ana-e2').textContent = fp.e2;
+      document.getElementById('ana-v1').textContent = formatVector(fp.eigenvectors?.[0]);
+      document.getElementById('ana-v2').textContent = formatVector(fp.eigenvectors?.[1]);
+      document.getElementById('ana-local-equation').textContent = `u_dot = J u, u = (x - ${formatNumber(fp.x)}, y - ${formatNumber(fp.y)})`;
+      document.getElementById('ana-nonhyperbolic').classList.toggle('hidden', fp.hyperbolic || fp.type === "Center");
+
+      renderTraceDetDiagram();
+      if (openAnalysis) switchTab('analysis');
+    }
+
+    function recalculateEquilibria() {
+      findEquilibria();
+      renderPhasePlane();
+    }
+
+    function updateStatus() {
+      document.getElementById('status-equilibria').textContent = state.equilibria.length;
+      document.getElementById('status-trajectories').textContent = state.trajectories.length;
+      document.getElementById('status-step').textContent = state.dt.toFixed(3);
+      document.getElementById('status-domain').textContent = `[${state.xmin.toFixed(1)}, ${state.xmax.toFixed(1)}] × [${state.ymin.toFixed(1)}, ${state.ymax.toFixed(1)}]`;
+    }
+
+    function renderPresetGallery() {
+      const container = document.getElementById('preset-cards-container');
+      container.innerHTML = "";
+
+      PRESETS.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "bg-dark-surface border border-dark-border rounded-xl p-4 shadow-xl space-y-3 hover:border-blue-500/50 transition group flex flex-col justify-between";
+        card.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-200 group-hover:text-blue-400 transition font-mono">${p.name}</h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">2D ODE</span>
+            </div>
+            <div class="bg-dark-bg p-2 rounded border border-dark-border font-mono text-xs space-y-1">
+              <div class="text-cyan-300">dx/dt = ${p.dxdt}</div>
+              <div class="text-pink-300">dy/dt = ${p.dydt}</div>
+            </div>
+            <p class="text-xs text-slate-400 leading-snug">${p.desc}</p>
+          </div>
+          <button onclick="loadPreset('${p.id}')" class="w-full mt-3 bg-dark-card hover:bg-blue-600 hover:text-white text-slate-300 border border-dark-border py-1.5 rounded-lg text-xs font-medium transition flex items-center justify-center space-x-1">
+            <i class="fa-solid fa-cloud-arrow-down text-[11px]"></i>
+            <span>Load Preset System</span>
+          </button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function loadPreset(presetId) {
+      const p = PRESETS.find(x => x.id === presetId);
+      if (!p) return;
+
+      document.getElementById('input-dxdt').value = p.dxdt;
+      document.getElementById('input-dydt').value = p.dydt;
+
+      applyCustomEquations(null, { bounds: p.bounds || neutralBounds() });
+      switchTab('explore');
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+
+      // Update button styles
+      ['explore', 'presets', 'analysis', 'about'].forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tabId) {
+          btn.className = "px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 flex items-center space-x-2 bg-blue-600 text-white shadow-sm";
+        } else {
+          btn.className = "px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-dark-card transition-all duration-150 flex items-center space-x-2";
+        }
+      });
+
+      if (tabId === 'explore') {
+        setTimeout(resizeCanvas, 50);
+      } else if (tabId === 'analysis') {
+        setTimeout(renderTraceDetDiagram, 50);
+      }
+    }
+
+    window.onload = function() {
+      renderPresetGallery();
+      applyCustomEquations(null, { bounds: state.defaultBounds });
+      resizeCanvas();
+      window.addEventListener('resize', () => {
+        resizeCanvas();
+        renderTraceDetDiagram();
+      });
+
+      // Default trajectory spawn
+      const defaultTraj = generateTrajectory(1.0, 1.0);
+      state.trajectories.push(defaultTraj);
+      state.selectedTrajectoryId = defaultTraj.id;
+      renderPhasePlane();
+      updateTrajectoryListUI();
+      updateStatus();
+    };
+  </script>
+</body>
+</html>
