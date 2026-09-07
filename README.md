@@ -51,10 +51,10 @@ python -m http.server 8000
 
 ## 🧪 Simulation Catalog
 
-### 1. 💠 [QUANTUM HYPER-COSMOS 4D (4D Relativistic Manifolds & Audio Synthesizer)](quantum_hypercosmos.html)
-* **File:** `quantum_hypercosmos.html`
-* **Topic:** 4D Riemannian Geometry, General Relativity, Non-Euclidean Rotations & Web Audio Synthesis
-* **Features:** Real-time 4-dimensional hyper-spatial rotations across $XW$, $YW$, and $ZW$ non-Euclidean planes, stereographic projection of 4D Tesseracts and Hopf Fibration Clifford Tori, dynamic Event Horizon gravitational singularities with Doppler redshift/blueshift, 12,000 relativistic quantum particles, and a polyphonic Solfeggio harmonic ambient synthesizer (432Hz/528Hz) responsive to spacetime curvature.
+### 1. [4D Manifold Projection & Relativistic Dynamics](manifold_4d_projection.html)
+* **File:** `manifold_4d_projection.html`
+* **Topic:** 4D Riemannian Geometry, Differential Geometry, General Relativity & Web Audio Sonification
+* **Features:** Real-time 4-dimensional hyper-spatial rotations across $XW$, $YW$, and $ZW$ non-Euclidean hyperplanes, stereographic projection of 4D Tesseracts and Hopf Fibration Clifford Tori, dynamic Schwarzschild event horizon gravitational singularities with Doppler redshift/blueshift, 12,000 relativistic quantum nodes, custom URL preset sharing, 4K snapshot export (3840x2160), and a polyphonic harmonic synthesizer responsive to metric curvature.
 
 ### 2. 🌿 [AETHERIA: Terrarium (2D Generative Artificial Life)](aetheria_terrarium_2d.html)
 * **File:** `aetheria_terrarium_2d.html`

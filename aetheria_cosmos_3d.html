@@ -638,11 +638,11 @@
                 if (this.ctx.state === 'suspended') this.ctx.resume();
 
                 this.masterGain = this.ctx.createGain();
-                this.masterGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                this.masterGain.gain.setValueAtTime(0.75, this.ctx.currentTime);
 
                 this.filterNode = this.ctx.createBiquadFilter();
                 this.filterNode.type = 'lowpass';
-                this.filterNode.frequency.setValueAtTime(2400, this.ctx.currentTime);
+                this.filterNode.frequency.setValueAtTime(3400, this.ctx.currentTime);
                 this.filterNode.Q.setValueAtTime(1.8, this.ctx.currentTime);
 
                 this.reverbNode = this.ctx.createConvolver();
@@ -690,7 +690,7 @@
                 lfo.connect(osc.frequency);
                 lfo.start();
 
-                gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.09, this.ctx.currentTime);
                 panner.pan.setValueAtTime((idx - 1) * 0.4, this.ctx.currentTime);
 
                 osc.connect(gain);
@@ -702,7 +702,7 @@
             });
         }
 
-        playChime(pitchIdx = null, volume = 0.08, panX = 0) {
+        playChime(pitchIdx = null, volume = 0.18, panX = 0) {
             if (!this.ctx || this.isMuted) return;
             const now = this.ctx.currentTime;
             if (now - this.lastTriggerTime < 0.04) return;
@@ -756,7 +756,7 @@
             filter.Q.setValueAtTime(4.0, now);
 
             gain.gain.setValueAtTime(0.001, now);
-            gain.gain.exponentialRampToValueAtTime(0.12, now + 0.9);
+            gain.gain.exponentialRampToValueAtTime(0.28, now + 0.9);
             gain.gain.exponentialRampToValueAtTime(0.0001, now + 4.0);
 
             panner.pan.setValueAtTime(panX, now);
@@ -774,7 +774,7 @@
             if (!this.ctx) return false;
             this.isMuted = !this.isMuted;
             if (this.masterGain) {
-                this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.3, this.ctx.currentTime, 0.05);
+                this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.75, this.ctx.currentTime, 0.05);
             }
             return !this.isMuted;
         }
@@ -1124,7 +1124,7 @@
                 this.boids.push(boid);
                 this.scene.add(boid.mesh);
             }
-            audio.playChime(7, 0.14);
+            audio.playChime(7, 0.25);
         }
 
         bindEvents() {
@@ -1254,7 +1254,7 @@
             if (Math.random() < 0.03 && this.boids.length > 0) {
                 const sample = this.boids[Math.floor(Math.random() * this.boids.length)];
                 if (sample.pos.length() < 35) {
-                    audio.playChime(sample.pitchIdx, 0.05, (sample.pos.x / this.boundsRadius));
+                    audio.playChime(sample.pitchIdx, 0.12, (sample.pos.x / this.boundsRadius));
                 }
             }
 
