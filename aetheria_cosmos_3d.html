@@ -638,15 +638,15 @@
                 if (this.ctx.state === 'suspended') this.ctx.resume();
 
                 this.masterGain = this.ctx.createGain();
-                this.masterGain.gain.setValueAtTime(0.75, this.ctx.currentTime);
+                this.masterGain.gain.setValueAtTime(0.85, this.ctx.currentTime);
 
                 this.filterNode = this.ctx.createBiquadFilter();
                 this.filterNode.type = 'lowpass';
-                this.filterNode.frequency.setValueAtTime(3400, this.ctx.currentTime);
-                this.filterNode.Q.setValueAtTime(1.8, this.ctx.currentTime);
+                this.filterNode.frequency.setValueAtTime(3800, this.ctx.currentTime);
+                this.filterNode.Q.setValueAtTime(1.5, this.ctx.currentTime);
 
                 this.reverbNode = this.ctx.createConvolver();
-                this.reverbNode.buffer = this.generateImpulseResponse(4.0, 2.2);
+                this.reverbNode.buffer = this.generateImpulseResponse(4.0, 2.0);
 
                 this.filterNode.connect(this.masterGain);
                 this.reverbNode.connect(this.masterGain);
@@ -674,24 +674,32 @@
         }
 
         startDeep3DDrone() {
-            const baseFreqs = [55.00, 82.41, 110.00];
-            baseFreqs.forEach((freq, idx) => {
+            // Multi-harmonic cosmic pad: sub-bass, warm roots, ethereal fifths and octaves
+            const droneVoices = [
+                { freq: 110.00, type: 'sine', gainVal: 0.28, lfoRate: 0.08, pan: 0.0 },
+                { freq: 164.81, type: 'triangle', gainVal: 0.24, lfoRate: 0.05, pan: -0.35 },
+                { freq: 220.00, type: 'sine', gainVal: 0.20, lfoRate: 0.07, pan: 0.35 },
+                { freq: 329.63, type: 'triangle', gainVal: 0.16, lfoRate: 0.04, pan: -0.2 },
+                { freq: 55.00,  type: 'sine', gainVal: 0.32, lfoRate: 0.03, pan: 0.0 }
+            ];
+
+            droneVoices.forEach((voice) => {
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 const panner = this.ctx.createStereoPanner();
 
-                osc.type = idx === 0 ? 'sine' : 'triangle';
-                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                osc.type = voice.type;
+                osc.frequency.setValueAtTime(voice.freq, this.ctx.currentTime);
 
                 const lfo = this.ctx.createOscillator();
                 const lfoGain = this.ctx.createGain();
-                lfo.frequency.setValueAtTime(0.06 + idx * 0.02, this.ctx.currentTime);
-                lfoGain.gain.setValueAtTime(1.8, this.ctx.currentTime);
+                lfo.frequency.setValueAtTime(voice.lfoRate, this.ctx.currentTime);
+                lfoGain.gain.setValueAtTime(3.5, this.ctx.currentTime);
                 lfo.connect(osc.frequency);
                 lfo.start();
 
-                gain.gain.setValueAtTime(0.09, this.ctx.currentTime);
-                panner.pan.setValueAtTime((idx - 1) * 0.4, this.ctx.currentTime);
+                gain.gain.setValueAtTime(voice.gainVal, this.ctx.currentTime);
+                panner.pan.setValueAtTime(voice.pan, this.ctx.currentTime);
 
                 osc.connect(gain);
                 gain.connect(panner);
@@ -702,7 +710,7 @@
             });
         }
 
-        playChime(pitchIdx = null, volume = 0.18, panX = 0) {
+        playChime(pitchIdx = null, volume = 0.22, panX = 0) {
             if (!this.ctx || this.isMuted) return;
             const now = this.ctx.currentTime;
             if (now - this.lastTriggerTime < 0.04) return;
@@ -743,20 +751,20 @@
             const panner = this.ctx.createStereoPanner();
 
             osc.type = 'sawtooth';
-            const baseF = 43.65;
+            const baseF = 55.00;
             osc.frequency.setValueAtTime(baseF, now);
             osc.frequency.exponentialRampToValueAtTime(baseF * 1.5, now + 1.8);
             osc.frequency.exponentialRampToValueAtTime(baseF, now + 3.6);
 
             const filter = this.ctx.createBiquadFilter();
             filter.type = 'bandpass';
-            filter.frequency.setValueAtTime(200, now);
-            filter.frequency.exponentialRampToValueAtTime(450, now + 1.8);
-            filter.frequency.exponentialRampToValueAtTime(160, now + 3.6);
-            filter.Q.setValueAtTime(4.0, now);
+            filter.frequency.setValueAtTime(260, now);
+            filter.frequency.exponentialRampToValueAtTime(550, now + 1.8);
+            filter.frequency.exponentialRampToValueAtTime(200, now + 3.6);
+            filter.Q.setValueAtTime(3.5, now);
 
             gain.gain.setValueAtTime(0.001, now);
-            gain.gain.exponentialRampToValueAtTime(0.28, now + 0.9);
+            gain.gain.exponentialRampToValueAtTime(0.32, now + 0.9);
             gain.gain.exponentialRampToValueAtTime(0.0001, now + 4.0);
 
             panner.pan.setValueAtTime(panX, now);
@@ -774,7 +782,7 @@
             if (!this.ctx) return false;
             this.isMuted = !this.isMuted;
             if (this.masterGain) {
-                this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.75, this.ctx.currentTime, 0.05);
+                this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.85, this.ctx.currentTime, 0.05);
             }
             return !this.isMuted;
         }
