@@ -1,14 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Glacial Lake Outburst Flood (GLOF) Simulator - Trishuli River Valley</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #1a202c; font-family: 'Inter', sans-serif; }
+        body { margin: 0; overflow: hidden; background-color: #1a202c; font-family: 'Inter', sans-serif; touch-action: none; }
         #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
         #ui-panel { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; width: 90%; max-width: 700px; }
         #overlay-info { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; }
@@ -18,6 +18,40 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            #overlay-info {
+                top: 8px;
+                left: 8px;
+                right: 8px;
+                max-width: none;
+                padding: 0.65rem;
+            }
+            #overlay-info h1 {
+                font-size: 0.95rem;
+                margin-bottom: 0.2rem;
+            }
+            #overlay-info p {
+                display: none;
+            }
+            #status-indicator {
+                margin-bottom: 0.2rem !important;
+                padding: 0.25rem 0.5rem !important;
+                font-size: 0.75rem !important;
+            }
+            #overlay-info .text-\[10px\] {
+                display: none;
+            }
+            #peace-token {
+                display: none;
+            }
+            #ui-panel {
+                bottom: 8px;
+                width: calc(100% - 16px);
+                max-width: none;
+                padding: 0.65rem;
+            }
         }
 
         /* Custom scrollbar for info panel */

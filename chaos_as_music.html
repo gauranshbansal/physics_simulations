@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Chaos as Music - Dynamical Synth</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -310,7 +310,7 @@
     </div>
   </header>
 
-  <main class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4 p-4 overflow-hidden">
+  <main class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4 p-4 overflow-y-auto md:overflow-hidden">
     <aside class="md:col-span-3 flex flex-col gap-4">
       <div class="panel flex-1">
         <h2 class="text-sm font-semibold text-gray-300 mb-2 uppercase tracking-wide border-b border-gray-700 pb-2">What You Hear</h2>
@@ -603,7 +603,7 @@
     }
 
     function dpr() {
-      return window.devicePixelRatio || 1;
+      return Math.min(window.devicePixelRatio || 1, 2);
     }
 
     function resizeOne(canvas) {
@@ -621,6 +621,25 @@
       state.bifurcationRendered = false;
     }
     window.addEventListener('resize', resizeCanvases);
+
+    const bifContainer = document.getElementById('bifurcation-container');
+    if (bifContainer) {
+      const handleBifInteract = (e) => {
+        const rect = bifContainer.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        state.r = 2.5 + ratio * (4.0 - 2.5);
+        els.rSlider.value = state.r;
+        updateUIIndicators();
+      };
+      let isBifDragging = false;
+      bifContainer.addEventListener('mousedown', (e) => { isBifDragging = true; handleBifInteract(e); });
+      window.addEventListener('mousemove', (e) => { if (isBifDragging) handleBifInteract(e); });
+      window.addEventListener('mouseup', () => { isBifDragging = false; });
+      bifContainer.addEventListener('touchstart', (e) => { isBifDragging = true; handleBifInteract(e); }, { passive: true });
+      bifContainer.addEventListener('touchmove', (e) => { if (isBifDragging) handleBifInteract(e); }, { passive: true });
+      window.addEventListener('touchend', () => { isBifDragging = false; });
+    }
 
     function mapToCanvas(val, minVal, maxVal, minCoord, maxCoord) {
       return minCoord + (val - minVal) / (maxVal - minVal) * (maxCoord - minCoord);

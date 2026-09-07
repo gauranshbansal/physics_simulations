@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Newton's Method Simulator</title>
     
     <!-- Tailwind CSS -->
@@ -123,10 +123,10 @@
   </script>
   <!-- End Security Layer -->
 </head>
-<body class="h-screen w-screen flex flex-col md:flex-row">
+<body class="min-h-screen md:h-screen w-screen flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
 
     <!-- Left Sidebar: Controls & Info -->
-    <div class="w-full md:w-[400px] h-full bg-[#111] border-r border-[#333] flex flex-col z-10 shadow-xl overflow-y-auto shrink-0 transition-all">
+    <div class="w-full md:w-[400px] min-h-[480px] md:h-full bg-[#111] border-r border-[#333] flex flex-col z-10 shadow-xl overflow-y-auto shrink-0 transition-all">
         
         <div class="p-6 border-b border-[#333]">
             <h1 class="text-2xl font-semibold text-white mb-2 tracking-tight">Newton's Method</h1>
@@ -185,7 +185,7 @@
     </div>
 
     <!-- Right Area: Canvas -->
-    <div class="flex-1 relative h-[50vh] md:h-full w-full bg-black">
+    <div class="flex-1 relative min-h-[400px] md:min-h-0 h-auto md:h-full w-full bg-black">
         <canvas id="sim-canvas"></canvas>
         
         <!-- Interactive overlays (coords on hover, maybe mobile hint) -->
@@ -265,7 +265,7 @@
         // --- Viewport & Coordinate Mapping ---
         function updateViewportDimensions() {
             // Handle high-DPI displays (Retina) for crisp lines
-            const dpr = window.devicePixelRatio || 1;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
             const width = canvas.clientWidth;
             const height = canvas.clientHeight;
             

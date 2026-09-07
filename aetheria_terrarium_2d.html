@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AETHERIA — Living Digital Terrarium & Soundscape | Gauransh Bansal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -520,6 +520,93 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile & Small Screen Responsiveness */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                padding: 10px;
+            }
+            .brand {
+                padding: 10px 14px;
+            }
+            .brand h1 {
+                font-size: 16px;
+                letter-spacing: 2px;
+            }
+            .brand-author {
+                font-size: 9px;
+            }
+            .stats-badge {
+                font-size: 9px;
+                gap: 8px;
+            }
+            .top-actions {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .glass-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+            .dock {
+                top: auto;
+                bottom: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                flex-direction: row;
+                padding: 8px 12px;
+                border-radius: 24px;
+                gap: 8px;
+            }
+            .dock-tool {
+                width: 40px;
+                height: 40px;
+            }
+            .dock-tool svg {
+                width: 18px;
+                height: 18px;
+            }
+            .bottom-bar {
+                flex-direction: column-reverse;
+                align-items: center;
+                gap: 8px;
+                bottom: 12px;
+                left: 12px;
+                right: 12px;
+            }
+            .thought-capsule {
+                width: 100%;
+                max-width: 100%;
+                padding: 8px 12px;
+            }
+            .biome-selector {
+                padding: 4px;
+            }
+            .biome-btn {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+            .inspector {
+                right: 12px;
+                top: auto;
+                bottom: 140px;
+                width: calc(100vw - 24px);
+                max-width: 320px;
+                max-height: 38vh;
+                overflow-y: auto;
+            }
+            .overlay-card {
+                padding: 24px 16px;
+                max-width: 90%;
+            }
+            .overlay-card h2 {
+                font-size: 24px;
+                letter-spacing: 4px;
+            }
         }
     </style>
   <!-- Gauransh Bansal Security & IP Protection Layer -->

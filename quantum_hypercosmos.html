@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Hyper-Cosmos 4D — Gauransh Bansal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600;700&family=Playfair+Display:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      background-color: #030712;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .serif {
+      font-family: 'Playfair Display', serif;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    .glow-effect {
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+    input[type=range] {
+      accent-color: #38bdf8;
+    }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    ::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.4); border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen overflow-hidden select-none flex flex-col justify-between">
+
+  <!-- Background Canvas Container -->
+  <div class="fixed inset-0 z-0 bg-[#030712] overflow-hidden">
+    <canvas id="cosmosCanvas" class="w-full h-full cursor-crosshair"></canvas>
+    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/40 pointer-events-none"></div>
+  </div>
+
+  <!-- Top Navigation & Status Bar -->
+  <header class="relative z-10 p-4 sm:p-6 flex flex-col md:flex-row justify-between items-start gap-4 pointer-events-none">
+    <div class="pointer-events-auto bg-slate-900/80 backdrop-blur-2xl border border-cyan-500/30 rounded-2xl p-4 shadow-[0_0_35px_rgba(6,182,212,0.18)] max-w-lg">
+      <div class="flex items-center justify-between gap-3 mb-1">
+        <div class="flex items-center gap-2.5">
+          <div class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></div>
+          <h1 class="text-xl font-black tracking-wider bg-gradient-to-r from-cyan-300 via-sky-400 to-indigo-400 bg-clip-text text-transparent">
+            HYPER-COSMOS 4D
+          </h1>
+        </div>
+        <a href="./index.html" class="flex items-center gap-1.5 text-xs font-medium text-neutral-400 hover:text-white px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/10 hover:border-cyan-500/40 transition-all">
+          <iconify-icon icon="lucide:arrow-left" width="13"></iconify-icon>
+          <span>Library</span>
+        </a>
+      </div>
+      <p class="text-xs text-slate-300 leading-relaxed font-light mt-1">
+        4-Dimensional Riemannian manifold projected onto 3D/2D space in real time. Drag across spacetime to distort higher dimensions. Click & hold to create a gravitational singularity.
+      </p>
+      <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] mono text-cyan-400/80">
+        <div>MANIFOLD: <span id="dimLabel" class="text-cyan-200 font-bold">4D Hypercube</span></div>
+        <div>QUANTUM NODES: <span id="particleCount" class="text-cyan-200 font-bold">12,000</span></div>
+        <div>ENTROPY: <span id="entropyVal" class="text-cyan-200 font-bold">0.941</span></div>
+      </div>
+    </div>
+
+    <!-- Quick Audio & Preset Controls -->
+    <div class="pointer-events-auto flex flex-col items-end gap-2">
+      <div class="bg-slate-900/80 backdrop-blur-2xl border border-cyan-500/30 rounded-2xl p-2 flex items-center gap-2 shadow-lg">
+        <button id="audioToggleBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 transition-all active:scale-95 text-xs font-semibold">
+          <iconify-icon id="soundIconOn" icon="lucide:volume-2" width="16" class="hidden"></iconify-icon>
+          <iconify-icon id="soundIconOff" icon="lucide:volume-x" width="16"></iconify-icon>
+          <span id="audioText">Harmonic Synth: OFF</span>
+        </button>
+        <button id="bigBangBtn" class="px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 transition-all active:scale-95 text-xs font-semibold flex items-center gap-1.5">
+          <iconify-icon icon="lucide:sparkles" width="14"></iconify-icon>
+          <span>Big Bang</span>
+        </button>
+      </div>
+
+      <!-- Realtime Math Transformation overlay -->
+      <div class="bg-slate-900/70 backdrop-blur-md border border-slate-800 rounded-xl px-3 py-2 text-[10px] mono text-slate-400 max-w-[300px]">
+        <div class="text-cyan-400/90 font-semibold mb-0.5">METRIC TENSOR TRANSFORMATION:</div>
+        <div id="matrixDisplay" class="text-slate-300 tracking-wider">R_{μν} - ½Rg_{μν} = [1.00, 0.00, 1.00]</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Interactive Controls Dock (Bottom) -->
+  <footer class="relative z-10 p-4 sm:p-6 pointer-events-none flex flex-col md:flex-row gap-4 justify-between items-end">
+    <!-- Presets Selector -->
+    <div class="pointer-events-auto bg-slate-900/85 backdrop-blur-2xl border border-slate-800 hover:border-cyan-500/40 transition-colors rounded-2xl p-3 shadow-xl w-full md:w-auto">
+      <div class="text-[11px] mono uppercase tracking-wider text-slate-400 mb-2 font-bold flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+        Topological Manifolds
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button class="preset-btn active px-3 py-2 rounded-xl text-xs font-medium border bg-cyan-500/20 border-cyan-400/60 text-cyan-200 transition-all hover:scale-105" data-mode="tesseract">
+          💠 4D Tesseract
+        </button>
+        <button class="preset-btn px-3 py-2 rounded-xl text-xs font-medium border bg-slate-800/60 border-slate-700/80 text-slate-300 transition-all hover:border-cyan-500/40 hover:scale-105" data-mode="hopf">
+          🌀 Hopf Fibration
+        </button>
+        <button class="preset-btn px-3 py-2 rounded-xl text-xs font-medium border bg-slate-800/60 border-slate-700/80 text-slate-300 transition-all hover:border-cyan-500/40 hover:scale-105" data-mode="blackhole">
+          🕳️ Event Horizon
+        </button>
+        <button class="preset-btn px-3 py-2 rounded-xl text-xs font-medium border bg-slate-800/60 border-slate-700/80 text-slate-300 transition-all hover:border-cyan-500/40 hover:scale-105" data-mode="chaos">
+          ⚡ Lorenz Chaos
+        </button>
+      </div>
+    </div>
+
+    <!-- Parameter Sliders -->
+    <div class="pointer-events-auto bg-slate-900/85 backdrop-blur-2xl border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-wrap sm:flex-nowrap gap-6 w-full md:w-auto items-center">
+      <div class="flex flex-col gap-1 w-28 sm:w-32">
+        <div class="flex justify-between text-[11px] mono text-slate-400">
+          <span>4D Rot (XW)</span>
+          <span id="xwVal" class="text-cyan-300 font-bold">1.0x</span>
+        </div>
+        <input id="xwSlider" type="range" min="0" max="3" step="0.05" value="1.0" class="w-full h-1 bg-slate-700 rounded-lg cursor-pointer">
+      </div>
+
+      <div class="flex flex-col gap-1 w-28 sm:w-32">
+        <div class="flex justify-between text-[11px] mono text-slate-400">
+          <span>Warp Metric</span>
+          <span id="warpVal" class="text-cyan-300 font-bold">1.2x</span>
+        </div>
+        <input id="warpSlider" type="range" min="0.1" max="4" step="0.1" value="1.2" class="w-full h-1 bg-slate-700 rounded-lg cursor-pointer">
+      </div>
+
+      <div class="flex flex-col gap-1 w-28 sm:w-32">
+        <div class="flex justify-between text-[11px] mono text-slate-400">
+          <span>Relativity Shift</span>
+          <span id="speedVal" class="text-cyan-300 font-bold">1.0x</span>
+        </div>
+        <input id="speedSlider" type="range" min="0" max="2.5" step="0.05" value="1.0" class="w-full h-1 bg-slate-700 rounded-lg cursor-pointer">
+      </div>
+
+      <!-- Camera Reset -->
+      <button id="resetCamBtn" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:border-slate-500 transition-all active:scale-95 text-xs mono flex items-center gap-1" title="Recenter Singularity">
+        <iconify-icon icon="lucide:crosshair" width="14"></iconify-icon>
+        <span>Reset</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- WebGL / Canvas / Audio Script -->
+  <script>
+    // --- Canvas & Math Setup ---
+    const canvas = document.getElementById('cosmosCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      initParticles();
+    });
+
+    // --- State Variables ---
+    let currentMode = 'tesseract';
+    let rotXY = 0, rotXZ = 0, rotXW = 0, rotYZ = 0, rotYW = 0, rotZW = 0;
+    let xwSpeed = 1.0;
+    let warpFactor = 1.2;
+    let timeSpeed = 1.0;
+    let time = 0;
+
+    let isMouseDown = false;
+    let mouseX = width / 2;
+    let mouseY = height / 2;
+    let prevMouseX = width / 2;
+    let prevMouseY = height / 2;
+    let singularityStrength = 0;
+    let singularityActive = false;
+
+    // --- Audio Engine (Web Audio API Synthesizer) ---
+    let audioCtx = null;
+    let isAudioPlaying = false;
+    let masterGain = null;
+    let filter = null;
+    let delayNode = null;
+    let oscillators = [];
+    const solfeggioFrequencies = [136.1, 174, 285, 396, 432, 528, 639, 852];
+
+    function initAudio() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+
+        filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(600, audioCtx.currentTime);
+        filter.Q.setValueAtTime(4.0, audioCtx.currentTime);
+
+        delayNode = audioCtx.createDelay();
+        delayNode.delayTime.setValueAtTime(0.35, audioCtx.currentTime);
+        const delayFeedback = audioCtx.createGain();
+        delayFeedback.gain.setValueAtTime(0.45, audioCtx.currentTime);
+
+        delayNode.connect(delayFeedback);
+        delayFeedback.connect(delayNode);
+        delayNode.connect(masterGain);
+
+        filter.connect(masterGain);
+        filter.connect(delayNode);
+        masterGain.connect(audioCtx.destination);
+
+        oscillators = solfeggioFrequencies.slice(0, 4).map((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const panner = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : null;
+          const oscGain = audioCtx.createGain();
+
+          osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          oscGain.gain.setValueAtTime(0.15 / (idx + 1), audioCtx.currentTime);
+
+          if (panner) {
+            panner.pan.setValueAtTime((idx - 1.5) * 0.5, audioCtx.currentTime);
+            osc.connect(panner);
+            panner.connect(filter);
+          } else {
+            osc.connect(filter);
+          }
+
+          osc.start();
+          return { osc, gain: oscGain, baseFreq: freq };
+        });
+
+        isAudioPlaying = true;
+        updateAudioUI();
+      } catch (err) {
+        console.warn('Audio init warning:', err);
+      }
+    }
+
+    function toggleAudio() {
+      if (!audioCtx) {
+        initAudio();
+        return;
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+        isAudioPlaying = true;
+      } else if (audioCtx.state === 'running') {
+        audioCtx.suspend();
+        isAudioPlaying = false;
+      }
+      updateAudioUI();
+    }
+
+    function updateAudioUI() {
+      const iconOn = document.getElementById('soundIconOn');
+      const iconOff = document.getElementById('soundIconOff');
+      const text = document.getElementById('audioText');
+      if (isAudioPlaying) {
+        iconOn.classList.remove('hidden');
+        iconOff.classList.add('hidden');
+        text.innerText = 'Harmonic Synth: LIVE';
+        text.classList.add('text-cyan-300');
+      } else {
+        iconOn.classList.add('hidden');
+        iconOff.classList.remove('hidden');
+        text.innerText = 'Harmonic Synth: OFF';
+        text.classList.remove('text-cyan-300');
+      }
+    }
+
+    function modulateAudio(pitchFactor, resonance) {
+      if (!isAudioPlaying || !filter || !audioCtx) return;
+      const targetFreq = 200 + pitchFactor * 2400;
+      filter.frequency.setTargetAtTime(Math.min(targetFreq, 4000), audioCtx.currentTime, 0.1);
+      
+      oscillators.forEach((o, i) => {
+        const harmonicMod = 1 + (Math.sin(time * 0.8 + i) * 0.05);
+        o.osc.frequency.setTargetAtTime(o.baseFreq * (0.8 + pitchFactor * 0.4) * harmonicMod, audioCtx.currentTime, 0.15);
+      });
+    }
+
+    // --- Particle System (12,000 Relativistic Quantum Points) ---
+    const TOTAL_PARTICLES = 12000;
+    let particles = [];
+
+    class Particle4D {
+      constructor(index) {
+        this.index = index;
+        this.reset();
+      }
+
+      reset() {
+        if (currentMode === 'tesseract') {
+          const s = 1.6;
+          this.x = (Math.random() - 0.5) * s * 2;
+          this.y = (Math.random() - 0.5) * s * 2;
+          this.z = (Math.random() - 0.5) * s * 2;
+          this.w = (Math.random() - 0.5) * s * 2;
+        } else if (currentMode === 'hopf') {
+          const u = Math.random() * Math.PI * 2;
+          const v = Math.random() * Math.PI * 2;
+          const r = 1.4;
+          this.x = r * Math.cos(u + v);
+          this.y = r * Math.sin(u + v);
+          this.z = r * Math.cos(u - v);
+          this.w = r * Math.sin(u - v);
+        } else if (currentMode === 'blackhole') {
+          const theta = Math.random() * Math.PI * 2;
+          const radius = 0.4 + Math.pow(Math.random(), 1.8) * 3.2;
+          this.x = Math.cos(theta) * radius;
+          this.y = (Math.random() - 0.5) * 0.25 * (radius * 0.4);
+          this.z = Math.sin(theta) * radius;
+          this.w = Math.sin(radius * 3) * 0.8;
+          this.baseAngle = theta;
+          this.baseRadius = radius;
+        } else if (currentMode === 'chaos') {
+          this.x = (Math.random() - 0.5) * 2;
+          this.y = (Math.random() - 0.5) * 2;
+          this.z = Math.random() * 3;
+          this.w = (Math.random() - 0.5) * 2;
+        }
+
+        this.vx = 0;
+        this.vy = 0;
+        this.vz = 0;
+        this.vw = 0;
+        this.hue = (this.index / TOTAL_PARTICLES) * 360;
+        this.size = Math.random() * 1.5 + 0.5;
+        this.energy = Math.random();
+      }
+
+      update(dt) {
+        if (currentMode === 'blackhole') {
+          const r = Math.sqrt(this.x * this.x + this.z * this.z) + 0.001;
+          const orbitalSpeed = (2.2 / Math.sqrt(r)) * dt * timeSpeed;
+          this.baseAngle = (this.baseAngle || 0) + orbitalSpeed;
+          
+          this.x = Math.cos(this.baseAngle) * this.baseRadius;
+          this.z = Math.sin(this.baseAngle) * this.baseRadius;
+          this.w = Math.sin(this.baseRadius * 4 + time * 2) * 0.5;
+        } else if (currentMode === 'chaos') {
+          const sigma = 10, rho = 28, beta = 8/3;
+          const dx = sigma * (this.y - this.x);
+          const dy = this.x * (rho - this.z) - this.y;
+          const dz = this.x * this.y - beta * this.z;
+          
+          this.x += dx * dt * 0.05 * timeSpeed;
+          this.y += dy * dt * 0.05 * timeSpeed;
+          this.z += (dz - 20) * dt * 0.05 * timeSpeed;
+          this.w = Math.cos(this.x * 0.1 + time) * 1.5;
+
+          if (isNaN(this.x) || Math.abs(this.x) > 30) this.reset();
+        }
+
+        if (singularityActive && singularityStrength > 0) {
+          const dx = (mouseX - width / 2) / 180 - this.x;
+          const dy = (mouseY - height / 2) / 180 - this.y;
+          const distSq = dx * dx + dy * dy + 0.1;
+          const force = (singularityStrength * 0.8) / distSq;
+          this.x += dx * force * dt;
+          this.y += dy * force * dt;
+          this.w += (Math.random() - 0.5) * force * dt * 2;
+        }
+      }
+    }
+
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < TOTAL_PARTICLES; i++) {
+        particles.push(new Particle4D(i));
+      }
+    }
+
+    // --- 4D Hyper-Spatial Matrix Rotation ---
+    function rotate4D(p, xy, xz, xw, yz, yw, zw) {
+      let x = p.x, y = p.y, z = p.z, w = p.w;
+
+      if (xw !== 0) {
+        const cos = Math.cos(xw), sin = Math.sin(xw);
+        const x1 = x * cos - w * sin;
+        const w1 = x * sin + w * cos;
+        x = x1; w = w1;
+      }
+      if (yw !== 0) {
+        const cos = Math.cos(yw), sin = Math.sin(yw);
+        const y1 = y * cos - w * sin;
+        const w1 = y * sin + w * cos;
+        y = y1; w = w1;
+      }
+      if (zw !== 0) {
+        const cos = Math.cos(zw), sin = Math.sin(zw);
+        const z1 = z * cos - w * sin;
+        const w1 = z * sin + w * cos;
+        z = z1; w = w1;
+      }
+
+      if (xy !== 0) {
+        const cos = Math.cos(xy), sin = Math.sin(xy);
+        const x1 = x * cos - y * sin;
+        const y1 = x * sin + y * cos;
+        x = x1; y = y1;
+      }
+      if (xz !== 0) {
+        const cos = Math.cos(xz), sin = Math.sin(xz);
+        const x1 = x * cos - z * sin;
+        const z1 = x * sin + z * cos;
+        x = x1; z = z1;
+      }
+      if (yz !== 0) {
+        const cos = Math.cos(yz), sin = Math.sin(yz);
+        const y1 = y * cos - z * sin;
+        const z1 = y * sin + z * cos;
+        y = y1; z = z1;
+      }
+
+      return { x, y, z, w };
+    }
+
+    function project4Dto2D(point, cameraDist4D = 3.2, cameraDist3D = 4.0) {
+      const distance4D = cameraDist4D - point.w;
+      const factor4D = distance4D > 0.05 ? 1 / distance4D : 1;
+      const x3D = point.x * factor4D * warpFactor;
+      const y3D = point.y * factor4D * warpFactor;
+      const z3D = point.z * factor4D * warpFactor;
+
+      const distance3D = cameraDist3D - z3D;
+      const factor3D = distance3D > 0.1 ? 1 / distance3D : 1;
+      
+      const scale = Math.min(width, height) * 0.9;
+      const screenX = width / 2 + x3D * factor3D * scale;
+      const screenY = height / 2 + y3D * factor3D * scale;
+      const depth = factor3D;
+
+      const redshift = (point.w + 1.5) / 3.0;
+
+      return { screenX, screenY, depth, redshift, z3D, w: point.w };
+    }
+
+    // --- Main Render Loop ---
+    let lastTime = performance.now();
+    let frameCount = 0;
+
+    function render(now) {
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+      time += dt * timeSpeed;
+      frameCount++;
+
+      ctx.fillStyle = 'rgba(3, 7, 18, 0.28)';
+      ctx.fillRect(0, 0, width, height);
+
+      rotXW += dt * 0.45 * xwSpeed * timeSpeed;
+      rotYW += dt * 0.35 * xwSpeed * timeSpeed;
+      rotXZ += dt * 0.2 * timeSpeed;
+
+      if (frameCount % 4 === 0) {
+        const pitch = Math.abs(Math.sin(rotXW)) * 0.5 + (singularityStrength * 0.5);
+        modulateAudio(pitch, warpFactor);
+      }
+
+      if (currentMode === 'blackhole' || singularityActive) {
+        const glowRadius = singularityActive ? 60 + singularityStrength * 80 : 45;
+        const sX = singularityActive ? mouseX : width / 2;
+        const sY = singularityActive ? mouseY : height / 2;
+
+        const grad = ctx.createRadialGradient(sX, sY, 5, sX, sY, glowRadius * 2);
+        grad.addColorStop(0, 'rgba(0, 0, 0, 1)');
+        grad.addColorStop(0.2, 'rgba(6, 182, 212, 0.6)');
+        grad.addColorStop(0.6, 'rgba(147, 51, 234, 0.2)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(sX, sY, glowRadius * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.save();
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.update(dt);
+
+        const rotated = rotate4D(p, rotXY, rotXZ, rotXW, rotYZ, rotYW, rotZW);
+        const proj = project4Dto2D(rotated);
+
+        if (proj.screenX < -50 || proj.screenX > width + 50 || proj.screenY < -50 || proj.screenY > height + 50) {
+          continue;
+        }
+
+        const alpha = Math.max(0.1, Math.min(1.0, proj.depth * 1.8));
+        const hue = (p.hue + time * 15 + proj.redshift * 120) % 360;
+        const size = Math.max(0.6, p.size * proj.depth * 2.2);
+
+        ctx.fillStyle = `hsla(${hue}, 85%, ${50 + proj.redshift * 25}%, ${alpha})`;
+        
+        ctx.beginPath();
+        ctx.arc(proj.screenX, proj.screenY, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      if (frameCount % 10 === 0) {
+        document.getElementById('entropyVal').innerText = (0.9 + Math.sin(time) * 0.08).toFixed(3);
+        document.getElementById('matrixDisplay').innerText = 
+          `R_{μν} - ½Rg_{μν} = [${(Math.cos(rotXW)).toFixed(2)}, ${(Math.sin(rotYW)).toFixed(2)}, ${(Math.cos(rotXZ)).toFixed(2)}]`;
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    // --- Interactive Event Listeners ---
+    window.addEventListener('mousedown', (e) => {
+      if (e.target.closest('button') || e.target.closest('input') || e.target.closest('header') || e.target.closest('footer') || e.target.closest('a')) return;
+      isMouseDown = true;
+      singularityActive = true;
+      singularityStrength = 1.0;
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      if (isMouseDown) {
+        const dx = e.clientX - prevMouseX;
+        const dy = e.clientY - prevMouseY;
+        rotXZ += dx * 0.008;
+        rotYZ += dy * 0.008;
+        rotXY += (dx + dy) * 0.004;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isMouseDown = false;
+      singularityActive = false;
+      singularityStrength = 0;
+    });
+
+    // Touch support for mobile devices
+    window.addEventListener('touchstart', (e) => {
+      if (e.target.closest('button') || e.target.closest('input') || e.target.closest('header') || e.target.closest('footer') || e.target.closest('a')) return;
+      if (e.touches.length > 0) {
+        isMouseDown = true;
+        singularityActive = true;
+        singularityStrength = 1.0;
+        mouseX = e.touches[0].clientX;
+        mouseY = e.touches[0].clientY;
+        prevMouseX = mouseX;
+        prevMouseY = mouseY;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0 && isMouseDown) {
+        mouseX = e.touches[0].clientX;
+        mouseY = e.touches[0].clientY;
+        const dx = mouseX - prevMouseX;
+        const dy = mouseY - prevMouseY;
+        rotXZ += dx * 0.008;
+        rotYZ += dy * 0.008;
+        prevMouseX = mouseX;
+        prevMouseY = mouseY;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      isMouseDown = false;
+      singularityActive = false;
+      singularityStrength = 0;
+    });
+
+    // Preset buttons
+    document.querySelectorAll('.preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.preset-btn').forEach((b) => {
+          b.classList.remove('bg-cyan-500/20', 'border-cyan-400/60', 'text-cyan-200');
+          b.classList.add('bg-slate-800/60', 'border-slate-700/80', 'text-slate-300');
+        });
+        btn.classList.add('bg-cyan-500/20', 'border-cyan-400/60', 'text-cyan-200');
+        btn.classList.remove('bg-slate-800/60', 'border-slate-700/80', 'text-slate-300');
+
+        currentMode = btn.dataset.mode;
+        const labels = {
+          tesseract: '4D Hypercube',
+          hopf: 'Hopf Fibration',
+          blackhole: 'Event Horizon Singularity',
+          chaos: 'Lorenz Strange Attractor'
+        };
+        document.getElementById('dimLabel').innerText = labels[currentMode];
+        initParticles();
+      });
+    });
+
+    // Sliders
+    document.getElementById('xwSlider').addEventListener('input', (e) => {
+      xwSpeed = parseFloat(e.target.value);
+      document.getElementById('xwVal').innerText = xwSpeed.toFixed(1) + 'x';
+    });
+
+    document.getElementById('warpSlider').addEventListener('input', (e) => {
+      warpFactor = parseFloat(e.target.value);
+      document.getElementById('warpVal').innerText = warpFactor.toFixed(1) + 'x';
+    });
+
+    document.getElementById('speedSlider').addEventListener('input', (e) => {
+      timeSpeed = parseFloat(e.target.value);
+      document.getElementById('speedVal').innerText = timeSpeed.toFixed(1) + 'x';
+    });
+
+    document.getElementById('resetCamBtn').addEventListener('click', () => {
+      rotXY = rotXZ = rotYZ = rotZW = 0;
+      warpFactor = 1.2;
+      document.getElementById('warpSlider').value = 1.2;
+      document.getElementById('warpVal').innerText = '1.2x';
+    });
+
+    document.getElementById('bigBangBtn').addEventListener('click', () => {
+      initParticles();
+      singularityActive = true;
+      singularityStrength = 2.5;
+      setTimeout(() => {
+        singularityActive = false;
+        singularityStrength = 0;
+      }, 600);
+    });
+
+    document.getElementById('audioToggleBtn').addEventListener('click', toggleAudio);
+
+    // Initial setup
+    initParticles();
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>

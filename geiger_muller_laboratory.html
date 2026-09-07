@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Geiger-Müller Virtual Physics Laboratory</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -619,7 +619,7 @@
   </script>
   <!-- End Security Layer -->
 </head>
-<body class="h-screen flex flex-col bg-slate-950 text-slate-100 select-none overflow-hidden" data-theme="standard">
+<body class="min-h-screen lg:h-screen flex flex-col bg-slate-950 text-slate-100 select-none overflow-x-hidden lg:overflow-hidden" data-theme="standard">
 
   <!-- Top Navigation & Global Parameter Bar -->
   <header class="bg-slate-900/95 border-b border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0 z-30 backdrop-blur">
@@ -809,10 +809,10 @@
   </div>
 
   <!-- Main Grid Workspace -->
-  <main class="flex-1 grid grid-cols-12 gap-2.5 p-2.5 overflow-hidden bg-slate-950">
+  <main class="flex-1 grid grid-cols-12 gap-2.5 p-2.5 overflow-y-auto lg:overflow-hidden bg-slate-950">
 
     <!-- LEFT COLUMN: Main GM Cutaway Tube & Particle Canvas (7 cols) -->
-    <section class="col-span-12 lg:col-span-7 flex flex-col gap-2 h-full overflow-hidden">
+    <section class="col-span-12 lg:col-span-7 flex flex-col gap-2 min-h-[480px] lg:min-h-0 lg:h-full overflow-visible lg:overflow-hidden">
       
       <!-- Primary Interactive Canvas Box -->
       <div id="panel-gm-chamber" class="relative flex-1 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl flex flex-col inspect-hoverable" data-inspect-title="PHYSICAL CHAMBER CUTAWAY" data-inspect-desc="Shows real-time particle radiation entering the tube, primary gas ionization, electron drift, Townsend multiplication, and positive ion sheath expansion. Watch for: the Townsend avalanche cascade near the central wire.">
@@ -983,7 +983,7 @@
       </section>
 
       <!-- RIGHT COLUMN: Oscilloscope, Digital Scaler & Multi-tab Experiments (5 cols) -->
-      <section class="col-span-12 lg:col-span-5 flex flex-col gap-2.5 h-full overflow-hidden">
+      <section class="col-span-12 lg:col-span-5 flex flex-col gap-2.5 min-h-[550px] lg:min-h-0 lg:h-full overflow-visible lg:overflow-hidden">
         
         <!-- Realtime Oscilloscope Panel (Pulse Dynamics) -->
         <div id="panel-oscilloscope" class="relative bg-slate-900 border border-slate-800 rounded-xl p-2.5 flex flex-col shadow-xl inspect-hoverable shrink-0" data-inspect-title="TEKTRONIX DIGITAL OSCILLOSCOPE" data-inspect-desc="Shows the detector's electrical voltage output V(t) as a function of time. Watch for: the sharp negative pulse produced whenever a Geiger discharge takes place.">

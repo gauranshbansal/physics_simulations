@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Same Equation, Different Reality</title>
     
     <!-- KaTeX for math rendering -->
@@ -500,6 +500,29 @@
             gap: 2rem;
             width: 100%;
             margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem 0.75rem;
+                gap: 1.25rem;
+            }
+            .main-equation {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+            }
+            .worlds-container {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+            .central-stage {
+                padding: 1.5rem 0;
+                min-height: auto;
+            }
+            .scribble-toolbar {
+                right: 8px;
+                bottom: 8px;
+            }
         }
 
         .world-panel {

@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ODE Numerical Methods Simulator</title>
     
     <!-- Tailwind CSS -->
@@ -122,10 +122,10 @@
   </script>
   <!-- End Security Layer -->
 </head>
-<body class="h-screen w-screen flex flex-col md:flex-row">
+<body class="min-h-screen md:h-screen w-screen flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
 
     <!-- Left Sidebar: Controls, Step Logs & Guide -->
-    <div class="w-full md:w-[420px] h-full bg-[#111] border-r border-[#333] flex flex-col z-10 shadow-xl shrink-0 transition-all overflow-hidden">
+    <div class="w-full md:w-[420px] min-h-[500px] md:h-full bg-[#111] border-r border-[#333] flex flex-col z-10 shadow-xl shrink-0 transition-all overflow-hidden">
         
         <!-- Tab Headers -->
         <div class="flex border-b border-[#333] bg-[#161616] text-xs font-semibold text-gray-400 select-none">
@@ -314,7 +314,7 @@
     </div>
 
     <!-- Right Area: Canvas -->
-    <div class="flex-1 relative h-[50vh] md:h-full w-full bg-black">
+    <div class="flex-1 relative min-h-[420px] md:min-h-0 h-auto md:h-full w-full bg-black">
         <canvas id="sim-canvas"></canvas>
         
         <!-- Legend overlay -->
@@ -471,7 +471,7 @@
 
         // --- Viewport & Coordinate Mapping ---
         function updateViewportDimensions() {
-            const dpr = window.devicePixelRatio || 1;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
             const width = canvas.clientWidth;
             const height = canvas.clientHeight;
             

@@ -1,4 +1,4 @@
-﻿# 🌌 Interactive Physics & Computational Simulations Suite
+# 🌌 Interactive Physics & Computational Simulations Suite
 
 > **A curated collection of client-side computational physics engines, generative ecosystems, numerical solvers, and interactive virtual laboratories engineered by [Gauransh Bansal](https://www.linkedin.com/in/gauransh-bansal-a71223239/).**
 
@@ -51,7 +51,12 @@ python -m http.server 8000
 
 ## 🧪 Simulation Catalog
 
-### 1. 🌿 [AETHERIA: Terrarium (2D Generative Artificial Life)](aetheria_terrarium_2d.html)
+### 1. 💠 [QUANTUM HYPER-COSMOS 4D (4D Relativistic Manifolds & Audio Synthesizer)](quantum_hypercosmos.html)
+* **File:** `quantum_hypercosmos.html`
+* **Topic:** 4D Riemannian Geometry, General Relativity, Non-Euclidean Rotations & Web Audio Synthesis
+* **Features:** Real-time 4-dimensional hyper-spatial rotations across $XW$, $YW$, and $ZW$ non-Euclidean planes, stereographic projection of 4D Tesseracts and Hopf Fibration Clifford Tori, dynamic Event Horizon gravitational singularities with Doppler redshift/blueshift, 12,000 relativistic quantum particles, and a polyphonic Solfeggio harmonic ambient synthesizer (432Hz/528Hz) responsive to spacetime curvature.
+
+### 2. 🌿 [AETHERIA: Terrarium (2D Generative Artificial Life)](aetheria_terrarium_2d.html)
 * **File:** `aetheria_terrarium_2d.html`
 * **Topic:** Artificial Life, Craig Reynolds Flocking, Autonomous Agents & Generative Harmonics
 * **Features:** Flocking herbivore boids with quadtree-accelerated spatial awareness, neural apex predators, multi-segment inverse-kinematics sinusoidal leviathans, nutrient spore flora lifecycle, genetic mutation inheritance across generations, and an ambient pentatonic generative Web Audio synthesizer.
