@@ -121,16 +121,6 @@ python -m http.server 8000
 
 ---
 
-## 🌐 Deploying to GitHub Pages
-
-1. In GitHub:
-   * Go to **Settings > Pages**
-   * Under **Branch**, choose **`main`** and **`/ (root)`**, then click **Save**.
-2. Your interactive simulations suite will be live worldwide at:  
-   `https://gauranshbansal.github.io/physics_simulations/`
-
----
-
 ## 👤 Author & Connect
 
 **Gauransh Bansal**  
