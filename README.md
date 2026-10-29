@@ -51,12 +51,7 @@ python -m http.server 8000
 
 ## 🧪 Simulation Catalog
 
-### 1. [4D Manifold Projection & Relativistic Dynamics](manifold_4d_projection.html)
-* **File:** `manifold_4d_projection.html`
-* **Topic:** 4D Riemannian Geometry, Differential Geometry, General Relativity & Web Audio Sonification
-* **Features:** Real-time 4-dimensional hyper-spatial rotations across $XW$, $YW$, and $ZW$ non-Euclidean hyperplanes, stereographic projection of 4D Tesseracts and Hopf Fibration Clifford Tori, dynamic Schwarzschild event horizon gravitational singularities with Doppler redshift/blueshift, 12,000 relativistic quantum nodes, custom URL preset sharing, 4K snapshot export (3840x2160), and a polyphonic harmonic synthesizer responsive to metric curvature.
-
-### 2. 🌿 [AETHERIA: Terrarium (2D Generative Artificial Life)](aetheria_terrarium_2d.html)
+### 1. 🌿 [AETHERIA: Terrarium (2D Generative Artificial Life)](aetheria_terrarium_2d.html)
 * **File:** `aetheria_terrarium_2d.html`
 * **Topic:** Artificial Life, Craig Reynolds Flocking, Autonomous Agents & Generative Harmonics
 * **Features:** Flocking herbivore boids with quadtree-accelerated spatial awareness, neural apex predators, multi-segment inverse-kinematics sinusoidal leviathans, nutrient spore flora lifecycle, genetic mutation inheritance across generations, and an ambient pentatonic generative Web Audio synthesizer.
@@ -84,25 +79,30 @@ python -m http.server 8000
 * **Features:** Real-time Lorenz and Rössler attractor trajectory calculations, 3D phase-space visualization, Web Audio API synthesizer mapped to dynamical coordinates ($x, y, z$), and Lyapunov exponent tracking.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
-### 6. 🌀 [Phase Space Laboratory](phase_space_lab.html)
+### 6. 🌐 [Landscape of Futures (Chaos & Complexity)](lof.html)
+* **File:** `lof.html`
+* **Topic:** Chaos Theory, Sensitive Dependence on Initial Conditions & Three.js
+* **Features:** Visual exploration of deterministic chaotic systems and bifurcation regimes, demonstrating how microscopic perturbations in initial states cascade into divergent macro-scale trajectories.
+
+### 7. 🌀 [Phase Space Laboratory](phase_space_lab.html)
 * **File:** `phase_space_lab.html`
 * **Topic:** Classical Mechanics, Hamiltonian Systems & Dynamical Systems
 * **Features:** Interactive vector field mapping, multi-particle trajectory tracing, energy conservation validation, limit cycles, and Hamiltonian flow phase portraits.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
-### 7. ⚖️ [Same Equation, Different Reality](same_equation_different_reality.html)
+### 8. ⚖️ [Same Equation, Different Reality](same_equation_different_reality.html)
 * **File:** `same_equation_different_reality.html`
 * **Topic:** Harmonic Oscillators Across Physical Domains
 * **Features:** Explores how a single second-order differential equation ($\ddot{x} + 2\gamma\dot{x} + \omega_0^2 x = F(t)$) manifests identically across mechanics (damped pendulum), electronics (RLC circuits), optics (Lorentz oscillator), and acoustic resonance.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
-### 8. 📐 [ODE Numerical Integration Methods](ode_methods_simulator.html)
+### 9. 📐 [ODE Numerical Integration Methods](ode_methods_simulator.html)
 * **File:** `ode_methods_simulator.html`
 * **Topic:** Computational Physics & Numerical Analysis
 * **Features:** Real-time side-by-side benchmark comparison of integration algorithms: **Euler**, **Euler-Cromer**, **Runge-Kutta 4th Order (RK4)**, and **Verlet/Leapfrog**, with phase drift and global truncation error metrics.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
-### 9. 🎯 [Newton-Raphson & Root-Finding Simulator](newton_raphson_simulator.html)
+### 10. 🎯 [Newton-Raphson & Root-Finding Simulator](newton_raphson_simulator.html)
 * **File:** `newton_raphson_simulator.html`
 * **Topic:** Numerical Mathematics & Convergence Basins
 * **Features:** Step-by-step tangent line geometry visualization, convergence animation, failure modes (local extrema cycles, inflection traps), and complex fractal basin boundaries.
@@ -113,6 +113,7 @@ python -m http.server 8000
 ## 🛠️ Tech Stack & Architecture
 
 * **Visual Engine:** HTML5 2D Canvas & Three.js WebGL with responsive high-DPI scaling.
+* **Ambient String-Frame Wave Physics:** Custom 2D harmonic wave-mesh and spring-damper string engine (`water-fluidity.js`) featuring Hooke's restoring tension, interactive cursor plucking/ripples on desktop, and autonomous flowy ambient undulation on mobile devices.
 * **UI/UX Design:** Custom Tailwind CSS with a dark glassmorphic theme.
 * **Numerical Mathematics:** Custom numerical integrators (Euler-Cromer, RK4, Symplectic Verlet, Newton-Raphson solvers).
 * **Audio Sonification:** Native Web Audio API polyphonic synthesizers with pentatonic scales.
