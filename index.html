@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Gauransh Bansal — Simulations Library</title>
+  <title>Gauransh Bansal | Simulations Library</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
@@ -79,10 +79,10 @@
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
     .hero-gradient {
-      background: linear-gradient(to top, #030305 0%, rgba(3,3,5,0.85) 30%, rgba(3,3,5,0.4) 60%, transparent 100%);
+      background: linear-gradient(to top, rgba(3,3,5,0.8) 0%, rgba(3,3,5,0.45) 40%, rgba(3,3,5,0.15) 75%, transparent 100%);
     }
     .hero-side-gradient {
-      background: linear-gradient(to right, #030305 0%, rgba(3,3,5,0.6) 40%, transparent 100%);
+      background: linear-gradient(to right, rgba(3,3,5,0.85) 0%, rgba(3,3,5,0.4) 40%, transparent 100%);
     }
 
     .hero-title {
@@ -208,11 +208,9 @@
 </head>
 <body class="bg-brand-black text-white font-sans antialiased">
 
-  <!-- Volumetric Background -->
+  <!-- Deep Space Watery Fluidity Canvas & Ambient Overlays -->
   <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-    <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full mix-blend-screen opacity-70" style="background: radial-gradient(circle, rgba(49, 46, 129, 0.4) 0%, transparent 70%);"></div>
-    <div class="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full mix-blend-screen opacity-60" style="background: radial-gradient(circle, rgba(76, 29, 149, 0.3) 0%, transparent 70%);"></div>
-    <div class="absolute top-[40%] left-[50%] -translate-x-1/2 w-[80vw] h-[40vw] rounded-full mix-blend-screen opacity-50" style="background: radial-gradient(circle, rgba(30, 58, 138, 0.3) 0%, transparent 70%);"></div>
+    <canvas id="water-fluid-canvas" class="w-full h-full block opacity-75"></canvas>
     <div class="bg-grain"></div>
   </div>
 
@@ -328,7 +326,7 @@
 
 
   <!-- ===================== STATS BAR ===================== -->
-  <section class="relative z-10 px-6 py-12 border-t border-white/5 bg-brand-black">
+  <section class="relative z-10 px-6 py-12 border-t border-white/5 bg-brand-black/40 backdrop-blur-md">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
       <p class="text-[11px] font-semibold tracking-[0.2em] uppercase text-neutral-500"><span id="statSims" class="font-serif text-lg font-medium text-white italic normal-case mr-1.5">0</span> Simulations</p>
       <p class="text-[11px] font-semibold tracking-[0.2em] uppercase text-neutral-500"><span id="statTopics" class="font-serif text-lg font-medium text-white italic normal-case mr-1.5">0</span> Topics Covered</p>
@@ -338,7 +336,7 @@
 
 
   <!-- ===================== FOOTER ===================== -->
-  <footer class="px-6 py-12 border-t border-white/5 relative z-10 bg-brand-black">
+  <footer class="px-6 py-12 border-t border-white/5 relative z-10 bg-brand-black/60 backdrop-blur-lg">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
       <div class="flex items-center gap-4">
         <div class="w-10 h-10 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center shadow-glass-edge-subtle">
@@ -358,11 +356,11 @@
   <script>
     // ╔══════════════════════════════════════════════════════════════╗
     // ║                                                              ║
-    // ║   SIMULATIONS LIBRARY — CONFIGURATION                        ║
+    // ║   SIMULATIONS LIBRARY: CONFIGURATION                         ║
     // ║                                                              ║
     // ║   To add a new simulation, just copy one of the objects      ║
     // ║   below and fill in the fields. Everything else is           ║
-    // ║   automatic — the hero, the row, the stats, the count.       ║
+    // ║   automatic: the hero, the row, the stats, the count.        ║
     // ║                                                              ║
     // ╚══════════════════════════════════════════════════════════════╝
 
@@ -413,7 +411,7 @@
         title: "LANDSCAPE OF FUTURES",
         subtitle: "Explore how initial conditions shape destiny",
         badge: "WebGL Ultra Edition",
-        description: "A visual exploration of chaotic systems — watch how microscopic changes in starting conditions cascade into entirely different destinies.",
+        description: "A visual exploration of chaotic systems, demonstrating how microscopic changes in starting conditions cascade into entirely different destinies.",
         image: "./Screenshot.png",
         url: "./lof.html",
         featured: false,
@@ -491,18 +489,6 @@
         featured: false,
         tags: ["Three.js", "Artificial Life", "Web Audio", "Spatial Synthesis", "3D Boids"],
         category: "Artificial Life & Audio",
-        year: "2026"
-      },
-      {
-        title: "4D MANIFOLD PROJECTION & RELATIVISTIC DYNAMICS",
-        subtitle: "Higher-dimensional stereographic projections, geodesic particle flows, and phase-space sonification",
-        badge: "Differential Geometry & Relativity",
-        description: "A real-time four-dimensional dynamical systems simulator projecting Riemannian hypercubes, Hopf fibrations, and Schwarzschild event horizon geodesics with 12,000 relativistic nodes, 4K snapshot export, and Web Audio synthesis.",
-        image: "./manifold_4d_projection.png",
-        url: "./manifold_4d_projection.html",
-        featured: false,
-        tags: ["4D Geometry", "Differential Geometry", "General Relativity", "Web Audio API", "Singularities"],
-        category: "Differential Geometry & Relativity",
         year: "2026"
       }
     ];
@@ -662,7 +648,7 @@
         
         // Use full width in grid mode, fixed width in row mode
         const widthClasses = isGrid ? 'w-full' : 'flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[380px]';
-        card.className = `sim-card relative ${widthClasses} rounded-2xl overflow-hidden border border-white/5 hover:border-white/15 bg-white/[0.02] shadow-glass-edge-subtle cursor-pointer group transition-all duration-tactile opacity-0 animate-fade-in-up flex flex-col justify-between`;
+        card.className = `sim-card relative ${widthClasses} rounded-2xl overflow-hidden border border-white/10 hover:border-white/25 bg-[#0a0d18]/50 backdrop-blur-md hover:bg-[#0f1424]/70 shadow-glass-edge-subtle cursor-pointer group transition-all duration-tactile opacity-0 animate-fade-in-up flex flex-col justify-between`;
         card.style.animationDelay = `${100 + i * 50}ms`;
 
         const isFeatured = sim === featured;
@@ -735,5 +721,7 @@
     renderSimulations();
   </script>
 
+  <!-- Deep Space Fluidity & Interactive Ripples Engine -->
+  <script src="./water-fluidity.js"></script>
 </body>
 </html>
