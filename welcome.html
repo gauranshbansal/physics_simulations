@@ -158,13 +158,15 @@
       const endX = startX + wTitle;
 
       mctx.textBaseline = 'middle';
+      const line1Y = narrow ? H * 0.42 : H * 0.40;
+      const line2Y = narrow ? H * 0.54 : H * 0.60;
       // Line 1: GAURANSH BANSAL
-      drawSpacedText('GAURANSH BANSAL', startX, H * 0.40, extraSpace, 'left');
+      drawSpacedText('GAURANSH BANSAL', startX, line1Y, extraSpace, 'left');
 
       // Line 2: LABS right aligned
       mctx.font = `900 ${labsSize}px Impact, "Arial Black", "Arial Narrow", sans-serif`;
       const labsSpace = Math.max(3, Math.round(labsSize * 0.10));
-      drawSpacedText('LABS', endX, H * 0.60, labsSpace, 'right');
+      drawSpacedText('LABS', endX, line2Y, labsSpace, 'right');
 
       const raw = mctx.getImageData(0, 0, mask.width, mask.height);
       pixels = raw.data;
@@ -178,6 +180,11 @@
       canvas.height = Math.round(H * D);
       ctx.setTransform(D, 0, 0, D, 0, 0);
       makeMask();
+      const isMobile = (W <= 820) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || ('ontouchstart' in window);
+      if (isMobile) {
+        reveal = 1.0;
+        if (enterShelf) enterShelf.classList.add('revealed');
+      }
     }
 
     function maskAlpha(x, y) {
@@ -264,8 +271,15 @@
         if (s.amp < 0.05 || s.radius > Math.max(W, H) * 1.1) solitons.splice(i, 1);
       }
 
-      const target = pointerInside ? 1 : 0;
-      reveal += (target - reveal) * (reduced ? 1 : 1 - Math.exp(-dt * 5.2));
+      // Detect mobile mode: screen width <= 820 or touch screen devices
+      const isMobile = (W > 0 && W <= 820) || 
+                       (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
+                       ('ontouchstart' in window);
+
+      // On mobile view: name is visible by default (target = 1) because mobile has no cursor hover.
+      // On desktop: target responds dynamically to mouse pointer hover.
+      const target = isMobile ? 1.0 : (pointerInside ? 1.0 : 0.0);
+      reveal += (target - reveal) * (reduced ? 1.0 : 1.0 - Math.exp(-dt * 5.2));
 
       ctx.fillStyle = '#030506';
       ctx.fillRect(0, 0, W, H);
@@ -273,11 +287,15 @@
       const spacing = Math.max(8.5, Math.min(11.5, H / 75));
       const count = Math.ceil(H / spacing);
       const step = Math.max(3.2, Math.min(4.8, W / 260));
-      const numSteps = Math.ceil((W + step * 2) / step);
 
-      if (ptsX.length < numSteps + 2) {
-        ptsX = new Float32Array(numSteps + 4);
-        ptsY = new Float32Array(numSteps + 4);
+      // Generous overshoot margin so lines never end near the corners or edges of the screen
+      const padX = Math.max(120, Math.ceil(W * 0.22));
+      const padY = Math.max(120, Math.ceil(H * 0.22));
+
+      const numSteps = Math.ceil((W + padX * 2) / step) + 16;
+      if (ptsX.length < numSteps + 4) {
+        ptsX = new Float32Array(numSteps + 16);
+        ptsY = new Float32Array(numSteps + 16);
       }
 
       const hasReveal = reveal > 0.003;
@@ -285,12 +303,15 @@
       const pFieldRadius = minWH * 0.03;
       const pFieldInv = 1 / (minWH * 0.15);
 
-      for (let row = -2; row <= count + 2; row++) {
+      const rowMin = -Math.ceil(padY / spacing) - 2;
+      const rowMax = count + Math.ceil(padY / spacing) + 2;
+
+      for (let row = rowMin; row <= rowMax; row++) {
         const base = row * spacing;
         const col = color(base);
 
         let ptIdx = 0;
-        for (let x = -step; x <= W + step; x += step) {
+        for (let x = -padX; x <= W + padX; x += step) {
           const [dx, dy] = flow(x, base, time);
           ptsX[ptIdx] = x + dx;
           ptsY[ptIdx] = base + dy;
@@ -491,6 +512,7 @@
 
     // Pointer & Touch Interaction
     welcomeScreen.addEventListener('pointermove', e => {
+      if (e.pointerType === 'touch') return; // On touch devices, name is always visible by default
       const r = welcomeScreen.getBoundingClientRect();
       px = e.clientX - r.left;
       py = e.clientY - r.top;

@@ -51,15 +51,17 @@
     canvas.height = height * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    cols = Math.ceil(width / CONFIG.spacingX) + 2;
-    rows = Math.ceil(height / CONFIG.spacingY) + 2;
+    const marginCols = 2;
+    const marginRows = 2;
+    cols = Math.ceil(width / CONFIG.spacingX) + marginCols * 2 + 1;
+    rows = Math.ceil(height / CONFIG.spacingY) + marginRows * 2 + 1;
     nodes = [];
 
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         nodes.push({
-          bx: c * CONFIG.spacingX, // Base X
-          by: r * CONFIG.spacingY, // Base Y
+          bx: (c - marginCols) * CONFIG.spacingX, // Base X (extends safely offscreen)
+          by: (r - marginRows) * CONFIG.spacingY, // Base Y (extends safely offscreen)
           dx: 0,                   // Displacement X
           dy: 0,                   // Displacement Y
           vx: 0,                   // Velocity X
