@@ -128,21 +128,32 @@
   let pressStartTime = 0;
   let heatStage = 0; // 0.0 = cold (default), 1.0 = subtle dim red (6s), 2.0 = neon cyberpunk red (10s)
 
-  function onPointerDown(e) {
+  function startHold(e) {
+    if (e && e.button && e.button !== 0) return; // Only trigger for primary left click or touch
     isPressed = true;
     pressStartTime = performance.now();
   }
 
-  function onPointerUp() {
+  function endHold() {
     isPressed = false;
     pressStartTime = 0;
   }
 
-  window.addEventListener('mousedown', onPointerDown, { passive: true });
-  window.addEventListener('mouseup', onPointerUp, { passive: true });
-  window.addEventListener('touchstart', onPointerDown, { passive: true });
-  window.addEventListener('touchend', onPointerUp, { passive: true });
-  window.addEventListener('touchcancel', onPointerUp, { passive: true });
+  window.addEventListener('pointerdown', startHold, { passive: true });
+  window.addEventListener('pointerup', endHold, { passive: true });
+  window.addEventListener('pointercancel', endHold, { passive: true });
+  window.addEventListener('mousedown', startHold, { passive: true });
+  window.addEventListener('mouseup', endHold, { passive: true });
+  window.addEventListener('touchstart', startHold, { passive: true });
+  window.addEventListener('touchend', endHold, { passive: true });
+  window.addEventListener('touchcancel', endHold, { passive: true });
+
+  // Prevent browser context menu or text-selection from aborting the long-press
+  window.addEventListener('contextmenu', (e) => {
+    if (isPressed && (performance.now() - pressStartTime > 600)) {
+      e.preventDefault();
+    }
+  });
 
   window.addEventListener('resize', () => {
     isMobile = checkIsMobile();
@@ -157,9 +168,9 @@
       if (heldMs >= 6000) {
         // Heating phase from 6s to 10s (stage 1.0 -> 2.0)
         targetStage = 1.0 + Math.min(1.0, (heldMs - 6000) / 4000);
-      } else if (heldMs >= 5000) {
-        // Subtle dim red tint phase from 5s to 6s (stage 0.0 -> 1.0)
-        targetStage = (heldMs - 5000) / 1000;
+      } else if (heldMs >= 4800) {
+        // Subtle dim red tint phase from 4.8s to 6s (stage 0.0 -> 1.0)
+        targetStage = Math.min(1.0, (heldMs - 4800) / 1200);
       }
     }
 
@@ -167,17 +178,19 @@
     if (!isPressed && heatStage < 0.001) {
       heatStage = 0;
     } else {
-      heatStage += (targetStage - heatStage) * (isPressed ? 0.04 : 0.035);
+      // Direct responsive ramping during press, gentle cooling decay upon release
+      const rate = isPressed ? 0.10 : 0.035;
+      heatStage += (targetStage - heatStage) * rate;
     }
 
     // Micro thermal vibration when actively heating (between 6s and 10s)
     if (heatStage > 1.02) {
       const heatFactor = heatStage - 1.0;
-      const thermalAmp = heatFactor * 0.022;
-      const t = timeNow * 0.015;
-      for (let i = 0; i < nodes.length; i += 4) { // Sparsely sample every 4th node for zero lag
-        nodes[i].vx += Math.sin(t + i) * thermalAmp;
-        nodes[i].vy += Math.cos(t * 1.3 + i) * thermalAmp;
+      const thermalAmp = heatFactor * 0.035;
+      const t = timeNow * 0.02;
+      for (let i = 0; i < nodes.length; i += 3) { // Sparsely sample every 3rd node
+        nodes[i].vx += Math.sin(t + i * 0.7) * thermalAmp;
+        nodes[i].vy += Math.cos(t * 1.3 + i * 0.7) * thermalAmp;
       }
     }
 
@@ -286,46 +299,50 @@
 
   function render() {
     ctx.clearRect(0, 0, width, height);
-    ctx.lineWidth = 1;
 
     // Fast-path for default idle/cold state: zero math, zero memory overhead!
     let strokeColorBase = '165, 180, 252';
     let nodeColorBase = '199, 210, 254';
     let baseAlpha = CONFIG.baseAlpha;
     let highlightAlpha = CONFIG.highlightAlpha;
+    let strokeWidth = 1.0;
 
     if (heatStage > 0.001) {
       if (heatStage <= 1.0) {
         // Stage 1: 5s-6s (subtle dim red tint, exact identical dimness)
         const t = heatStage;
-        const rVal = Math.round(165 * (1 - t) + 218 * t);
-        const gVal = Math.round(180 * (1 - t) + 148 * t);
-        const bVal = Math.round(252 * (1 - t) + 162 * t);
+        const rVal = Math.round(165 * (1 - t) + 225 * t);
+        const gVal = Math.round(180 * (1 - t) + 138 * t);
+        const bVal = Math.round(252 * (1 - t) + 158 * t);
         strokeColorBase = `${rVal}, ${gVal}, ${bVal}`;
 
         const rNode = Math.round(199 * (1 - t) + 235 * t);
-        const gNode = Math.round(210 * (1 - t) + 172 * t);
-        const bNode = Math.round(254 * (1 - t) + 182 * t);
+        const gNode = Math.round(210 * (1 - t) + 168 * t);
+        const bNode = Math.round(254 * (1 - t) + 178 * t);
         nodeColorBase = `${rNode}, ${gNode}, ${bNode}`;
+        baseAlpha = CONFIG.baseAlpha + 0.015 * t;
       } else {
-        // Stage 2: 6s-10s (heating up to neon cyberpunk red, bright yet non-distracting)
+        // Stage 2: 6s-10s (heating up to bright neon cyberpunk red, unmistakable yet clean & non-distracting)
         const h = Math.min(1.0, heatStage - 1.0);
-        // [218, 148, 162] -> [255, 26, 74] (neon cyberpunk crimson-red)
-        const rVal = Math.round(218 + (255 - 218) * h);
-        const gVal = Math.round(148 + (26 - 148) * h);
-        const bVal = Math.round(162 + (74 - 162) * h);
+        // [225, 138, 158] -> [255, 18, 65] (pure electric cyberpunk neon crimson-red)
+        const rVal = Math.round(225 + (255 - 225) * h);
+        const gVal = Math.round(138 + (18 - 138) * h);
+        const bVal = Math.round(158 + (65 - 158) * h);
         strokeColorBase = `${rVal}, ${gVal}, ${bVal}`;
 
         const rNode = Math.round(235 + (255 - 235) * h);
-        const gNode = Math.round(172 + (60 - 172) * h);
-        const bNode = Math.round(182 + (110 - 182) * h);
+        const gNode = Math.round(168 + (45 - 168) * h);
+        const bNode = Math.round(178 + (90 - 178) * h);
         nodeColorBase = `${rNode}, ${gNode}, ${bNode}`;
 
-        // Gentle neon luminosity scaling (0.045 -> 0.11 base, remaining refined & non-distracting)
-        baseAlpha = CONFIG.baseAlpha + 0.065 * h;
-        highlightAlpha = CONFIG.highlightAlpha + 0.14 * h;
+        // Clearly visible neon luminescence (base alpha rises from 0.06 -> 0.46, highlight up to 0.85)
+        baseAlpha = 0.06 + 0.40 * h;
+        highlightAlpha = CONFIG.highlightAlpha + 0.65 * h;
+        strokeWidth = 1.0 + 0.45 * h;
       }
     }
+
+    ctx.lineWidth = strokeWidth;
 
     // Draw Horizontal Strings
     for (let r = 0; r < rows; r++) {
@@ -383,12 +400,13 @@
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
       if (n.energy > 0.08) {
-        ctx.fillStyle = `rgba(${nodeColorBase}, ${(n.energy * (0.35 + 0.25 * Math.max(0, heatStage - 1))).toFixed(3)})`;
+        ctx.fillStyle = `rgba(${nodeColorBase}, ${(n.energy * (0.35 + 0.45 * Math.max(0, heatStage - 1))).toFixed(3)})`;
         ctx.beginPath();
-        ctx.arc(n.bx + n.dx, n.by + n.dy, 1.2, 0, Math.PI * 2);
+        ctx.arc(n.bx + n.dx, n.by + n.dy, heatStage > 1 ? 1.6 : 1.2, 0, Math.PI * 2);
         ctx.fill();
       }
     }
+  }
   }
 
   function animate(timeNow) {

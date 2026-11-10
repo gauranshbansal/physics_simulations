@@ -211,8 +211,6 @@ Copyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
   <!-- End Security Layer -->
 </head>
 <body class="bg-brand-black text-white font-sans antialiased">
-  <canvas id="cavitationCanvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999998;"></canvas>
-
   
           <!-- Fullscreen Welcome Gate: Gauransh Bansal Labs (Pure sech2 Soliton Field) -->
   <style>
@@ -601,140 +599,6 @@ Copyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
       if (enterShelf) enterShelf.classList.add('revealed');
     }, 2200);
 
-    // =========================================================================
-    // EXP 27A-style cavitation click: compact, snappy, single-canvas engine.
-    // - One <canvas>, one rAF loop, time-based (identical speed on 60/120/144Hz)
-    // - No DOM nodes, no CSS box-shadow transitions, no ctx.shadowBlur
-    //   (those were the main sources of jank). Glow = cheap radial gradients.
-    // =========================================================================
-    const cavCanvas = document.getElementById('cavitationCanvas');
-    const cavCtx = cavCanvas ? cavCanvas.getContext('2d') : null;
-    let cavEvents = [];
-    let cavRaf = null;
-    let cavDpr = 1;
-
-    // Timeline (ms): expand -> implosion -> flash + shockwave
-    const T_EXPAND = 85, T_COLLAPSE = 35, T_SHOCK = 400, T_FLASH = 110;
-    const T_BURST = T_EXPAND + T_COLLAPSE;
-    const R_BUBBLE = 17, R_SHOCK = 62;
-
-    const easeOut = q => 1 - Math.pow(1 - q, 3);
-    const easeIn  = q => q * q * q;
-
-    function resizeCavCanvas() {
-      if (!cavCanvas) return;
-      cavDpr = Math.min(window.devicePixelRatio || 1, 2);
-      cavCanvas.width = Math.round(window.innerWidth * cavDpr);
-      cavCanvas.height = Math.round(window.innerHeight * cavDpr);
-      cavCtx.setTransform(cavDpr, 0, 0, cavDpr, 0, 0);
-    }
-    window.addEventListener('resize', resizeCavCanvas, { passive: true });
-    resizeCavCanvas();
-
-    function glow(x, y, r, a, grayMix) {
-      if (a <= 0.003 || r <= 0.5) return;
-      const g = cavCtx.createRadialGradient(x, y, 0, x, y, r);
-      // Pure monochromatic gradient: white core -> soft gray midtone -> transparent
-      g.addColorStop(0, `rgba(255,255,255,${(a * 0.45).toFixed(3)})`);
-      g.addColorStop(grayMix || 0.45, `rgba(210,215,225,${(a * 0.16).toFixed(3)})`);
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      cavCtx.fillStyle = g;
-      cavCtx.beginPath();
-      cavCtx.arc(x, y, r, 0, 6.2832);
-      cavCtx.fill();
-    }
-
-    function renderCav(now) {
-      cavRaf = null;
-      const c = cavCtx;
-      c.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
-      for (let i = cavEvents.length - 1; i >= 0; i--) {
-        const ev = cavEvents[i];
-        const age = now - ev.t0;
-        if (age < 0) continue;
-        if (age > T_BURST + T_SHOCK) { cavEvents.splice(i, 1); continue; }
-
-        // ---- Bubble: expansion then violent implosion (Monochrome Grayscale) ----
-        if (age < T_BURST) {
-          let r, fillA, white;
-          if (age < T_EXPAND) {
-            const q = easeOut(age / T_EXPAND);
-            r = 3 + (R_BUBBLE - 3) * q;
-            fillA = 0.22; white = 0;
-          } else {
-            const q = easeIn((age - T_EXPAND) / T_COLLAPSE);
-            r = R_BUBBLE - (R_BUBBLE - 1.2) * q;
-            fillA = 0.22 + 0.40 * q; white = q;
-          }
-          c.globalCompositeOperation = 'lighter';
-          glow(ev.x, ev.y, r * 2.2, (0.25 + 0.45 * white) * 0.6, 0.45);
-          c.globalCompositeOperation = 'source-over';
-
-          // Monochromatic fluid fill (subtle neutral grey to bright white)
-          const grayVal = Math.round(180 + 75 * white);
-          c.fillStyle = `rgba(${grayVal},${grayVal},${grayVal},${(fillA * 0.28).toFixed(3)})`;
-          c.beginPath(); c.arc(ev.x, ev.y, r, 0, 6.2832); c.fill();
-
-          // Delicate white boundary stroke
-          c.strokeStyle = `rgba(255,255,255,${(0.40 + 0.40 * white).toFixed(2)})`;
-          c.lineWidth = 1.1;
-          c.stroke();
-        }
-
-        // ---- Sonoluminescent flash (Monochrome White/Silver) ----
-        const fa = age - T_BURST;
-        if (fa >= 0 && fa < T_FLASH) {
-          const q = fa / T_FLASH;
-          c.globalCompositeOperation = 'lighter';
-          glow(ev.x, ev.y, 8 + 26 * easeOut(q), 0.50 * (1 - q), 0.35);
-          c.globalCompositeOperation = 'source-over';
-        }
-
-        // ---- Radial shockwave (Monochrome Whites, Greys, Black Accent) ----
-        if (fa >= 0) {
-          const q = Math.min(fa / T_SHOCK, 1);
-          const r = 5 + R_SHOCK * easeOut(q);
-          const alpha = Math.pow(1 - q, 1.6);
-
-          // 1. Soft atmospheric grayscale halo
-          c.strokeStyle = `rgba(255,255,255,${(alpha * 0.08).toFixed(3)})`;
-          c.lineWidth = 4 * alpha + 1;
-          c.beginPath(); c.arc(ev.x, ev.y, r, 0, 6.2832); c.stroke();
-
-          // 2. Subtle dark contrast contour (black accent for depth)
-          if (r > 6) {
-            c.strokeStyle = `rgba(0,0,0,${(alpha * 0.16).toFixed(3)})`;
-            c.lineWidth = 0.8;
-            c.beginPath(); c.arc(ev.x, ev.y, Math.max(0.5, r - 1.0), 0, 6.2832); c.stroke();
-          }
-
-          // 3. Crisp primary silver-white ring (higher transparency)
-          c.strokeStyle = `rgba(255,255,255,${(alpha * 0.52).toFixed(3)})`;
-          c.lineWidth = 0.75 + 1.1 * alpha;
-          c.beginPath(); c.arc(ev.x, ev.y, r, 0, 6.2832); c.stroke();
-
-          // 4. Secondary rebound ring (delicate monochrome gray)
-          if (r > 16) {
-            c.strokeStyle = `rgba(200,205,215,${(alpha * 0.32).toFixed(3)})`;
-            c.lineWidth = 0.65;
-            c.beginPath(); c.arc(ev.x, ev.y, r * 0.65, 0, 6.2832); c.stroke();
-          }
-        }
-      }
-
-      if (cavEvents.length) cavRaf = requestAnimationFrame(renderCav);
-      else c.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    }
-
-    window.triggerGlobalCavitation = function(clickX, clickY) {
-      if (!cavCtx) return;
-      if (cavEvents.length >= 8) cavEvents.shift();
-      // t0 = event timestamp so the animation starts the instant of the click
-      cavEvents.push({ x: clickX, y: clickY, t0: performance.now() });
-      if (!cavRaf) cavRaf = requestAnimationFrame(renderCav);
-    };
-
     // Pointer & Touch Interaction
     welcomeScreen.addEventListener('pointermove', e => {
       if (e.pointerType === 'touch') return; // On touch devices, name is always visible by default
@@ -749,11 +613,6 @@ Copyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
       px = -9999; py = -9999;
     });
 
-    // Global instantaneous tactile click response
-    window.addEventListener('pointerdown', e => {
-      window.triggerGlobalCavitation(e.clientX, e.clientY);
-    }, { passive: true });
-
     function dismissWelcome() {
       if (dismissed) return;
       dismissed = true;
@@ -762,14 +621,11 @@ Copyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
       setTimeout(() => {
         welcomeScreen.style.display = 'none';
       }, 750);
-    
     }
 
     enterBtn.addEventListener('click', e => {
       e.stopPropagation();
-      const rect = enterBtn.getBoundingClientRect();
-      window.triggerGlobalCavitation(rect.left + rect.width / 2, rect.top + rect.height / 2);
-      setTimeout(dismissWelcome, 240);
+      dismissWelcome();
     });
 
     // === Scroll to Open Feature (Mouse Wheel & Mobile Touch Swipe) ===
@@ -810,7 +666,7 @@ Copyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
 
   <!-- Deep Space Watery Fluidity Canvas & Ambient Overlays -->
   <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-    <canvas id="water-fluid-canvas" class="w-full h-full block opacity-75"></canvas>
+    <canvas id="water-fluid-canvas" class="w-full h-full block opacity-90 transition-opacity duration-700"></canvas>
     <div class="bg-grain"></div>
   </div>
 
@@ -867,14 +723,17 @@ Copyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
 
   <!-- ===================== HERO SECTION ===================== -->
   <section id="featured" class="relative min-h-[90vh] flex items-end pb-16 pt-20">
-    <div id="hero-bg" class="absolute inset-0 z-0 overflow-hidden">
+    <div id="hero-bg" class="absolute inset-0 z-0 overflow-hidden hidden md:block">
       <img id="hero-image" src="" alt="" class="hero-image w-full h-full object-cover opacity-40 mix-blend-luminosity hero-image-mask">
       <div class="hero-side-gradient absolute inset-0"></div>
       <div class="hero-gradient absolute inset-0"></div>
     </div>
 
+    <!-- Mobile view: No thumbnail image behind text. Straight to the interactive web with subtle background shadow -->
+    <div class="absolute inset-0 z-0 pointer-events-none md:hidden" style="background: radial-gradient(ellipse at 50% 65%, rgba(3,5,8,0.72) 0%, rgba(3,5,8,0.3) 65%, transparent 100%);"></div>
+
     <div class="relative z-10 max-w-7xl mx-auto px-6 w-full">
-      <div id="hero-content" class="max-w-2xl"></div>
+      <div id="hero-content" class="max-w-2xl drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"></div>
     </div>
 
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden md:block" style="animation: float 4s ease-in-out infinite;">
