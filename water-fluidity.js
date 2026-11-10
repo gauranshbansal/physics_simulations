@@ -123,12 +123,44 @@
     mouse.y = -9999;
   });
 
+  // --- SUBTLE RED TINT EASTER EGG (Long press/hold for 5-6s) ---
+  let isPressed = false;
+  let pressStartTime = 0;
+  let redTintProgress = 0; // 0.0 = default indigo-white, 1.0 = subtle dim red tint
+
+  function onPointerDown(e) {
+    isPressed = true;
+    pressStartTime = performance.now();
+  }
+
+  function onPointerUp() {
+    isPressed = false;
+    pressStartTime = 0;
+  }
+
+  window.addEventListener('mousedown', onPointerDown, { passive: true });
+  window.addEventListener('mouseup', onPointerUp, { passive: true });
+  window.addEventListener('touchstart', onPointerDown, { passive: true });
+  window.addEventListener('touchend', onPointerUp, { passive: true });
+  window.addEventListener('touchcancel', onPointerUp, { passive: true });
+
   window.addEventListener('resize', () => {
     isMobile = checkIsMobile();
     initGrid();
   });
 
   function updatePhysics(timeNow) {
+    // 0. Hold-duration check for subtle red tint (held for > 5-6 seconds)
+    let targetTint = 0;
+    if (isPressed && pressStartTime > 0) {
+      const heldMs = timeNow - pressStartTime;
+      if (heldMs >= 5000) {
+        // Ramp smoothly from 0 to 1 between 5.0s and 6.0s
+        targetTint = Math.min(1.0, (heldMs - 5000) / 1000);
+      }
+    }
+    redTintProgress += (targetTint - redTintProgress) * 0.04;
+
     // 1. Advance active radial ripples
     for (let i = ripples.length - 1; i >= 0; i--) {
       ripples[i].radius += CONFIG.rippleSpeed;
@@ -236,6 +268,19 @@
     ctx.clearRect(0, 0, width, height);
     ctx.lineWidth = 1;
 
+    // Dynamic color tint: default indigo-white (165, 180, 252) -> very subtle dim red tint (218, 148, 162)
+    // Preserves identical dimness and alpha without increasing brightness at all
+    const t = Math.max(0, Math.min(1, redTintProgress));
+    const rVal = Math.round(165 * (1 - t) + 218 * t);
+    const gVal = Math.round(180 * (1 - t) + 148 * t);
+    const bVal = Math.round(252 * (1 - t) + 162 * t);
+    const strokeColorBase = `${rVal}, ${gVal}, ${bVal}`;
+
+    const rNode = Math.round(199 * (1 - t) + 235 * t);
+    const gNode = Math.round(210 * (1 - t) + 172 * t);
+    const bNode = Math.round(254 * (1 - t) + 182 * t);
+    const nodeColorBase = `${rNode}, ${gNode}, ${bNode}`;
+
     // Draw Horizontal Strings
     for (let r = 0; r < rows; r++) {
       ctx.beginPath();
@@ -257,7 +302,7 @@
         }
       }
       const alpha = CONFIG.baseAlpha + rowEnergy * (CONFIG.highlightAlpha - CONFIG.baseAlpha);
-      ctx.strokeStyle = `rgba(165, 180, 252, ${alpha.toFixed(3)})`; // Soft indigo-white tint
+      ctx.strokeStyle = `rgba(${strokeColorBase}, ${alpha.toFixed(3)})`;
       ctx.stroke();
     }
 
@@ -283,7 +328,7 @@
           }
         }
         const alpha = (CONFIG.baseAlpha * 0.75) + colEnergy * (CONFIG.highlightAlpha - CONFIG.baseAlpha);
-        ctx.strokeStyle = `rgba(165, 180, 252, ${alpha.toFixed(3)})`;
+        ctx.strokeStyle = `rgba(${strokeColorBase}, ${alpha.toFixed(3)})`;
         ctx.stroke();
       }
     }
@@ -292,7 +337,7 @@
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
       if (n.energy > 0.08) {
-        ctx.fillStyle = `rgba(199, 210, 254, ${(n.energy * 0.35).toFixed(3)})`;
+        ctx.fillStyle = `rgba(${nodeColorBase}, ${(n.energy * 0.35).toFixed(3)})`;
         ctx.beginPath();
         ctx.arc(n.bx + n.dx, n.by + n.dy, 1.2, 0, Math.PI * 2);
         ctx.fill();
