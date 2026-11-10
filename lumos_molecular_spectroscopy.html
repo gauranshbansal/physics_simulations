@@ -3745,11 +3745,11 @@
                     slotGroup.add(s.anchor);
                 });
 
-                // 4. Interaction Collider
-                const colGeo = new THREE.BoxGeometry(0.95, 1.15, 0.55);
+                // 4. Interaction Collider - Generously sized to cover the entire altar, plinth & slots
+                const colGeo = new THREE.BoxGeometry(1.60, 1.60, 1.20);
                 const colMat = new THREE.MeshBasicMaterial({ visible: false });
                 this.colliderMesh = new THREE.Mesh(colGeo, colMat);
-                this.colliderMesh.position.y = 0.55;
+                this.colliderMesh.position.y = 0.70;
                 this.colliderMesh.userData.interactableType = 'puzzle_box';
                 this.group.add(this.colliderMesh);
 
@@ -3757,7 +3757,9 @@
             }
 
             findSlotForCompound(compoundKey) {
-                return this.slots.find((s) => s.key === compoundKey) || null;
+                if (!compoundKey) return null;
+                const cleanKey = String(compoundKey).trim().toLowerCase();
+                return this.slots.find((s) => s.key.toLowerCase() === cleanKey) || null;
             }
 
             getFilledCount() {
@@ -4932,10 +4934,13 @@
                 this.currentDataset = MolecularPhysicsEngine.computeRotationalDataset(this.compound);
                 this.deliveredRecord = null; // Stores the exact dataset locked into the delivered scroll
 
-                // Raycasting from the wand tip
+                // Raycasting from center camera reticle and wand tip
                 this.raycaster = new THREE.Raycaster();
                 this.raycaster.near = 0.05;
-                this.raycaster.far = 5.0;
+                this.raycaster.far = 6.0;
+                this.cameraRaycaster = new THREE.Raycaster();
+                this.cameraRaycaster.near = 0.05;
+                this.cameraRaycaster.far = 6.0;
                 this._tipPos = new THREE.Vector3();
                 this._wandDir = new THREE.Vector3();
                 this._aimPointWorld = new THREE.Vector3();
@@ -5239,6 +5244,16 @@
                     }
                     const busy = (this.state === 'acquiring' || this.state === 'owl_delivery');
                     if (!busy) {
+                        // If carrying a scroll and looking at or standing near the alchemical table, left-click places it!
+                        if (this.carriedScroll) {
+                            const pPos = this.fpCamera.camera.position;
+                            const aPos = this.puzzleBox ? this.puzzleBox.group.position : new THREE.Vector3(-2.35, 0, -1.35);
+                            const distToAltar = pPos.distanceTo(aPos);
+                            if (this.currentHoveredTarget === 'puzzle_box' || distToAltar <= 3.5) {
+                                this.handleGrabOrPlaceAction();
+                                return;
+                            }
+                        }
                         if (this.currentHoveredTarget === 'scroll' && this.currentHoveredScroll) {
                             this.openDeliveredScroll(this.currentHoveredScroll);
                             return;
@@ -5266,6 +5281,8 @@
                         e.preventDefault();
                         if (this._isScrollModalOpen()) {
                             this.closeScrollModal();
+                        } else if (this.carriedScroll) {
+                            this.handleGrabOrPlaceAction();
                         } else if (this.hedwig.scrollLanded) {
                             this.openDeliveredScroll();
                         }
@@ -6260,22 +6277,49 @@
             handleGrabOrPlaceAction() {
                 // If currently carrying a scroll:
                 if (this.carriedScroll) {
-                    // If aiming at or near the Puzzle Box in the back-left corner:
-                    if (this.currentHoveredTarget === 'puzzle_box' && this.puzzleBox) {
+                    const pPos = this.fpCamera.camera.position;
+                    const aPos = this.puzzleBox ? this.puzzleBox.group.position : new THREE.Vector3(-2.35, 0, -1.35);
+                    const distToAltar = pPos.distanceTo(aPos);
+                    const camDir = new THREE.Vector3();
+                    this.fpCamera.camera.getWorldDirection(camDir);
+                    const toAltar = new THREE.Vector3().subVectors(aPos, pPos).normalize();
+                    const isFacingAltar = camDir.dot(toAltar) > 0.05;
+
+                    const isAtAltar = (this.currentHoveredTarget === 'puzzle_box') || 
+                                      (distToAltar <= 3.5 && isFacingAltar) || 
+                                      (distToAltar <= 2.4);
+
+                    // If aiming at or standing at the Alchemical Table:
+                    if (isAtAltar && this.puzzleBox) {
                         const compound = this.carriedScroll.record.dataset.compound;
                         const slot = this.puzzleBox.findSlotForCompound(compound.key);
-                        if (slot && !slot.scroll) {
-                            const placed = this.puzzleBox.placeScroll(this.carriedScroll);
-                            if (placed) {
-                                this.audio.playScanCompleteChime();
-                                this.wand.camera.remove(this.carriedScroll.group);
-                                this.carriedScroll = null;
-                                this._refreshTargetContextHUD();
-                                this._updateTutorialBanner();
+                        if (slot) {
+                            if (!slot.scroll) {
+                                const placed = this.puzzleBox.placeScroll(this.carriedScroll);
+                                if (placed) {
+                                    this.audio.playScanCompleteChime();
+                                    if (this.carriedScroll.group.parent) {
+                                        this.carriedScroll.group.parent.remove(this.carriedScroll.group);
+                                    }
+                                    this.carriedScroll = null;
+                                    this._refreshTargetContextHUD();
+                                    this._updateTutorialBanner();
+                                    return;
+                                }
+                            } else {
+                                // Slot is already occupied: notify student and keep scroll in hand
+                                this.targetName.textContent = `Archive Slot ${compound.key} Already Filled!`;
+                                this.targetActionBtn.innerHTML = `KEEPING SCROLL · ALREADY ARCHIVED`;
                                 return;
                             }
                         }
                     }
+
+                    // Safety guard: if near the alchemical table, NEVER send the scroll back to the main desk
+                    if (distToAltar <= 3.6) {
+                        return;
+                    }
+
                     // Otherwise drop scroll onto the table / floor:
                     this.dropCarriedScroll();
                     return;
@@ -6367,18 +6411,23 @@
 
                 if (this.carriedScroll) {
                     const cKey = this.carriedScroll.record.dataset.compound.key;
-                    if (this.currentHoveredTarget === 'puzzle_box') {
+                    const pPos = this.fpCamera.camera.position;
+                    const aPos = this.puzzleBox ? this.puzzleBox.group.position : new THREE.Vector3(-2.35, 0, -1.35);
+                    const distToAltar = pPos.distanceTo(aPos);
+                    const isAtAltar = (this.currentHoveredTarget === 'puzzle_box') || (distToAltar <= 3.5);
+
+                    if (isAtAltar && this.puzzleBox) {
                         const slot = this.puzzleBox.findSlotForCompound(cKey);
                         if (slot && !slot.scroll) {
-                            this.targetName.textContent = `Colored Archive: ${cKey} Slot`;
-                            this.targetActionBtn.innerHTML = `PLACE ${cKey} SCROLL <kbd>G</kbd>`;
+                            this.targetName.textContent = `Alchemical Archive: ${cKey} Slot`;
+                            this.targetActionBtn.innerHTML = `PLACE ${cKey} SCROLL <kbd>Click</kbd> / <kbd>G</kbd> / <kbd>E</kbd>`;
                         } else {
                             this.targetName.textContent = `Archive Slot ${cKey} Already Filled`;
-                            this.targetActionBtn.innerHTML = `DROP SCROLL <kbd>G</kbd>`;
+                            this.targetActionBtn.innerHTML = `ALREADY ARCHIVED <kbd>G</kbd>`;
                         }
                     } else {
                         this.targetName.textContent = `Carrying ${cKey} Scroll`;
-                        this.targetActionBtn.innerHTML = `TAKE TO ARCHIVE BOX (OR DROP <kbd>G</kbd>)`;
+                        this.targetActionBtn.innerHTML = `TAKE TO ARCHIVE TABLE (OR DROP <kbd>G</kbd>)`;
                     }
                     this.targetHud.classList.remove('target-banner-hidden');
                 } else if (this.currentHoveredTarget === 'puzzle_box') {
@@ -6431,16 +6480,43 @@
                         }
                     }
 
-                    this.raycaster.set(this._tipPos, this._wandDir);
-                    const hits = this.raycaster.intersectObjects(targets, false);
+                    // Prioritize raycast from center screen crosshair/reticle (player's actual gaze)
+                    this.cameraRaycaster.setFromCamera({ x: 0, y: 0 }, this.fpCamera.camera);
+                    let hits = this.cameraRaycaster.intersectObjects(targets, false);
+
+                    // Fallback to wand tip direction
+                    if (hits.length === 0 || hits[0].distance > 5.0) {
+                        this.raycaster.set(this._tipPos, this._wandDir);
+                        const wandHits = this.raycaster.intersectObjects(targets, false);
+                        if (wandHits.length > 0 && wandHits[0].distance <= 5.0) {
+                            hits = wandHits;
+                        }
+                    }
 
                     let hoveredType = null;
                     let hoveredScrollItem = null;
-                    if (hits.length > 0 && hits[0].distance <= 3.8) {
+                    if (hits.length > 0 && hits[0].distance <= 5.2) {
                         const obj = hits[0].object;
                         hoveredType = obj.userData.interactableType || null;
                         if (hoveredType === 'scroll') {
                             hoveredScrollItem = obj.userData.scrollItem || null;
+                        }
+                    }
+
+                    // Spatial Proximity Helper: If standing at the alchemical table and facing it, lock onto puzzle_box
+                    if (this.puzzleBox) {
+                        const pPos = this.fpCamera.camera.position;
+                        const aPos = this.puzzleBox.group.position;
+                        const distToAltar = pPos.distanceTo(aPos);
+                        const camDir = new THREE.Vector3();
+                        this.fpCamera.camera.getWorldDirection(camDir);
+                        const toAltar = new THREE.Vector3().subVectors(aPos, pPos).normalize();
+                        const isFacingAltar = camDir.dot(toAltar) > 0.15;
+
+                        if ((distToAltar <= 3.4 && isFacingAltar) || distToAltar <= 2.2) {
+                            if (hoveredType === null || hoveredType === 'puzzle_box') {
+                                hoveredType = 'puzzle_box';
+                            }
                         }
                     }
 
