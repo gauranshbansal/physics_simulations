@@ -120,6 +120,11 @@ python -m http.server 8000
 
 ---
 
+### 13. 🔮 [LUMOS: Magical Molecular Spectroscopy Laboratory](lumos_molecular_spectroscopy.html)
+* **File:** `lumos_molecular_spectroscopy.html`
+* **Topic:** Quantum Chemistry, Molecular Spectroscopy, Microwave & Infrared Transitions
+* **Features:** Immersive first-person 3D laboratory exploring pure rotational (microwave) and vibrational (infrared) molecular spectroscopy across diatomic molecules ($^1\text{H}^{35}\text{Cl}$, $^1\text{H}^{79}\text{Br}$, $^1\text{H}^{127}\text{I}$, $^{12}\text{C}^{16}\text{O}$). Cast the *Lumos* beam with an articulated wizard hand and wand to interrogate quantum states, reveal chalk derivations on the modular blackboard, decode Hedwig's experimental parchment scrolls, and solve the 4-compound alchemical archive vault puzzle.
+
 ## 🛠️ Tech Stack & Architecture
 
 * **Visual Engine:** HTML5 2D Canvas & Three.js WebGL with responsive high-DPI retina scaling.
