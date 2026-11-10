@@ -123,91 +123,12 @@
     mouse.y = -9999;
   });
 
-  // --- SUBTLE THERMAL RED TINT & CYBERPUNK HEATING (5s -> 6s -> 10s hold Easter Egg) ---
-  let isPressed = false;
-  let pressStartTime = 0;
-  let heatStage = 0; // 0.0 = cold (default), 1.0 = subtle dim red (6s), 2.0 = neon cyberpunk red (10s)
-
-  function startHold(e) {
-    if (e && e.button && e.button !== 0) return; // Only trigger for primary left click or touch
-    isPressed = true;
-    pressStartTime = performance.now();
-
-    const cx = (e.touches && e.touches[0]) ? e.touches[0].clientX : (e.clientX !== undefined ? e.clientX : mouse.x);
-    const cy = (e.touches && e.touches[0]) ? e.touches[0].clientY : (e.clientY !== undefined ? e.clientY : mouse.y);
-    if (cx > 0 && cy > 0) {
-      ripples.push({
-        x: cx,
-        y: cy,
-        radius: 4,
-        maxRadius: 280,
-        strength: CONFIG.rippleStrength * 1.6,
-        wavelength: 46
-      });
-      if (ripples.length > 12) ripples.shift();
-    }
-  }
-
-  function endHold() {
-    isPressed = false;
-    pressStartTime = 0;
-  }
-
-  window.addEventListener('pointerdown', startHold, { passive: true });
-  window.addEventListener('pointerup', endHold, { passive: true });
-  window.addEventListener('pointercancel', endHold, { passive: true });
-  window.addEventListener('mousedown', startHold, { passive: true });
-  window.addEventListener('mouseup', endHold, { passive: true });
-  window.addEventListener('touchstart', startHold, { passive: true });
-  window.addEventListener('touchend', endHold, { passive: true });
-  window.addEventListener('touchcancel', endHold, { passive: true });
-
-  // Prevent browser context menu or text-selection from aborting the long-press
-  window.addEventListener('contextmenu', (e) => {
-    if (isPressed && (performance.now() - pressStartTime > 600)) {
-      e.preventDefault();
-    }
-  });
-
   window.addEventListener('resize', () => {
     isMobile = checkIsMobile();
     initGrid();
   });
 
   function updatePhysics(timeNow) {
-    // 0. Hold-duration check: 5s subtle red -> 6s heating -> 10s neon cyberpunk red
-    let targetStage = 0;
-    if (isPressed && pressStartTime > 0) {
-      const heldMs = timeNow - pressStartTime;
-      if (heldMs >= 6000) {
-        // Heating phase from 6s to 10s (stage 1.0 -> 2.0)
-        targetStage = 1.0 + Math.min(1.0, (heldMs - 6000) / 4000);
-      } else if (heldMs >= 4800) {
-        // Subtle dim red tint phase from 4.8s to 6s (stage 0.0 -> 1.0)
-        targetStage = Math.min(1.0, (heldMs - 4800) / 1200);
-      }
-    }
-
-    // Zero-overhead fast exit: when idle and cold, skip all thermal computation
-    if (!isPressed && heatStage < 0.001) {
-      heatStage = 0;
-    } else {
-      // Direct responsive ramping during press, gentle cooling decay upon release
-      const rate = isPressed ? 0.10 : 0.035;
-      heatStage += (targetStage - heatStage) * rate;
-    }
-
-    // Micro thermal vibration when actively heating (between 6s and 10s)
-    if (heatStage > 1.02) {
-      const heatFactor = heatStage - 1.0;
-      const thermalAmp = heatFactor * 0.035;
-      const t = timeNow * 0.02;
-      for (let i = 0; i < nodes.length; i += 3) { // Sparsely sample every 3rd node
-        nodes[i].vx += Math.sin(t + i * 0.7) * thermalAmp;
-        nodes[i].vy += Math.cos(t * 1.3 + i * 0.7) * thermalAmp;
-      }
-    }
-
     // 1. Advance active radial ripples
     for (let i = ripples.length - 1; i >= 0; i--) {
       ripples[i].radius += CONFIG.rippleSpeed;
@@ -313,50 +234,7 @@
 
   function render() {
     ctx.clearRect(0, 0, width, height);
-
-    // Fast-path for default idle/cold state: zero math, zero memory overhead!
-    let strokeColorBase = '165, 180, 252';
-    let nodeColorBase = '199, 210, 254';
-    let baseAlpha = CONFIG.baseAlpha;
-    let highlightAlpha = CONFIG.highlightAlpha;
-    let strokeWidth = 1.0;
-
-    if (heatStage > 0.001) {
-      if (heatStage <= 1.0) {
-        // Stage 1: 5s-6s (subtle dim red tint, exact identical dimness)
-        const t = heatStage;
-        const rVal = Math.round(165 * (1 - t) + 225 * t);
-        const gVal = Math.round(180 * (1 - t) + 138 * t);
-        const bVal = Math.round(252 * (1 - t) + 158 * t);
-        strokeColorBase = `${rVal}, ${gVal}, ${bVal}`;
-
-        const rNode = Math.round(199 * (1 - t) + 235 * t);
-        const gNode = Math.round(210 * (1 - t) + 168 * t);
-        const bNode = Math.round(254 * (1 - t) + 178 * t);
-        nodeColorBase = `${rNode}, ${gNode}, ${bNode}`;
-        baseAlpha = CONFIG.baseAlpha + 0.015 * t;
-      } else {
-        // Stage 2: 6s-10s (heating up to bright neon cyberpunk red, unmistakable yet clean & non-distracting)
-        const h = Math.min(1.0, heatStage - 1.0);
-        // [225, 138, 158] -> [255, 18, 65] (pure electric cyberpunk neon crimson-red)
-        const rVal = Math.round(225 + (255 - 225) * h);
-        const gVal = Math.round(138 + (18 - 138) * h);
-        const bVal = Math.round(158 + (65 - 158) * h);
-        strokeColorBase = `${rVal}, ${gVal}, ${bVal}`;
-
-        const rNode = Math.round(235 + (255 - 235) * h);
-        const gNode = Math.round(168 + (45 - 168) * h);
-        const bNode = Math.round(178 + (90 - 178) * h);
-        nodeColorBase = `${rNode}, ${gNode}, ${bNode}`;
-
-        // Clearly visible neon luminescence (base alpha rises from 0.06 -> 0.46, highlight up to 0.85)
-        baseAlpha = 0.06 + 0.40 * h;
-        highlightAlpha = CONFIG.highlightAlpha + 0.65 * h;
-        strokeWidth = 1.0 + 0.45 * h;
-      }
-    }
-
-    ctx.lineWidth = strokeWidth;
+    ctx.lineWidth = 1;
 
     // Draw Horizontal Strings
     for (let r = 0; r < rows; r++) {
@@ -378,8 +256,8 @@
           ctx.quadraticCurveTo(prev.bx + prev.dx, prev.by + prev.dy, cx, cy);
         }
       }
-      const alpha = baseAlpha + rowEnergy * (highlightAlpha - baseAlpha);
-      ctx.strokeStyle = `rgba(${strokeColorBase}, ${alpha.toFixed(3)})`;
+      const alpha = CONFIG.baseAlpha + rowEnergy * (CONFIG.highlightAlpha - CONFIG.baseAlpha);
+      ctx.strokeStyle = `rgba(165, 180, 252, ${alpha.toFixed(3)})`; // Soft indigo-white tint
       ctx.stroke();
     }
 
@@ -404,8 +282,8 @@
             ctx.quadraticCurveTo(prev.bx + prev.dx, prev.by + prev.dy, cx, cy);
           }
         }
-        const alpha = (baseAlpha * 0.75) + colEnergy * (highlightAlpha - baseAlpha);
-        ctx.strokeStyle = `rgba(${strokeColorBase}, ${alpha.toFixed(3)})`;
+        const alpha = (CONFIG.baseAlpha * 0.75) + colEnergy * (CONFIG.highlightAlpha - CONFIG.baseAlpha);
+        ctx.strokeStyle = `rgba(165, 180, 252, ${alpha.toFixed(3)})`;
         ctx.stroke();
       }
     }
@@ -414,9 +292,9 @@
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
       if (n.energy > 0.08) {
-        ctx.fillStyle = `rgba(${nodeColorBase}, ${(n.energy * (0.35 + 0.45 * Math.max(0, heatStage - 1))).toFixed(3)})`;
+        ctx.fillStyle = `rgba(199, 210, 254, ${(n.energy * 0.35).toFixed(3)})`;
         ctx.beginPath();
-        ctx.arc(n.bx + n.dx, n.by + n.dy, heatStage > 1 ? 1.6 : 1.2, 0, Math.PI * 2);
+        ctx.arc(n.bx + n.dx, n.by + n.dy, 1.2, 0, Math.PI * 2);
         ctx.fill();
       }
     }
