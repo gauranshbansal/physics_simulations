@@ -428,12 +428,13 @@
     window.addEventListener('resize', resizeCavCanvas, { passive: true });
     resizeCavCanvas();
 
-    function glow(x, y, r, a, cyanMix) {
+    function glow(x, y, r, a, grayMix) {
       if (a <= 0.003 || r <= 0.5) return;
       const g = cavCtx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, `rgba(255,255,255,${a})`);
-      g.addColorStop(cyanMix, `rgba(6,182,212,${a * 0.55})`);
-      g.addColorStop(1, 'rgba(6,182,212,0)');
+      // Pure monochromatic gradient: white core -> soft gray midtone -> transparent
+      g.addColorStop(0, `rgba(255,255,255,${(a * 0.45).toFixed(3)})`);
+      g.addColorStop(grayMix || 0.45, `rgba(210,215,225,${(a * 0.16).toFixed(3)})`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
       cavCtx.fillStyle = g;
       cavCtx.beginPath();
       cavCtx.arc(x, y, r, 0, 6.2832);
@@ -451,54 +452,69 @@
         if (age < 0) continue;
         if (age > T_BURST + T_SHOCK) { cavEvents.splice(i, 1); continue; }
 
-        // ---- Bubble: expansion then violent implosion ----
+        // ---- Bubble: expansion then violent implosion (Monochrome Grayscale) ----
         if (age < T_BURST) {
           let r, fillA, white;
           if (age < T_EXPAND) {
             const q = easeOut(age / T_EXPAND);
             r = 3 + (R_BUBBLE - 3) * q;
-            fillA = 0.35; white = 0;
+            fillA = 0.22; white = 0;
           } else {
             const q = easeIn((age - T_EXPAND) / T_COLLAPSE);
             r = R_BUBBLE - (R_BUBBLE - 1.2) * q;
-            fillA = 0.35 + 0.65 * q; white = q;
+            fillA = 0.22 + 0.40 * q; white = q;
           }
           c.globalCompositeOperation = 'lighter';
-          glow(ev.x, ev.y, r * 2.4, 0.35 + 0.5 * white, 0.35);
+          glow(ev.x, ev.y, r * 2.2, (0.25 + 0.45 * white) * 0.6, 0.45);
           c.globalCompositeOperation = 'source-over';
-          c.fillStyle = `rgba(${Math.round(120 + 135 * white)},${Math.round(220 + 35 * white)},255,${fillA * 0.55})`;
+
+          // Monochromatic fluid fill (subtle neutral grey to bright white)
+          const grayVal = Math.round(180 + 75 * white);
+          c.fillStyle = `rgba(${grayVal},${grayVal},${grayVal},${(fillA * 0.28).toFixed(3)})`;
           c.beginPath(); c.arc(ev.x, ev.y, r, 0, 6.2832); c.fill();
-          c.strokeStyle = 'rgba(255,255,255,0.92)';
-          c.lineWidth = 1.5;
+
+          // Delicate white boundary stroke
+          c.strokeStyle = `rgba(255,255,255,${(0.40 + 0.40 * white).toFixed(2)})`;
+          c.lineWidth = 1.1;
           c.stroke();
         }
 
-        // ---- Sonoluminescent flash ----
+        // ---- Sonoluminescent flash (Monochrome White/Silver) ----
         const fa = age - T_BURST;
         if (fa >= 0 && fa < T_FLASH) {
           const q = fa / T_FLASH;
           c.globalCompositeOperation = 'lighter';
-          glow(ev.x, ev.y, 10 + 30 * easeOut(q), 1 - q, 0.25);
+          glow(ev.x, ev.y, 8 + 26 * easeOut(q), 0.50 * (1 - q), 0.35);
           c.globalCompositeOperation = 'source-over';
         }
 
-        // ---- Radial shockwave ----
+        // ---- Radial shockwave (Monochrome Whites, Greys, Black Accent) ----
         if (fa >= 0) {
           const q = Math.min(fa / T_SHOCK, 1);
           const r = 5 + R_SHOCK * easeOut(q);
           const alpha = Math.pow(1 - q, 1.6);
-          // soft halo (cheap replacement for shadowBlur)
-          c.strokeStyle = `rgba(6,182,212,${alpha * 0.16})`;
-          c.lineWidth = 5 * alpha + 1;
+
+          // 1. Soft atmospheric grayscale halo
+          c.strokeStyle = `rgba(255,255,255,${(alpha * 0.08).toFixed(3)})`;
+          c.lineWidth = 4 * alpha + 1;
           c.beginPath(); c.arc(ev.x, ev.y, r, 0, 6.2832); c.stroke();
-          // crisp primary ring
-          c.strokeStyle = `rgba(6,182,212,${alpha * 0.95})`;
-          c.lineWidth = 0.8 + 1.5 * alpha;
-          c.beginPath(); c.arc(ev.x, ev.y, r, 0, 6.2832); c.stroke();
-          // secondary rebound ring
-          if (r > 16) {
-            c.strokeStyle = `rgba(255,255,255,${alpha * 0.65})`;
+
+          // 2. Subtle dark contrast contour (black accent for depth)
+          if (r > 6) {
+            c.strokeStyle = `rgba(0,0,0,${(alpha * 0.16).toFixed(3)})`;
             c.lineWidth = 0.8;
+            c.beginPath(); c.arc(ev.x, ev.y, Math.max(0.5, r - 1.0), 0, 6.2832); c.stroke();
+          }
+
+          // 3. Crisp primary silver-white ring (higher transparency)
+          c.strokeStyle = `rgba(255,255,255,${(alpha * 0.52).toFixed(3)})`;
+          c.lineWidth = 0.75 + 1.1 * alpha;
+          c.beginPath(); c.arc(ev.x, ev.y, r, 0, 6.2832); c.stroke();
+
+          // 4. Secondary rebound ring (delicate monochrome gray)
+          if (r > 16) {
+            c.strokeStyle = `rgba(200,205,215,${(alpha * 0.32).toFixed(3)})`;
+            c.lineWidth = 0.65;
             c.beginPath(); c.arc(ev.x, ev.y, r * 0.65, 0, 6.2832); c.stroke();
           }
         }
