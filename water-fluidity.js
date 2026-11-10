@@ -123,10 +123,10 @@
     mouse.y = -9999;
   });
 
-  // --- SUBTLE RED TINT EASTER EGG (Long press/hold for 5-6s) ---
+  // --- SUBTLE THERMAL RED TINT & CYBERPUNK HEATING (5s -> 6s -> 10s hold Easter Egg) ---
   let isPressed = false;
   let pressStartTime = 0;
-  let redTintProgress = 0; // 0.0 = default indigo-white, 1.0 = subtle dim red tint
+  let heatStage = 0; // 0.0 = cold (default), 1.0 = subtle dim red (6s), 2.0 = neon cyberpunk red (10s)
 
   function onPointerDown(e) {
     isPressed = true;
@@ -150,16 +150,36 @@
   });
 
   function updatePhysics(timeNow) {
-    // 0. Hold-duration check for subtle red tint (held for > 5-6 seconds)
-    let targetTint = 0;
+    // 0. Hold-duration check: 5s subtle red -> 6s heating -> 10s neon cyberpunk red
+    let targetStage = 0;
     if (isPressed && pressStartTime > 0) {
       const heldMs = timeNow - pressStartTime;
-      if (heldMs >= 5000) {
-        // Ramp smoothly from 0 to 1 between 5.0s and 6.0s
-        targetTint = Math.min(1.0, (heldMs - 5000) / 1000);
+      if (heldMs >= 6000) {
+        // Heating phase from 6s to 10s (stage 1.0 -> 2.0)
+        targetStage = 1.0 + Math.min(1.0, (heldMs - 6000) / 4000);
+      } else if (heldMs >= 5000) {
+        // Subtle dim red tint phase from 5s to 6s (stage 0.0 -> 1.0)
+        targetStage = (heldMs - 5000) / 1000;
       }
     }
-    redTintProgress += (targetTint - redTintProgress) * 0.04;
+
+    // Zero-overhead fast exit: when idle and cold, skip all thermal computation
+    if (!isPressed && heatStage < 0.001) {
+      heatStage = 0;
+    } else {
+      heatStage += (targetStage - heatStage) * (isPressed ? 0.04 : 0.035);
+    }
+
+    // Micro thermal vibration when actively heating (between 6s and 10s)
+    if (heatStage > 1.02) {
+      const heatFactor = heatStage - 1.0;
+      const thermalAmp = heatFactor * 0.022;
+      const t = timeNow * 0.015;
+      for (let i = 0; i < nodes.length; i += 4) { // Sparsely sample every 4th node for zero lag
+        nodes[i].vx += Math.sin(t + i) * thermalAmp;
+        nodes[i].vy += Math.cos(t * 1.3 + i) * thermalAmp;
+      }
+    }
 
     // 1. Advance active radial ripples
     for (let i = ripples.length - 1; i >= 0; i--) {
@@ -268,18 +288,44 @@
     ctx.clearRect(0, 0, width, height);
     ctx.lineWidth = 1;
 
-    // Dynamic color tint: default indigo-white (165, 180, 252) -> very subtle dim red tint (218, 148, 162)
-    // Preserves identical dimness and alpha without increasing brightness at all
-    const t = Math.max(0, Math.min(1, redTintProgress));
-    const rVal = Math.round(165 * (1 - t) + 218 * t);
-    const gVal = Math.round(180 * (1 - t) + 148 * t);
-    const bVal = Math.round(252 * (1 - t) + 162 * t);
-    const strokeColorBase = `${rVal}, ${gVal}, ${bVal}`;
+    // Fast-path for default idle/cold state: zero math, zero memory overhead!
+    let strokeColorBase = '165, 180, 252';
+    let nodeColorBase = '199, 210, 254';
+    let baseAlpha = CONFIG.baseAlpha;
+    let highlightAlpha = CONFIG.highlightAlpha;
 
-    const rNode = Math.round(199 * (1 - t) + 235 * t);
-    const gNode = Math.round(210 * (1 - t) + 172 * t);
-    const bNode = Math.round(254 * (1 - t) + 182 * t);
-    const nodeColorBase = `${rNode}, ${gNode}, ${bNode}`;
+    if (heatStage > 0.001) {
+      if (heatStage <= 1.0) {
+        // Stage 1: 5s-6s (subtle dim red tint, exact identical dimness)
+        const t = heatStage;
+        const rVal = Math.round(165 * (1 - t) + 218 * t);
+        const gVal = Math.round(180 * (1 - t) + 148 * t);
+        const bVal = Math.round(252 * (1 - t) + 162 * t);
+        strokeColorBase = `${rVal}, ${gVal}, ${bVal}`;
+
+        const rNode = Math.round(199 * (1 - t) + 235 * t);
+        const gNode = Math.round(210 * (1 - t) + 172 * t);
+        const bNode = Math.round(254 * (1 - t) + 182 * t);
+        nodeColorBase = `${rNode}, ${gNode}, ${bNode}`;
+      } else {
+        // Stage 2: 6s-10s (heating up to neon cyberpunk red, bright yet non-distracting)
+        const h = Math.min(1.0, heatStage - 1.0);
+        // [218, 148, 162] -> [255, 26, 74] (neon cyberpunk crimson-red)
+        const rVal = Math.round(218 + (255 - 218) * h);
+        const gVal = Math.round(148 + (26 - 148) * h);
+        const bVal = Math.round(162 + (74 - 162) * h);
+        strokeColorBase = `${rVal}, ${gVal}, ${bVal}`;
+
+        const rNode = Math.round(235 + (255 - 235) * h);
+        const gNode = Math.round(172 + (60 - 172) * h);
+        const bNode = Math.round(182 + (110 - 182) * h);
+        nodeColorBase = `${rNode}, ${gNode}, ${bNode}`;
+
+        // Gentle neon luminosity scaling (0.045 -> 0.11 base, remaining refined & non-distracting)
+        baseAlpha = CONFIG.baseAlpha + 0.065 * h;
+        highlightAlpha = CONFIG.highlightAlpha + 0.14 * h;
+      }
+    }
 
     // Draw Horizontal Strings
     for (let r = 0; r < rows; r++) {
@@ -301,7 +347,7 @@
           ctx.quadraticCurveTo(prev.bx + prev.dx, prev.by + prev.dy, cx, cy);
         }
       }
-      const alpha = CONFIG.baseAlpha + rowEnergy * (CONFIG.highlightAlpha - CONFIG.baseAlpha);
+      const alpha = baseAlpha + rowEnergy * (highlightAlpha - baseAlpha);
       ctx.strokeStyle = `rgba(${strokeColorBase}, ${alpha.toFixed(3)})`;
       ctx.stroke();
     }
@@ -327,7 +373,7 @@
             ctx.quadraticCurveTo(prev.bx + prev.dx, prev.by + prev.dy, cx, cy);
           }
         }
-        const alpha = (CONFIG.baseAlpha * 0.75) + colEnergy * (CONFIG.highlightAlpha - CONFIG.baseAlpha);
+        const alpha = (baseAlpha * 0.75) + colEnergy * (highlightAlpha - baseAlpha);
         ctx.strokeStyle = `rgba(${strokeColorBase}, ${alpha.toFixed(3)})`;
         ctx.stroke();
       }
@@ -337,7 +383,7 @@
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
       if (n.energy > 0.08) {
-        ctx.fillStyle = `rgba(${nodeColorBase}, ${(n.energy * 0.35).toFixed(3)})`;
+        ctx.fillStyle = `rgba(${nodeColorBase}, ${(n.energy * (0.35 + 0.25 * Math.max(0, heatStage - 1))).toFixed(3)})`;
         ctx.beginPath();
         ctx.arc(n.bx + n.dx, n.by + n.dy, 1.2, 0, Math.PI * 2);
         ctx.fill();
