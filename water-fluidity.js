@@ -132,6 +132,20 @@
     if (e && e.button && e.button !== 0) return; // Only trigger for primary left click or touch
     isPressed = true;
     pressStartTime = performance.now();
+
+    const cx = (e.touches && e.touches[0]) ? e.touches[0].clientX : (e.clientX !== undefined ? e.clientX : mouse.x);
+    const cy = (e.touches && e.touches[0]) ? e.touches[0].clientY : (e.clientY !== undefined ? e.clientY : mouse.y);
+    if (cx > 0 && cy > 0) {
+      ripples.push({
+        x: cx,
+        y: cy,
+        radius: 4,
+        maxRadius: 280,
+        strength: CONFIG.rippleStrength * 1.6,
+        wavelength: 46
+      });
+      if (ripples.length > 12) ripples.shift();
+    }
   }
 
   function endHold() {
@@ -406,7 +420,6 @@
         ctx.fill();
       }
     }
-  }
   }
 
   function animate(timeNow) {
