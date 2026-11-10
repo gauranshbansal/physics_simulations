@@ -125,7 +125,9 @@
       const ALLOWED_DOMAINS = [
         'gauranshbansal.com',
         'www.gauranshbansal.com',
-        'gauranshbansal.github.io'
+        'gauranshbansal.github.io',
+        'academicportfolio.pages.dev',
+        'pages.dev'
       ];
 
       if (!isLocal && !ALLOWED_DOMAINS.some(d => window.location.hostname === d || window.location.hostname.endsWith('.' + d))) {
@@ -180,7 +182,12 @@
         <span class="font-medium text-sm tracking-tight hidden md:block text-neutral-200 group-hover:text-white transition-colors">Gauransh Bansal</span>
       </a>
 
-      <div class="flex items-center gap-6 sm:gap-8">
+      <div class="flex items-center gap-4 sm:gap-6">
+        <a href="https://academicportfolio.pages.dev" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 hover:border-cyan-400/60 hover:bg-cyan-500/20 text-xs font-medium text-cyan-300 hover:text-white transition-all shadow-glass-edge-subtle">
+          <iconify-icon icon="lucide:graduation-cap" width="14" class="text-cyan-400"></iconify-icon>
+          <span>Academic Portfolio</span>
+          <iconify-icon icon="lucide:arrow-up-right" width="12" class="text-cyan-400"></iconify-icon>
+        </a>
         <a href="./index.html" class="text-xs font-medium tracking-wider uppercase text-neutral-400 hover:text-white transition-colors">← Back to Portfolio</a>
         <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-cyan-400/50 hover:bg-cyan-500/10 text-xs font-medium text-neutral-300 hover:text-cyan-300 transition-all">
           <iconify-icon icon="lucide:linkedin" width="13"></iconify-icon>
@@ -195,9 +202,17 @@
 
     <!-- Header / Manifesto Title -->
     <header class="mb-16 opacity-0 animate-fade-in-up">
-      <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.03] border border-white/10 mb-6">
-        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-        <span class="text-[10px] font-mono tracking-[0.25em] uppercase text-cyan-300">Gauransh Bansal</span>
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.03] border border-white/10">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span class="text-[10px] font-mono tracking-[0.25em] uppercase text-cyan-300">Gauransh Bansal</span>
+        </div>
+
+        <a href="https://academicportfolio.pages.dev" target="_blank" rel="noopener noreferrer" class="group inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 hover:border-cyan-400/70 hover:bg-cyan-500/20 text-xs font-mono tracking-wider uppercase text-cyan-300 hover:text-white transition-all shadow-glass-edge-subtle">
+          <iconify-icon icon="lucide:graduation-cap" width="15" class="text-cyan-400"></iconify-icon>
+          <span>academicportfolio.pages.dev</span>
+          <iconify-icon icon="lucide:arrow-up-right" width="13" class="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></iconify-icon>
+        </a>
       </div>
       
       <h1 class="font-serif hero-title text-4xl sm:text-6xl font-medium tracking-tight leading-[1.15] mb-6">
@@ -393,6 +408,10 @@
       </p>
 
       <div class="flex flex-wrap items-center justify-center gap-4">
+        <a href="https://academicportfolio.pages.dev" target="_blank" rel="noopener noreferrer" class="px-7 py-3.5 rounded-full bg-cyan-500/10 border border-cyan-400/40 hover:border-cyan-400/80 text-cyan-300 font-semibold text-xs tracking-wider uppercase hover:bg-cyan-500/20 transition-all inline-flex items-center gap-2">
+          <iconify-icon icon="lucide:graduation-cap" width="16"></iconify-icon>
+          Academic Portfolio
+        </a>
         <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer" class="px-7 py-3.5 rounded-full bg-white text-black font-semibold text-xs tracking-wider uppercase shadow-button-physical hover:scale-105 transition-all inline-flex items-center gap-2">
           <iconify-icon icon="lucide:linkedin" width="16"></iconify-icon>
           LinkedIn Profile

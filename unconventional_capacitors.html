@@ -1,0 +1,2718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>The World of Capacitors: Canonical & Unconventional Geometries</title>
+    
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #050508;
+            --surface-color: #0c0d14;
+            --surface-hover: #141724;
+            --border-color: #1e2233;
+            --border-highlight: #38425e;
+            --text-main: #e2e8f0;
+            --text-muted: #8492a6;
+            
+            /* System specific accents */
+            --color-parallel: #38bdf8;   /* Sky Blue */
+            --color-cyl: #34d399;        /* Emerald Green */
+            --color-sphere: #f472b6;     /* Rose Pink */
+            --color-unconv: #a855f7;     /* Quantum Violet */
+            --color-gold: #fbbf24;       /* Amber Gold */
+
+            --font-ui: 'Inter', sans-serif;
+            --font-serif: 'Lora', serif;
+            --font-mono: 'Share Tech Mono', monospace;
+        }
+
+        /* Obsidian Amber Theme */
+        body.theme-amber {
+            --bg-color: #080604;
+            --surface-color: #120e09;
+            --surface-hover: #1c160f;
+            --border-color: #2e2316;
+            --border-highlight: #523e25;
+            --text-main: #fef08a;
+            --text-muted: #a17c45;
+            --color-parallel: #facc15;
+            --color-cyl: #fbbf24;
+            --color-sphere: #f59e0b;
+            --color-unconv: #eab308;
+            --color-gold: #fef08a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .bg-ambient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 50% 12%, rgba(56, 189, 248, 0.04), transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1360px;
+            padding: 2.5rem 1.5rem 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 1.5rem 0 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-weight: 300;
+            letter-spacing: 0.12em;
+            font-size: 1.85rem;
+            text-transform: uppercase;
+            color: var(--text-main);
+            margin-bottom: 0.35rem;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+            font-family: var(--font-serif);
+            font-style: italic;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .author-tag {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.6rem;
+            letter-spacing: 0.05em;
+        }
+        .author-tag a {
+            color: var(--color-parallel);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .author-tag a:hover {
+            text-decoration: underline;
+        }
+
+        /* Central Stage: Focused Mathematical Focal Point */
+        /* Central Stage: Focused Mathematical Focal Point */
+        .central-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0 1.5rem;
+            min-height: 170px;
+            position: relative;
+            width: 100%;
+        }
+
+        .equation-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .main-equation {
+            font-size: 2.3rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 25px rgba(56, 189, 248, 0.12);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .explosion-splash-frame {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 165px;
+            width: auto;
+            aspect-ratio: 396 / 492;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            background: #000000;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.12), inset 0 0 10px rgba(0, 0, 0, 0.8);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            cursor: pointer;
+        }
+
+        .explosion-splash-frame:hover {
+            transform: translateY(-50%) scale(1.05);
+            border-color: rgba(251, 191, 36, 0.75);
+            box-shadow: 0 0 28px rgba(251, 191, 36, 0.25);
+        }
+
+        .explosion-splash-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            filter: contrast(1.08) brightness(1.04);
+        }
+
+        @media (max-width: 1150px) {
+            .explosion-splash-frame {
+                position: static;
+                transform: none;
+                margin: 0 auto 1.25rem;
+                height: 150px;
+            }
+            .explosion-splash-frame:hover {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Master Voltage Slider */
+        .master-control {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .control-val {
+            font-family: var(--font-mono);
+            color: var(--color-parallel);
+            font-weight: 600;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            margin-top: -5px;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 3px;
+            cursor: pointer;
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        /* Three Worlds Grid */
+        .worlds-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.75rem;
+            width: 100%;
+        }
+
+        .world-panel {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .world-panel:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-highlight);
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .world-header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.85rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .world-title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .world-title {
+            font-size: 0.92rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .isolate-btn-small {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.68rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            transition: all 0.2s ease;
+        }
+        .isolate-btn-small:hover {
+            color: #ffffff;
+            border-color: var(--text-main);
+            background: var(--surface-hover);
+        }
+
+        .tier-badge {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.18rem 0.5rem;
+            border-radius: 4px;
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .world-math {
+            margin-top: 0.4rem;
+            font-size: 1.25rem;
+            min-height: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .math-interpretation {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            min-height: 1.3rem;
+            text-align: center;
+            font-family: var(--font-serif);
+            font-style: italic;
+        }
+
+        .canvas-container {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            position: relative;
+            background: #000000;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .canvas-container canvas,
+        .iso-canvas-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+
+        /* Specific accents */
+        #parallel-panel .world-title { color: var(--color-parallel); }
+        #cyl-panel .world-title { color: var(--color-cyl); }
+        #sphere-panel .world-title { color: var(--color-sphere); }
+
+        /* Multiverse Escalation Section */
+        .multiverse-wrapper {
+            display: none;
+            flex-direction: column;
+            gap: 2rem;
+            width: 100%;
+            margin-top: 1.5rem;
+            padding-top: 2rem;
+            border-top: 1px dashed var(--border-color);
+            animation: fadeIn 0.3s ease forwards;
+        }
+        .multiverse-wrapper.visible {
+            display: flex;
+        }
+
+        /* Explicit Deep Space Theme */
+        body.theme-space {
+            --bg-color: #030712;
+            --surface-color: #0a0f1d;
+            --surface-hover: #111a2e;
+            --border-color: #1e293b;
+            --border-highlight: #38bdf8;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --color-parallel: #38bdf8;
+            --color-cyl: #34d399;
+            --color-sphere: #f472b6;
+            --color-unconv: #a855f7;
+            --color-gold: #fbbf24;
+        }
+
+        .progression-banner {
+            text-align: center;
+            background: var(--surface-color);
+            padding: 1.5rem 2rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .progression-title {
+            font-size: 1rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--color-unconv);
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+        .progression-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-family: var(--font-serif);
+        }
+
+        /* Bottom Controls Action Bar */
+        .action-bar {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.85rem;
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            width: 100%;
+        }
+
+        button {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1.1rem;
+            font-family: var(--font-ui);
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.25s ease;
+        }
+
+        button:hover {
+            color: var(--text-main);
+            border-color: var(--text-muted);
+            background: var(--surface-hover);
+        }
+
+        button.active {
+            color: #ffffff;
+            border-color: var(--color-parallel);
+            background: rgba(56, 189, 248, 0.12);
+        }
+
+        /* ========================================================
+           FULLSCREEN ISOLATION & DERIVATION MODAL
+           ======================================================== */
+        .isolation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #08080a;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        body.theme-amber .isolation-overlay { background: #080604; }
+
+        .isolation-overlay.visible {
+            display: flex;
+            animation: fadeIn 0.2s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .isolation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .isolation-title {
+            font-size: 1.25rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .iso-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--surface-hover);
+            padding: 0.45rem 0.9rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .split-view {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+            gap: 2rem;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            flex: 1;
+            min-height: 0;
+        }
+
+        @media (max-width: 960px) {
+            .split-view { grid-template-columns: minmax(0, 1fr); }
+            .worlds-container { grid-template-columns: 1fr; }
+        }
+
+        .iso-left-pane {
+            min-width: 0;
+            max-width: 100%;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .iso-canvas-container {
+            width: 100%;
+            max-width: 100%;
+            aspect-ratio: 4 / 3;
+            position: relative;
+            background: #000000;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: crosshair;
+        }
+
+        .iso-probe-bar {
+            width: 100%;
+            background: rgba(12, 13, 20, 0.88);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .probe-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .probe-indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #38bdf8;
+            box-shadow: 0 0 8px #38bdf8;
+            animation: probePulse 1.8s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes probePulse {
+            0%, 100% { opacity: 0.4; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.25); }
+        }
+
+        .probe-hint-title {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+            font-weight: 500;
+        }
+
+        .probe-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.6rem;
+        }
+
+        .probe-metric-box {
+            background: var(--surface-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.45rem 0.6rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .probe-metric-box .p-label {
+            font-size: 0.64rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .probe-metric-box .p-value {
+            font-family: var(--font-mono);
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .probe-stress-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .p-stress-label {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .probe-gauge-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .probe-gauge-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8 0%, #34d399 50%, #fbbf24 80%, #ef4444 100%);
+            border-radius: 3px;
+            transition: width 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .p-stress-val {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--color-parallel);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .iso-right-pane {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+            max-height: calc(100vh - 160px);
+        }
+
+        .iso-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.35rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .iso-eq-box {
+            background: var(--surface-hover);
+            padding: 1.25rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: auto;
+            margin-bottom: 0.6rem;
+        }
+
+        .iso-explanation {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+            font-family: var(--font-serif);
+        }
+
+        .iso-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            margin-top: 0.35rem;
+        }
+        .iso-table th, .iso-table td {
+            padding: 0.55rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+        .iso-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            line-height: 1.8;
+        }
+        footer a {
+            color: var(--color-parallel);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-ambient"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>The World of Capacitors</h1>
+            <div class="subtitle">Energy stored not in the plates, but woven into the geometric stress of electric fields.</div>
+            <div class="author-tag">
+                Developed by <span style="color:var(--text-main); font-weight:500;">Gauransh Bansal</span> — 
+                <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a>
+            </div>
+        </header>
+
+        <!-- Central Stage: Universal Field Relation & Master Slider -->
+        <div class="central-stage">
+            <div class="equation-label">Fundamental Law of Capacitance</div>
+            <div class="main-equation" id="main-eq">$$C = \frac{Q}{\Delta V} = \frac{\varepsilon \oint \vec{E} \cdot d\vec{A}}{\int \vec{E} \cdot d\vec{r}}$$</div>
+
+            <div class="explosion-splash-frame" title="Capacitor Dielectric Breakdown Animation">
+                <img src="capacitor_explosion.gif" alt="Capacitor Dielectric Breakdown">
+            </div>
+
+            <div class="master-control">
+                <div class="control-header">
+                    <span>Applied Potential Difference</span>
+                    <span class="control-val" id="omega-display">V = 48.0 V</span>
+                </div>
+                <input type="range" id="voltage-slider" min="5" max="150" step="1" value="48">
+            </div>
+        </div>
+
+        <!-- ==========================================
+             ACT I: THE CANONICAL TRIO
+             ========================================== -->
+        <div class="worlds-container" id="canonical-container">
+            <!-- 1. Parallel Plate -->
+            <div class="world-panel" id="parallel-panel" onclick="isolateSystem('parallel')">
+                <div class="world-header">
+                    <div class="world-title-bar">
+                        <div class="world-title">Parallel Plate</div>
+                        <button class="isolate-btn-small" onclick="event.stopPropagation(); isolateSystem('parallel')">Isolate</button>
+                    </div>
+                    <div class="tier-badge">UNIFORM FIELD</div>
+                    <div class="world-math" id="math-parallel"></div>
+                    <div class="math-interpretation">Constant gap d. Linear drop V(x). Field purely perpendicular.</div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="canvas-parallel"></canvas>
+                </div>
+            </div>
+
+            <!-- 2. Cylindrical Coaxial (3D Cylinder) -->
+            <div class="world-panel" id="cyl-panel" onclick="isolateSystem('cylindrical')">
+                <div class="world-header">
+                    <div class="world-title-bar">
+                        <div class="world-title">Cylindrical (Coaxial)</div>
+                        <button class="isolate-btn-small" onclick="event.stopPropagation(); isolateSystem('cylindrical')">Isolate</button>
+                    </div>
+                    <div class="tier-badge">1/r RADIAL DROP & SHIELD</div>
+                    <div class="world-math" id="math-cylindrical"></div>
+                    <div class="math-interpretation">Tight core to outer shield. Field decays as 1/r. Outer space feels zero flux.</div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="canvas-cylindrical"></canvas>
+                </div>
+            </div>
+
+            <!-- 3. Concentric Spherical (3D Cutaway Sphere) -->
+            <div class="world-panel" id="sphere-panel" onclick="isolateSystem('spherical')">
+                <div class="world-header">
+                    <div class="world-title-bar">
+                        <div class="world-title">Concentric Spherical</div>
+                        <button class="isolate-btn-small" onclick="event.stopPropagation(); isolateSystem('spherical')">Isolate</button>
+                    </div>
+                    <div class="tier-badge">INVERSE-SQUARE COULOMB</div>
+                    <div class="world-math" id="math-spherical"></div>
+                    <div class="math-interpretation">Radially isotropic. Charge distributes evenly with zero edge singularities.</div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="canvas-spherical"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             ACT II: UNCONVENTIONAL SHAPES (EXPANDABLE)
+             ========================================== -->
+        <div class="multiverse-wrapper" id="unconv-wrapper">
+            <div class="progression-banner">
+                <div class="progression-title">✦ Unconventional Geometries: Beyond Classical Symmetry</div>
+                <div class="progression-sub">
+                    Capacitance is fundamentally a Dirichlet boundary-value problem of Laplace's equation <span id="math-laplace"></span>. When plates are tilted, wires run parallel, cylinders shift off-center, or surfaces form confocal ellipses and coaxial cones, the geometry reshapes the electric field lines into rich non-uniform topologies.
+                </div>
+            </div>
+
+            <div class="worlds-container" id="unconv-container">
+                <!-- 1. Tilted Wedge Plates -->
+                <div class="world-panel" id="panel-wedge" onclick="isolateSystem('wedge')">
+                    <div class="world-header">
+                        <div class="world-title-bar">
+                            <div class="world-title" style="color:var(--color-gold);">Tilted Wedge Plates</div>
+                            <button class="isolate-btn-small" onclick="event.stopPropagation(); isolateSystem('wedge')">Isolate</button>
+                        </div>
+                        <div class="tier-badge">POLAR THROAT SQUEEZE</div>
+                        <div class="world-math" id="math-wedge"></div>
+                        <div class="math-interpretation">Field lines bend into circular arcs. Intense squeezing at the vertex throat.</div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="canvas-wedge"></canvas>
+                    </div>
+                </div>
+
+                <!-- 2. Parallel Twin Wires -->
+                <div class="world-panel" id="panel-wires" onclick="isolateSystem('wires')">
+                    <div class="world-header">
+                        <div class="world-title-bar">
+                            <div class="world-title" style="color:var(--color-parallel);">Parallel Twin Wires (Lecher Line)</div>
+                            <button class="isolate-btn-small" onclick="event.stopPropagation(); isolateSystem('wires')">Isolate</button>
+                        </div>
+                        <div class="tier-badge">BIPOLAR PINCH</div>
+                        <div class="world-math" id="math-wires"></div>
+                        <div class="math-interpretation">Two conductors. Field forms eccentric circles, crowding between them.</div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="canvas-wires"></canvas>
+                    </div>
+                </div>
+
+                <!-- 3. Eccentric Coaxial Cylinders -->
+                <div class="world-panel" id="panel-eccentric" onclick="isolateSystem('eccentric')">
+                    <div class="world-header">
+                        <div class="world-title-bar">
+                            <div class="world-title" style="color:var(--color-cyl);">Eccentric Coaxial Cylinders</div>
+                            <button class="isolate-btn-small" onclick="event.stopPropagation(); isolateSystem('eccentric')">Isolate</button>
+                        </div>
+                        <div class="tier-badge">CORE OFF-CENTER</div>
+                        <div class="world-math" id="math-eccentric"></div>
+                        <div class="math-interpretation">Move the core. Watch the field bunch up in the pinched gap.</div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="canvas-eccentric"></canvas>
+                    </div>
+                </div>
+
+                <!-- 4. Confocal Elliptic Cylinders -->
+                <div class="world-panel" id="panel-elliptic" onclick="isolateSystem('elliptic')">
+                    <div class="world-header">
+                        <div class="world-title-bar">
+                            <div class="world-title" style="color:var(--color-sphere);">Confocal Elliptic Cylinders</div>
+                            <button class="isolate-btn-small" onclick="event.stopPropagation(); isolateSystem('elliptic')">Isolate</button>
+                        </div>
+                        <div class="tier-badge">HYPERBOLIC FLUX</div>
+                        <div class="world-math" id="math-elliptic"></div>
+                        <div class="math-interpretation">Elliptic boundaries force the electric field lines into confocal hyperbolas.</div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="canvas-elliptic"></canvas>
+                    </div>
+                </div>
+
+                <!-- 5. Coaxial Cone-in-Cone -->
+                <div class="world-panel" id="panel-conical" onclick="isolateSystem('conical')">
+                    <div class="world-header">
+                        <div class="world-title-bar">
+                            <div class="world-title" style="color:var(--color-unconv);">Coaxial Cone-in-Cone</div>
+                            <button class="isolate-btn-small" onclick="event.stopPropagation(); isolateSystem('conical')">Isolate</button>
+                        </div>
+                        <div class="tier-badge">APEX DIVERGENCE</div>
+                        <div class="world-math" id="math-conical"></div>
+                        <div class="math-interpretation">Concentric cones. Field arches azimuthally and concentrates at the sharp apex.</div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="canvas-conical"></canvas>
+                    </div>
+                </div>
+
+                <!-- 6. Interdigitated Micro-Comb -->
+                <div class="world-panel" id="panel-comb" onclick="isolateSystem('comb')">
+                    <div class="world-header">
+                        <div class="world-title-bar">
+                            <div class="world-title" style="color:var(--color-gold);">Interdigitated Micro-Comb</div>
+                            <button class="isolate-btn-small" onclick="event.stopPropagation(); isolateSystem('comb')">Isolate</button>
+                        </div>
+                        <div class="tier-badge">FRINGE-FIELD DRIVE</div>
+                        <div class="world-math" id="math-comb"></div>
+                        <div class="math-interpretation">Fringing fields around finger tips contribute significantly, driving linear force.</div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="canvas-comb"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Minimalist Action Bar -->
+        <div class="action-bar">
+            <button id="btn-lines" class="active">Field Lines</button>
+            <button id="btn-unlock-unconv" style="border-color:var(--color-unconv); color:var(--color-unconv);">✦ Explore 6 Unconventional Shapes</button>
+            <button id="btn-music">🎵 Music: OFF</button>
+            <button id="btn-sfx">🔔 Sound FX: OFF</button>
+            <button id="btn-theme">Theme: Deep Space</button>
+        </div>
+
+        <footer>
+            Developed by <strong>Gauransh Bansal</strong> | Interactive Physics & Dynamical Systems Lab<br>
+            Inspired by <em>Same Equation, Different Reality</em> • Standalone HTML5 Canvas & KaTeX Simulation
+        </footer>
+    </div>
+
+    <!-- ==========================================
+         ISOLATION OVERLAY (FOCUS EXPLORATION)
+         ========================================== -->
+    <div class="isolation-overlay" id="isolation-overlay">
+        <div class="isolation-header">
+            <div class="isolation-title" id="iso-title">System Isolated</div>
+            <button onclick="closeIsolation()">✕ Exit Isolation</button>
+        </div>
+
+        <div class="split-view">
+            <!-- Left Pane: Big 3D Canvas & Interactive Field Probe -->
+            <div class="iso-left-pane">
+                <div class="iso-canvas-container" id="iso-canvas-container">
+                    <canvas id="canvas-isolated"></canvas>
+                </div>
+                <div class="iso-probe-bar" id="iso-probe-bar">
+                    <div class="probe-header">
+                        <span class="probe-indicator-dot"></span>
+                        <span class="probe-hint-title" id="probe-hint-title">Interactive Field Probe — Move cursor over geometry to inspect where field gets squeezed</span>
+                    </div>
+                    <div class="probe-metrics-grid">
+                        <div class="probe-metric-box">
+                            <span class="p-label">Local Field |E⃗|</span>
+                            <span class="p-value" id="probe-metric-e">--</span>
+                        </div>
+                        <div class="probe-metric-box">
+                            <span class="p-label">Potential V(r)</span>
+                            <span class="p-value" id="probe-metric-v">--</span>
+                        </div>
+                        <div class="probe-metric-box">
+                            <span class="p-label">Energy Density u_E</span>
+                            <span class="p-value" id="probe-metric-u">--</span>
+                        </div>
+                    </div>
+                    <div class="probe-stress-wrap">
+                        <span class="p-stress-label">Field Squeeze Index:</span>
+                        <div class="probe-gauge-track">
+                            <div class="probe-gauge-fill" id="probe-gauge-fill" style="width: 25%;"></div>
+                        </div>
+                        <span class="p-stress-val" id="probe-stress-val">Nominal</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Pane: Multi-Line KaTeX Derivations -->
+            <div class="iso-right-pane">
+                <!-- 1. Gauss Law & Electric Field -->
+                <div>
+                    <div class="iso-section-title">1. Electric Field & Governing Equation</div>
+                    <div class="iso-eq-box" id="iso-math-gauss"></div>
+                    <div class="iso-explanation" id="iso-explain-gauss"></div>
+                </div>
+
+                <!-- 2. Electrostatic Potential Integral -->
+                <div>
+                    <div class="iso-section-title">2. Electrostatic Potential Difference V(r)</div>
+                    <div class="iso-eq-box" id="iso-math-potential"></div>
+                    <div class="iso-explanation" id="iso-explain-potential"></div>
+                </div>
+
+                <!-- 3. Capacitance Formula -->
+                <div>
+                    <div class="iso-section-title">3. Capacitance Derivation</div>
+                    <div class="iso-eq-box" id="iso-math-cap"></div>
+                    <div class="iso-explanation" id="iso-explain-cap"></div>
+                </div>
+
+                <!-- 4. Total Electrostatic Energy -->
+                <div>
+                    <div class="iso-section-title">4. Stored Energy (Volumetric Field Integral)</div>
+                    <div class="iso-eq-box" id="iso-math-energy"></div>
+                    <div class="iso-explanation" id="iso-explain-energy"></div>
+                </div>
+
+                <!-- 5. Variable Mapping Table -->
+                <div>
+                    <div class="iso-section-title">5. Physical Parameters & Coordinates</div>
+                    <table class="iso-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Parameter</th>
+                                <th>SI Unit</th>
+                                <th>Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody id="iso-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 6. Intuitive Physical Mechanism -->
+                <div>
+                    <div class="iso-section-title">6. Geometric Intuition & Engineering Reality</div>
+                    <div class="iso-explanation" id="iso-explain-intuition" style="color:#ffffff;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         SIMULATION & MATHEMATICAL LOGIC
+         ========================================== -->
+    <script>
+        const EPSILON_0 = 8.8541878128e-12;
+
+        const STATE = {
+            voltage: 48.0,
+            showFieldLines: true,
+            musicEnabled: false,
+            sfxEnabled: false,
+            unconvUnlocked: false,
+            themeIndex: 0,
+            time: 0,
+            isolatedKey: null
+        };
+
+        // All 9 Systems: 3 Canonical + 6 Genuine Geometric Unconventional Capacitors
+        const SYSTEMS = {
+            // CANONICAL
+            parallel: {
+                title: "Parallel Plate",
+                tier: "UNIFORM FIELD",
+                color: "#38bdf8",
+                previewMath: "C = \\frac{\\varepsilon A}{d}",
+                interp: "Constant gap d. Linear drop V(x). Field purely perpendicular.",
+                gaussMath: "\\begin{aligned} \\oint \\vec{E} \\cdot d\\vec{A} &= \\frac{Q_{\\text{enc}}}{\\varepsilon} \\\\[6pt] E \\cdot A &= \\frac{\\sigma A}{\\varepsilon} \\\\[6pt] E &= \\frac{\\sigma}{\\varepsilon} = \\frac{Q}{\\varepsilon A} \\end{aligned}",
+                gaussExplain: "Construct a Gaussian pillbox enclosing an area A of charge on the positive plate. By translational symmetry, the field is purely normal to the plates and zero inside the conductor.",
+                potentialMath: "\\begin{aligned} \\Delta V &= -\\int_0^d \\vec{E} \\cdot d\\vec{r} \\\\[6pt] &= E \\int_0^d dx = E \\cdot d = \\frac{Q d}{\\varepsilon A} \\end{aligned}",
+                potentialExplain: "Because the electric field is strictly uniform across gap d, the electrostatic potential drops with a constant linear gradient dV/dx = -E.",
+                capMath: "C = \\frac{Q}{\\Delta V} = \\frac{\\varepsilon A}{d} = \\kappa \\frac{\\varepsilon_0 A}{d}",
+                capExplain: "Capacitance depends exclusively on geometry (directly on area A, inversely on gap d) and dielectric permittivity κ of the filling medium.",
+                energyMath: "\\begin{aligned} U &= \\int_{\\text{volume}} \\frac{1}{2} \\varepsilon |\\vec{E}|^2 dV \\\\[6pt] &= \\frac{1}{2} \\varepsilon \\left(\\frac{V}{d}\\right)^2 (A d) = \\frac{1}{2} C V^2 \\end{aligned}",
+                energyExplain: "Integrating field energy density u_E = 1/2 ε E² over the gap volume precisely equals 1/2 C V², proving energy resides in the field.",
+                mapping: [
+                    ["A", "Plate Overlap Area", "m²", "Facing surface area of conductive electrodes"],
+                    ["d", "Plate Spacing", "m", "Distance between opposing conductive surfaces"],
+                    ["\\varepsilon", "Permittivity", "F/m", "Permittivity of the medium (\\varepsilon = \\varepsilon_r \\varepsilon_0)"],
+                    ["\\sigma", "Surface Charge", "C/m²", "Charge distributed per unit electrode area"]
+                ],
+                intuition: "The classical parallel plate capacitor. Fringe fields curve outward at the perimeter edges. Inserting a dielectric aligns bound atomic dipoles, counteracting the free field and multiplying charge capacity."
+            },
+
+            cylindrical: {
+                title: "Cylindrical (Coaxial)",
+                tier: "1/r RADIAL DROP & SHIELD",
+                color: "#34d399",
+                previewMath: "\\frac{C}{L} = \\frac{2\\pi\\varepsilon}{\\ln(b/a)}",
+                interp: "Tight core to outer shield. Field decays as 1/r. Outer space feels zero flux.",
+                gaussMath: "\\begin{aligned} \\oint \\vec{E} \\cdot d\\vec{A} &= E(r) \\cdot (2\\pi r L) = \\frac{Q_{\\text{enc}}}{\\varepsilon} \\\\[6pt] E(r) &= \\frac{\\lambda}{2\\pi\\varepsilon r} = \\frac{Q}{2\\pi\\varepsilon L r} \\hat{r} \\end{aligned}",
+                gaussExplain: "Construct a coaxial Gaussian cylinder of radius r and length L. By axial and rotational symmetry, flux only pierces the curved cylindrical barrel, showing E falls off inversely as 1/r.",
+                potentialMath: "\\begin{aligned} \\Delta V &= -\\int_b^a E(r) dr \\\\[6pt] &= \\frac{Q}{2\\pi\\varepsilon L} \\int_a^b \\frac{dr}{r} = \\frac{Q}{2\\pi\\varepsilon L} \\ln\\left(\\frac{b}{a}\\right) \\end{aligned}",
+                potentialExplain: "Integrating 1/r produces the natural logarithm. The electric potential gradient is steep near the inner core (r=a) and flattens toward the outer shield (r=b).",
+                capMath: "\\frac{C}{L} = \\frac{2\\pi\\varepsilon}{\\ln(b/a)} = \\frac{2\\pi\\kappa\\varepsilon_0}{\\ln(b/a)}",
+                capExplain: "Capacitance per unit length depends solely on the ratio of radii b/a! Scaling both radii up by 10× leaves the capacitance per meter completely unaltered.",
+                energyMath: "\\begin{aligned} U &= \\int_a^b \\frac{1}{2} \\varepsilon [E(r)]^2 (2\\pi r L) dr \\\\[6pt] &= \\frac{Q^2 \\ln(b/a)}{4\\pi\\varepsilon L} = \\frac{1}{2} C V^2 \\end{aligned}",
+                energyExplain: "The volume integral over concentric cylindrical shells confirms that electrostatic energy is strongly concentrated immediately adjacent to the inner core.",
+                mapping: [
+                    ["a", "Inner Core Radius", "m", "Radius of internal cylindrical conductive rod"],
+                    ["b", "Outer Shield Radius", "m", "Radius of outer coaxial cylindrical shield"],
+                    ["L", "Axial Length", "m", "Cylinder length along longitudinal axis"],
+                    ["\\lambda", "Linear Charge Density", "C/m", "Charge per unit length along cylinder"]
+                ],
+                intuition: "Coaxial geometry powers every high-frequency RF transmission line (coax). Because the outer conductor encloses all flux (E=0 for r > b), the external space feels zero field, preventing interference."
+            },
+
+            spherical: {
+                title: "Concentric Spherical",
+                tier: "INVERSE-SQUARE COULOMB",
+                color: "#f472b6",
+                previewMath: "C = \\frac{4\\pi\\varepsilon a b}{b - a}",
+                interp: "Radially isotropic. Charge distributes evenly with zero edge singularities.",
+                gaussMath: "\\begin{aligned} \\oint \\vec{E} \\cdot d\\vec{A} &= E(r) \\cdot (4\\pi r^2) = \\frac{Q}{\\varepsilon} \\\\[6pt] E(r) &= \\frac{Q}{4\\pi\\varepsilon r^2} \\hat{r} \\end{aligned}",
+                gaussExplain: "A concentric Gaussian sphere of radius r contains charge Q. Isotropic symmetry in all 4π steradians yields Coulomb's pure inverse-square law.",
+                potentialMath: "\\begin{aligned} \\Delta V &= -\\int_b^a \\frac{Q}{4\\pi\\varepsilon r^2} dr = \\frac{Q(b - a)}{4\\pi\\varepsilon a b} \\end{aligned}",
+                potentialExplain: "Integrating 1/r² yields the difference of reciprocal radii. For a tiny gap (b - a = d ≪ a), this reduces to ε(4πa²)/d = εA/d!",
+                capMath: "C = \\frac{4\\pi\\varepsilon a b}{b - a} \\xrightarrow{b \\to \\infty} C_{\\text{isolated}} = 4\\pi\\varepsilon a",
+                capExplain: "As the outer shell expands to infinity (b → ∞), an isolated sphere maintains an intrinsic self-capacitance C = 4πεa referenced to the cosmic vacuum.",
+                energyMath: "\\begin{aligned} U &= \\int_a^b \\frac{1}{2} \\varepsilon \\left(\\frac{Q}{4\\pi\\varepsilon r^2}\\right)^2 (4\\pi r^2) dr \\\\[6pt] &= \\frac{Q^2}{8\\pi\\varepsilon} \\left(\\frac{1}{a} - \\frac{1}{b}\\right) = \\frac{1}{2} C V^2 \\end{aligned}",
+                energyExplain: "Energy concentration peaks sharply near r = a. The self-energy of a charged sphere provides the classical foundation for electromagnetic self-energy.",
+                mapping: [
+                    ["a", "Inner Sphere Radius", "m", "Radius of inner solid conductive sphere"],
+                    ["b", "Outer Sphere Radius", "m", "Radius of concentric surrounding sphere shell"],
+                    ["C_{\\text{iso}}", "Self-Capacitance", "F", "Intrinsic capacitance to infinity (4πεa)"]
+                ],
+                intuition: "The spherical geometry distributes the charge uniformly over the surface and avoids edge singularities. Used in high-voltage standards and Van de Graaff generators."
+            },
+
+            // 6 GENUINE GEOMETRIC UNCONVENTIONAL SHAPES
+            wedge: {
+                title: "Tilted Wedge Plates",
+                tier: "POLAR THROAT SQUEEZE",
+                color: "#fbbf24",
+                previewMath: "C = \\frac{\\varepsilon L}{\\theta} \\ln\\left(\\frac{r_2}{r_1}\\right)",
+                interp: "Field lines bend into circular arcs. Intense squeezing at the vertex throat.",
+                gaussMath: "\\begin{aligned} \\nabla^2 V &= \\frac{1}{r} \\frac{\\partial}{\\partial r}\\left(r \\frac{\\partial V}{\\partial r}\\right) + \\frac{1}{r^2} \\frac{\\partial^2 V}{\\partial \\phi^2} = 0 \\\\[6pt] V(\\phi) &= V_0 \\frac{\\phi}{\\theta} \\implies \\vec{E} = -\\frac{1}{r} \\frac{\\partial V}{\\partial \\phi} \\hat{\\phi} = -\\frac{V_0}{r \\theta} \\hat{\\phi} \\end{aligned}",
+                gaussExplain: "Two plates of length L spanning radial distances from r₁ to r₂, inclined at opening angle θ. In polar coordinates, Laplace's equation yields a potential that depends linearly on azimuth angle φ, so electric field lines form circular arcs of radius r!",
+                potentialMath: "\\begin{aligned} \\Delta V = \\int_0^\\theta E_\\phi (r d\\phi) = V_0 \\end{aligned}",
+                potentialExplain: "The electric field intensity is strongest near the vertex throat (small r) and weakens toward the outer opening inversely as 1/r.",
+                capMath: "C = \\frac{Q}{V_0} = \\frac{\\varepsilon L}{\\theta} \\ln\\left(\\frac{r_2}{r_1}\\right)",
+                capExplain: "Integrating surface charge density σ(r) = ε E(r) along the radial plate width from r₁ to r₂ produces the characteristic logarithm ln(r₂/r₁).",
+                energyMath: "\\begin{aligned} U &= \\int_{r_1}^{r_2} \\int_0^\\theta \\frac{1}{2} \\varepsilon \\left(\\frac{V_0}{r \\theta}\\right)^2 (r dr d\\phi L) \\\\[6pt] &= \\frac{\\varepsilon L V_0^2}{2 \\theta} \\ln\\left(\\frac{r_2}{r_1}\\right) = \\frac{1}{2} C V_0^2 \\end{aligned}",
+                energyExplain: "Energy density is inversely quadratic u_E(r) ∝ 1/r², concentrating electrostatic energy in the narrowest part of the wedge.",
+                mapping: [
+                    ["\\theta", "Opening Wedge Angle", "rad", "Angle between inclined conductive planes"],
+                    ["r_1", "Inner Throat Radius", "m", "Distance from apex to nearest plate edge"],
+                    ["r_2", "Outer Mouth Radius", "m", "Distance from apex to farthest plate edge"],
+                    ["L", "Axial Length", "m", "Depth of plates along wedge apex axis"]
+                ],
+                intuition: "Tilted plate capacitors model micro-electromechanical hinge mirrors, rotary variable capacitors in vintage radios, and tilting MEMS switches."
+            },
+
+            wires: {
+                title: "Parallel Twin Wires (Lecher Line)",
+                tier: "BIPOLAR PINCH",
+                color: "#38bdf8",
+                previewMath: "\\frac{C}{L} = \\frac{\\pi\\varepsilon}{\\cosh^{-1}(d / 2a)}",
+                interp: "Two conductors. Field forms eccentric circles, crowding between them.",
+                gaussMath: "\\begin{aligned} V(x, y) &= \\frac{\\lambda}{2\\pi\\varepsilon} \\ln\\left(\\frac{r_2}{r_1}\\right) \\\\[6pt] \\vec{E} &= -\\nabla V \\quad (\\text{Bipolar Orthogonal Circles}) \\end{aligned}",
+                gaussExplain: "Two identical parallel cylindrical conductors of radius a separated by center-to-center distance d. Solved via method of image line charges located at eccentric focal points.",
+                potentialMath: "\\begin{aligned} \\Delta V &= \\frac{\\lambda}{\\pi\\varepsilon} \\ln\\left( \\frac{d}{2a} + \\sqrt{\\frac{d^2}{4a^2} - 1} \\right) \\\\[6pt] &= \\frac{\\lambda}{\\pi\\varepsilon} \\cosh^{-1}\\left(\\frac{d}{2a}\\right) \\end{aligned}",
+                potentialExplain: "The exact potential difference follows the inverse hyperbolic cosine, valid for ANY separation d > 2a.",
+                capMath: "\\frac{C}{L} = \\frac{\\pi\\varepsilon}{\\cosh^{-1}(d / 2a)} \\approx \\frac{\\pi\\varepsilon}{\\ln(d/a)} \\quad (\\text{when } d \\gg a)",
+                capExplain: "When the wires are widely spaced (d ≫ a), cosh⁻¹(d/2a) asymptotically reduces to ln(d/a), the familiar textbook twin-lead formula.",
+                energyMath: "\\begin{aligned} U &= \\frac{1}{2} \\left( \\frac{C}{L} \\right) L V^2 \\\\[6pt] &= \\frac{\\pi \\varepsilon L V^2}{2 \\cosh^{-1}(d/2a)} \\end{aligned}",
+                energyExplain: "Energy resides in the dipolar eccentric field surrounding the two wires, with maximum energy density on the facing inner wire surfaces.",
+                mapping: [
+                    ["a", "Wire Radius", "m", "Radius of each cylindrical wire conductor"],
+                    ["d", "Center Spacing", "m", "Distance between center axes of the two wires"],
+                    ["d/2a", "Normalized Separation", "—", "Geometric ratio defining bipolar coordinate poles"]
+                ],
+                intuition: "Twin-lead wire capacitors govern overhead high-voltage power transmission lines, vintage TV twin-lead antenna lines, and printed circuit board differential signal pairs."
+            },
+
+            eccentric: {
+                title: "Eccentric Coaxial Cylinders",
+                tier: "CORE OFF-CENTER",
+                color: "#34d399",
+                previewMath: "\\frac{C}{L} = \\frac{2\\pi\\varepsilon}{\\cosh^{-1}\\left(\\frac{a^2+b^2-d^2}{2ab}\\right)}",
+                interp: "Move the core. Watch the field bunch up in the pinched gap.",
+                gaussMath: "\\begin{aligned} w &= f(z) = \\frac{z - c}{z + c} \\\\[6pt] &\\implies \\text{Conformal Möbius map from eccentric to concentric} \\end{aligned}",
+                gaussExplain: "An inner cylinder of radius a placed inside an outer cylinder of radius b, but with its center shifted by offset distance d. Solved by Möbius conformal mapping to concentric cylinders.",
+                potentialMath: "\\begin{aligned} \\Delta V = \\frac{Q}{2\\pi\\varepsilon L} \\cosh^{-1}\\left(\\frac{a^2 + b^2 - d^2}{2ab}\\right) \\end{aligned}",
+                potentialExplain: "As the offset d increases toward (b - a), the narrow gap closes and the potential gradient explodes locally, leading to severe field concentration.",
+                capMath: "\\frac{C}{L} = \\frac{2\\pi\\varepsilon}{\\cosh^{-1}\\left(\\frac{a^2 + b^2 - d^2}{2ab}\\right)} \\xrightarrow{d \\to 0} \\frac{2\\pi\\varepsilon}{\\ln(b/a)}",
+                capExplain: "Notice that when the offset d = 0, this exact formula reduces mathematically to the concentric cylinder formula 2πε / ln(b/a)!",
+                energyMath: "\\begin{aligned} U &= \\frac{1}{2} C V^2 \\\\[6pt] &= \\frac{\\pi\\varepsilon L V^2}{\\cosh^{-1}\\left(\\frac{a^2+b^2-d^2}{2ab}\\right)} \\end{aligned}",
+                energyExplain: "Offsetting the inner core ALWAYS increases capacitance because the capacitance increase in the narrowed gap dominates the reduction in the widened gap.",
+                mapping: [
+                    ["a", "Inner Cylinder Radius", "m", "Radius of offset internal conductor"],
+                    ["b", "Outer Cylinder Radius", "m", "Radius of enclosing cylindrical shield"],
+                    ["d", "Axis Offset Distance", "m", "Distance between the two cylinder centers"]
+                ],
+                intuition: "Same conductors. Same voltage. Move one off-center. Watch where the field gets squeezed. As the inner cylinder shifts toward the outer shell, the electric field lines bunch tightly in the narrowest gap, creating extreme localized electric stress."
+            },
+
+            elliptic: {
+                title: "Confocal Elliptic Cylinders",
+                tier: "HYPERBOLIC FLUX",
+                color: "#f472b6",
+                previewMath: "\\frac{C}{L} = \\frac{2\\pi\\varepsilon}{u_2 - u_1}",
+                interp: "Elliptic boundaries force the electric field lines into confocal hyperbolas.",
+                gaussMath: "\\begin{aligned} x &= c \\cosh u \\cos v, \\quad y = c \\sinh u \\sin v \\\\[6pt] \\nabla^2 V &= \\frac{1}{c^2 (\\cosh^2 u - \\cos^2 v)} \\left( \\frac{\\partial^2 V}{\\partial u^2} + \\frac{\\partial^2 V}{\\partial v^2} \\right) = 0 \\end{aligned}",
+                gaussExplain: "Two confocal elliptic cylinders sharing common foci at (±c, 0). In elliptic coordinates (u, v), coordinate surfaces u = const are confocal ellipses and v = const are orthogonal hyperbolas!",
+                potentialMath: "\\begin{aligned} V(u) = V_1 + (V_2 - V_1) \\frac{u - u_1}{u_2 - u_1} \\end{aligned}",
+                potentialExplain: "Laplace's equation simplifies to pure 1D form d²V/du² = 0! The electric field lines are confocal hyperbolas traveling perpendicularly between the elliptic shells.",
+                capMath: "\\frac{C}{L} = \\frac{2\\pi\\varepsilon}{u_2 - u_1} = \\frac{2\\pi\\varepsilon}{\\cosh^{-1}(a_2/c) - \\cosh^{-1}(a_1/c)}",
+                capExplain: "Capacitance is governed cleanly by the difference in radial elliptic coordinates (u₂ - u₁), where a₁ and a₂ are the semi-major axes.",
+                energyMath: "\\begin{aligned} U &= \\frac{1}{2} C (\\Delta V)^2 \\\\[6pt] &= \\frac{\\pi\\varepsilon L (\\Delta V)^2}{u_2 - u_1} \\end{aligned}",
+                energyExplain: "Field intensity is greatest at the sharp ends of the inner ellipse (highest curvature), demonstrating electrostatic edge concentration.",
+                mapping: [
+                    ["2c", "Focal Distance", "m", "Distance between shared focal points"],
+                    ["u_1, u_2", "Elliptic Parameters", "—", "Coordinate values defining inner and outer ellipses"],
+                    ["a_1, a_2", "Semi-major Axes", "m", "Longest radius of inner and outer ellipses"]
+                ],
+                intuition: "Used in particle accelerator beam pipes where electron bunches have elliptical cross-sections, and in oval waveguide resonators."
+            },
+
+            conical: {
+                title: "Coaxial Cone-in-Cone",
+                tier: "APEX DIVERGENCE",
+                color: "#a855f7",
+                previewMath: "C = \\frac{2\\pi\\varepsilon L}{\\ln\\left[\\frac{\\tan(\\theta_2 / 2)}{\\tan(\\theta_1 / 2)}\\right]}",
+                interp: "Concentric cones. Field arches azimuthally and concentrates at the sharp apex.",
+                gaussMath: "\\begin{aligned} \\nabla^2 V &= \\frac{1}{r^2 \\sin\\theta} \\frac{\\partial}{\\partial \\theta}\\left(\\sin\\theta \\frac{\\partial V}{\\partial \\theta}\\right) = 0 \\\\[6pt] V(\\theta) &= C_1 \\ln\\left[\\tan\\left(\\frac{\\theta}{2}\\right)\\right] + C_2 \\end{aligned}",
+                gaussExplain: "Inner cone of half-angle θ₁ and outer coaxial cone of half-angle θ₂ meeting at a common apex. By conical symmetry, potential depends only on polar angle θ.",
+                potentialMath: "\\begin{aligned} \\vec{E} &= -\\frac{1}{r} \\frac{\\partial V}{\\partial \\theta} \\hat{\\theta} \\\\[6pt] &= -\\frac{V_0}{r \\sin\\theta \\ln\\left[\\frac{\\tan(\\theta_2/2)}{\\tan(\\theta_1/2)}\\right]} \\hat{\\theta} \\end{aligned}",
+                potentialExplain: "Field lines are circular arcs traveling along polar angle θ from the inner cone surface to the outer cone, with intensity falling as 1/r.",
+                capMath: "C = \\frac{2\\pi\\varepsilon L}{\\ln\\left[\\frac{\\tan(\\theta_2 / 2)}{\\tan(\\theta_1 / 2)}\\right]}",
+                capExplain: "For cones of slant length L, integrating the surface charge gives a pure logarithmic relation involving the half-angle tangents.",
+                energyMath: "\\begin{aligned} U &= \\frac{1}{2} C V_0^2 \\\\[6pt] &= \\frac{\\pi\\varepsilon L V_0^2}{\\ln\\left[\\frac{\\tan(\\theta_2 / 2)}{\\tan(\\theta_1 / 2)}\\right]} \\end{aligned}",
+                energyExplain: "Energy density diverges near the apex (r → 0), requiring blunted apexes in physical high-voltage conical feedhorns.",
+                mapping: [
+                    ["\\theta_1, \\theta_2", "Cone Half-Angles", "rad", "Angles of inner and outer conical boundaries"],
+                    ["L", "Slant Length", "m", "Radial extension along cone surface from apex"]
+                ],
+                intuition: "Forms the theoretical model for ultra-broadband biconical and TEM horn antennas, which guide electromagnetic pulses without dispersion across decades of frequency."
+            },
+
+            comb: {
+                title: "Interdigitated Micro-Comb",
+                tier: "FRINGE-FIELD DRIVE",
+                color: "#fbbf24",
+                previewMath: "C \\approx 2N\\frac{\\varepsilon t x}{g} + C_{\\text{fringe}}",
+                interp: "Fringing fields around finger tips contribute significantly, driving linear force.",
+                gaussMath: "\\begin{aligned} C(x) &= 2N \\left( \\frac{\\varepsilon t x}{g} + C_{\\text{fringe}} \\right) \\\\[6pt] \\vec{F}_{\\text{drive}} &= +\\frac{1}{2} \\frac{\\partial C}{\\partial x} V^2 \\hat{x} = \\frac{N \\varepsilon t}{g} V^2 \\hat{x} \\end{aligned}",
+                gaussExplain: "Planar interlocked micro-teeth fabricated on silicon wafers. Fringing fields around the finger tips contribute significantly to the total capacitance and create the actuation force.",
+                potentialMath: "\\begin{aligned} F_{\\text{drive}} &= \\frac{1}{2} V^2 \\frac{\\partial C}{\\partial x} = \\frac{N \\varepsilon t}{g} V^2 \\\\[6pt] \\frac{\\partial F}{\\partial x} &= 0 \\quad (\\text{Displacement-Independent Force}) \\end{aligned}",
+                potentialExplain: "The electrostatic actuation force along overlap axis x is completely displacement-independent, avoiding the pull-in snap-down instability of parallel plates.",
+                capMath: "C(x) = C_0 + \\frac{2N\\varepsilon t}{g} x",
+                capExplain: "Capacitance modulates linearly with finger overlap x, number of finger pairs N, and finger thickness t.",
+                energyMath: "\\begin{aligned} U(x) &= \\frac{1}{2} C(x) V^2 \\\\[6pt] &= \\frac{1}{2} \\left( C_0 + \\frac{2N\\varepsilon t x}{g} \\right) V^2 \\end{aligned}",
+                energyExplain: "Electrical energy is converted smoothly into mechanical force with extreme microscale repeatability.",
+                mapping: [
+                    ["N", "Number of Finger Pairs", "—", "Multiplier of parallel capacitive gaps"],
+                    ["x", "Overlap Length", "m", "Active engaged finger length"],
+                    ["t", "Finger Thickness", "m", "Out-of-plane structural silicon height"],
+                    ["g", "Gap Spacing", "m", "Sub-micron gap between neighboring fingers"]
+                ],
+                intuition: "The standard sensor in modern smartphone MEMS accelerometers, drone gyroscopes, and micro-mirror optical switches."
+            }
+        };
+
+        function safeKaTeX(latex, el, display = true) {
+            if (!el) return;
+            if (typeof katex === 'undefined') {
+                el.textContent = latex;
+                return;
+            }
+            try {
+                katex.render(latex, el, { displayMode: display, throwOnError: false });
+            } catch (err) {
+                el.textContent = latex;
+            }
+        }
+
+                function initAllMath() {
+            if (typeof katex === 'undefined') return;
+
+            // Auto-render any TeX expressions in body
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+
+            // Explicitly render main-eq with clean LaTeX
+            const mainEqEl = document.getElementById('main-eq');
+            if (mainEqEl) {
+                safeKaTeX("C = \\frac{Q}{\\Delta V} = \\frac{\\varepsilon \\oint \\vec{E} \\cdot d\\vec{A}}{\\int \\vec{E} \\cdot d\\vec{r}}", mainEqEl, true);
+            }
+
+            const laplaceEl = document.getElementById('math-laplace');
+            if (laplaceEl) {
+                safeKaTeX("\\nabla^2 V = 0", laplaceEl, false);
+            }
+
+            // Render Preview Equations on All 9 Cards
+            const allKeys = ['parallel', 'cylindrical', 'spherical', 'wedge', 'wires', 'eccentric', 'elliptic', 'conical', 'comb'];
+            allKeys.forEach(k => {
+                const el = document.getElementById(`math-${k}`);
+                if (el && SYSTEMS[k]) {
+                    safeKaTeX(SYSTEMS[k].previewMath, el);
+                }
+            });
+        }
+
+        function renderMathWhenReady() {
+            if (typeof katex !== 'undefined') {
+                initAllMath();
+            } else {
+                let attempts = 0;
+                const timer = setInterval(() => {
+                    attempts++;
+                    if (typeof katex !== 'undefined') {
+                        clearInterval(timer);
+                        initAllMath();
+                    } else if (attempts > 60) {
+                        clearInterval(timer);
+                    }
+                }, 50);
+            }
+        }
+
+        // ==========================================
+        // 3D & 2D CANVAS RENDERING ENGINE
+        // ==========================================
+
+        // Dynamic Retina & DPI-Aware Canvas Resizer (Pixel-Perfect Container Framing)
+        function getCanvasContext(id) {
+            const c = document.getElementById(id);
+            if (!c) return null;
+            const container = c.parentElement;
+            const rect = container ? container.getBoundingClientRect() : c.getBoundingClientRect();
+            if (!rect || rect.width === 0 || rect.height === 0) return null;
+
+            const w = Math.round(rect.width);
+            const h = Math.round(rect.height);
+            const dpr = window.devicePixelRatio || 1;
+            const tw = Math.round(w * dpr);
+            const th = Math.round(h * dpr);
+
+            if (c.width !== tw || c.height !== th) {
+                c.width = tw;
+                c.height = th;
+            }
+
+            const ctx = c.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w, h };
+        }
+
+        // 3D Parallel Plate
+        function draw3DParallel(ctx, w, h, isModal = false) {
+            ctx.clearRect(0, 0, w, h);
+            const cx = w / 2, cy = h / 2;
+            const t = STATE.time;
+
+            const pw = w * (isModal ? 0.52 : 0.46);
+            const pl = h * (isModal ? 0.30 : 0.26);
+            const gap = h * (isModal ? 0.32 : 0.28);
+
+            function project(x, y, z) {
+                return { x: cx + (x - z * 0.7), y: cy + y + (z * 0.35) };
+            }
+
+            const topY = -gap / 2;
+            const botY = gap / 2;
+
+            // Bottom Plate (Ground)
+            ctx.fillStyle = '#1e293b';
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            const p1 = project(-pw/2, botY, -pl/2);
+            const p2 = project(pw/2, botY, -pl/2);
+            const p3 = project(pw/2, botY, pl/2);
+            const p4 = project(-pw/2, botY, pl/2);
+            ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+            ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            // Field Lines & Moving Charges
+            if (STATE.showFieldLines) {
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+                const nx = isModal ? 6 : 4;
+                const nz = isModal ? 5 : 3;
+                for (let ix = 0; ix <= nx; ix++) {
+                    for (let iz = 0; iz <= nz; iz++) {
+                        const x = -pw/2 + (ix / nx) * pw;
+                        const z = -pl/2 + (iz / nz) * pl;
+                        const topPt = project(x, topY, z);
+                        const botPt = project(x, botY, z);
+                        ctx.beginPath();
+                        ctx.moveTo(topPt.x, topPt.y);
+                        ctx.lineTo(botPt.x, botPt.y);
+                        ctx.stroke();
+
+                        // Streaming charge
+                        const f = ((t * 25 + ix * 15 + iz * 20) % 100) / 100;
+                        const px = topPt.x + (botPt.x - topPt.x) * f;
+                        const py = topPt.y + (botPt.y - topPt.y) * f;
+                        ctx.fillStyle = '#38bdf8';
+                        ctx.beginPath();
+                        ctx.arc(px, py, 1.8, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            // Top Plate (+Q)
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const tp1 = project(-pw/2, topY, -pl/2);
+            const tp2 = project(pw/2, topY, -pl/2);
+            const tp3 = project(pw/2, topY, pl/2);
+            const tp4 = project(-pw/2, topY, pl/2);
+            ctx.moveTo(tp1.x, tp1.y); ctx.lineTo(tp2.x, tp2.y);
+            ctx.lineTo(tp3.x, tp3.y); ctx.lineTo(tp4.x, tp4.y);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('+Q (Top Plate)', cx - 15, tp1.y - 10);
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('−Q (Ground)', cx + 35, p3.y + 14);
+
+        }
+
+        // 3D Cylindrical Coaxial Capacitor
+        function draw3DCylindrical(ctx, w, h, isModal = false) {
+            ctx.clearRect(0, 0, w, h);
+            const cx = w / 2, cy = h / 2;
+            const t = STATE.time;
+
+            const L = h * (isModal ? 0.58 : 0.50);
+            const rOuter = Math.min(w, h) * (isModal ? 0.32 : 0.28);
+            const rInner = rOuter * 0.32;
+            const tilt = 0.35;
+
+            const topY = cy - L / 2;
+            const botY = cy + L / 2;
+
+            // Outer cylinder body back
+            ctx.fillStyle = 'rgba(52, 211, 153, 0.08)';
+            ctx.beginPath();
+            ctx.ellipse(cx, topY, rOuter, rOuter * tilt, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(52, 211, 153, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(cx - rOuter, topY); ctx.lineTo(cx - rOuter, botY);
+            ctx.moveTo(cx + rOuter, topY); ctx.lineTo(cx + rOuter, botY);
+            ctx.stroke();
+
+            // Inner solid conductive rod
+            ctx.fillStyle = '#065f46';
+            ctx.beginPath();
+            ctx.ellipse(cx, botY, rInner, rInner * tilt, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            const rodGrad = ctx.createLinearGradient(cx - rInner, 0, cx + rInner, 0);
+            rodGrad.addColorStop(0, '#059669');
+            rodGrad.addColorStop(0.5, '#34d399');
+            rodGrad.addColorStop(1, '#047857');
+            ctx.fillStyle = rodGrad;
+            ctx.fillRect(cx - rInner, topY, rInner * 2, L);
+
+            ctx.fillStyle = '#6ee7b7';
+            ctx.beginPath();
+            ctx.ellipse(cx, topY, rInner, rInner * tilt, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#a7f3d0';
+            ctx.stroke();
+
+            // 3D Radial Field Vectors shooting outward
+            if (STATE.showFieldLines) {
+                const ringCount = isModal ? 5 : 3;
+                const spokes = isModal ? 12 : 8;
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(52, 211, 153, 0.45)';
+
+                for (let ring = 1; ring <= ringCount; ring++) {
+                    const y = topY + (ring / (ringCount + 1)) * L;
+                    for (let s = 0; s < spokes; s++) {
+                        const ang = (s / spokes) * Math.PI * 2 + t * 0.2;
+                        const cos = Math.cos(ang);
+                        const sin = Math.sin(ang) * tilt;
+
+                        const startX = cx + cos * rInner;
+                        const startY = y + sin * rInner;
+                        const endX = cx + cos * rOuter;
+                        const endY = y + sin * rOuter;
+
+                        ctx.beginPath();
+                        ctx.moveTo(startX, startY);
+                        ctx.lineTo(endX, endY);
+                        ctx.stroke();
+
+                        // Streaming charge
+                        const f = ((t * 30 + s * 15 + ring * 25) % 100) / 100;
+                        const px = startX + (endX - startX) * f;
+                        const py = startY + (endY - startY) * f;
+                        ctx.fillStyle = '#34d399';
+                        ctx.beginPath();
+                        ctx.arc(px, py, 1.8, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            // Outer Cylinder Front Rim
+            ctx.strokeStyle = '#34d399';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.ellipse(cx, botY, rOuter, rOuter * tilt, 0, 0, Math.PI);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(cx, topY, rOuter, rOuter * tilt, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = '#34d399';
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('Core a', cx, topY - 10);
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('Shield b', cx + rOuter - 10, botY + 16);
+
+        }
+
+        // 3D Concentric Spherical
+        function draw3DSpherical(ctx, w, h, isModal = false) {
+            ctx.clearRect(0, 0, w, h);
+            const cx = w / 2, cy = h / 2;
+            const t = STATE.time;
+
+            const rOuter = Math.min(w, h) * (isModal ? 0.38 : 0.34);
+            const rInner = rOuter * 0.36;
+
+            ctx.strokeStyle = 'rgba(244, 114, 182, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.setLineDash([3, 4]);
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rOuter, rOuter * 0.35, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx, cy, rOuter * 0.35, rOuter, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            if (STATE.showFieldLines) {
+                const rays = isModal ? 24 : 14;
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(244, 114, 182, 0.4)';
+
+                for (let i = 0; i < rays; i++) {
+                    const ang = (i / rays) * Math.PI * 2;
+                    const cos = Math.cos(ang);
+                    const sin = Math.sin(ang);
+
+                    ctx.beginPath();
+                    ctx.moveTo(cx + cos * rInner, cy + sin * rInner);
+                    ctx.lineTo(cx + cos * rOuter, cy + sin * rOuter);
+                    ctx.stroke();
+
+                    const f = ((t * 20 + i * 18) % 100) / 100;
+                    const pr = rInner + (rOuter - rInner) * Math.pow(f, 1.4);
+                    ctx.fillStyle = '#f472b6';
+                    ctx.beginPath();
+                    ctx.arc(cx + cos * pr, cy + sin * pr, 1.8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            const coreGrad = ctx.createRadialGradient(cx - rInner * 0.35, cy - rInner * 0.35, 2, cx, cy, rInner);
+            coreGrad.addColorStop(0, '#fdf2f8');
+            coreGrad.addColorStop(0.4, '#f472b6');
+            coreGrad.addColorStop(1, '#be185d');
+            ctx.fillStyle = coreGrad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('+Q', cx, cy);
+
+            ctx.fillStyle = '#f472b6';
+            ctx.font = '10px monospace';
+            ctx.fillText('Core a', cx + rInner + 18, cy - 8);
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('Shell b', cx + rOuter - 5, cy - rOuter * 0.7);
+
+        }
+
+        // ==========================================
+        // 6 UNCONVENTIONAL SHAPES (CENTERED & ACTIVE)
+        // ==========================================
+
+        // 1. Tilted Wedge Plates (ACTIVE)
+        function drawWedge(ctx, w, h, isModal = false) {
+            ctx.clearRect(0, 0, w, h);
+            const cx = w * 0.16, cy = h * 0.5;
+            const t = STATE.time;
+            const r1 = w * 0.16;
+            const r2 = w * 0.74;
+            const theta = 0.50; // Opening angle
+
+            // Top inclined plate (+Q)
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(-theta/2) * r1, cy + Math.sin(-theta/2) * r1);
+            ctx.lineTo(cx + Math.cos(-theta/2) * r2, cy + Math.sin(-theta/2) * r2);
+            ctx.stroke();
+
+            // Bottom inclined plate (Ground)
+            ctx.strokeStyle = '#475569';
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(theta/2) * r1, cy + Math.sin(theta/2) * r1);
+            ctx.lineTo(cx + Math.cos(theta/2) * r2, cy + Math.sin(theta/2) * r2);
+            ctx.stroke();
+
+            // Circular arc field lines
+            if (STATE.showFieldLines) {
+                const arcs = isModal ? 12 : 8;
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+                for (let i = 0; i < arcs; i++) {
+                    const r = r1 + (i / (arcs - 1)) * (r2 - r1);
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, -theta/2, theta/2);
+                    ctx.stroke();
+
+                    // Active streaming charge: faster near vertex (1/r)
+                    const speedMultiplier = (r1 / r) * 1.5;
+                    const f = ((t * 35 * speedMultiplier + i * 20) % 100) / 100;
+                    const a = -theta/2 + f * theta;
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.beginPath();
+                    ctx.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 2.0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Labels
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = 'bold 10px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('+Q Plate', cx + Math.cos(-theta/2) * r2 - 40, cy + Math.sin(-theta/2) * r2 - 8);
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('Ground', cx + Math.cos(theta/2) * r2 - 35, cy + Math.sin(theta/2) * r2 + 16);
+            ctx.fillText('Angle θ', cx + r1 * 0.7, cy + 3);
+
+        }
+
+        // 2. Parallel Twin Wires (Lecher Line) (CENTERED & VIBRANTLY ACTIVE)
+        function drawWires(ctx, w, h, isModal = false) {
+            ctx.clearRect(0, 0, w, h);
+            const cx = w / 2, cy = h / 2;
+            const t = STATE.time;
+            const d = w * 0.44;
+            const a = Math.min(w, h) * 0.08;
+            const w1x = cx - d/2;
+            const w2x = cx + d/2;
+
+            // Dipolar bridging flux loops & active charge streaming
+            if (STATE.showFieldLines) {
+                const lines = isModal ? 9 : 7;
+                for (let k = 0; k < lines; k++) {
+                    const frac = (k - (lines - 1) / 2) / ((lines - 1) / 2); // -1 to +1
+                    const curveOffset = frac * h * 0.38;
+                    
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+                    ctx.beginPath();
+                    ctx.moveTo(w1x, cy);
+                    ctx.quadraticCurveTo(cx, cy + curveOffset, w2x, cy);
+                    ctx.stroke();
+
+                    // Active streaming charges: dual particle streams per loop
+                    [0, 50].forEach(phase => {
+                        const f = ((t * 32 + k * 16 + phase) % 100) / 100;
+                        const px = Math.pow(1 - f, 2) * w1x + 2 * (1 - f) * f * cx + Math.pow(f, 2) * w2x;
+                        const py = Math.pow(1 - f, 2) * cy + 2 * (1 - f) * f * (cy + curveOffset) + Math.pow(f, 2) * cy;
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#38bdf8';
+                        ctx.beginPath();
+                        ctx.arc(px, py, 1.4, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                }
+
+                // Outer circular equipotential rings
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.18)';
+                [a * 1.8, a * 2.6].forEach(r => {
+                    ctx.beginPath(); ctx.arc(w1x, cy, r, 0, Math.PI * 2); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(w2x, cy, r, 0, Math.PI * 2); ctx.stroke();
+                });
+            }
+
+            // Conductor 1 (+Q Wire)
+            const g1 = ctx.createRadialGradient(w1x - 3, cy - 3, 2, w1x, cy, a);
+            g1.addColorStop(0, '#bae6fd');
+            g1.addColorStop(0.5, '#38bdf8');
+            g1.addColorStop(1, '#0284c7');
+            ctx.fillStyle = g1;
+            ctx.beginPath();
+            ctx.arc(w1x, cy, a, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#e0f2fe';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('+Q', w1x, cy);
+
+            // Conductor 2 (-Q Wire)
+            const g2 = ctx.createRadialGradient(w2x - 3, cy - 3, 2, w2x, cy, a);
+            g2.addColorStop(0, '#64748b');
+            g2.addColorStop(0.8, '#334155');
+            g2.addColorStop(1, '#1e293b');
+            ctx.fillStyle = g2;
+            ctx.beginPath();
+            ctx.arc(w2x, cy, a, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('−Q', w2x, cy);
+
+            // Dimension label
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px monospace';
+            ctx.fillText('Spacing d', cx, cy + a + 16);
+
+        }
+
+        // 3. Eccentric Coaxial Cylinders (CENTERED & VIBRANTLY ACTIVE)
+        function drawEccentric(ctx, w, h, isModal = false) {
+            ctx.clearRect(0, 0, w, h);
+            const cx = w / 2, cy = h / 2;
+            const t = STATE.time;
+            const rOuter = Math.min(w, h) * 0.38;
+            const rInner = rOuter * 0.32;
+            const offset = rOuter * 0.38; // Shifted right
+
+            const innerX = cx + offset;
+            const innerY = cy;
+
+            // Outer Shield Cylinder
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Radial Field Lines & Active Charges (Crowded in narrow gap)
+            if (STATE.showFieldLines) {
+                const rays = isModal ? 22 : 16;
+                for (let i = 0; i < rays; i++) {
+                    const ang = (i / rays) * Math.PI * 2;
+                    const ix = innerX + Math.cos(ang) * rInner;
+                    const iy = innerY + Math.sin(ang) * rInner;
+
+                    // Approximate projection onto outer boundary
+                    const ox = cx + Math.cos(ang * 0.88) * rOuter;
+                    const oy = cy + Math.sin(ang * 0.88) * rOuter;
+
+                    // Gap tightness factor: cos(ang) > 0 is the pinch side!
+                    const isPinch = Math.cos(ang) > 0;
+                    ctx.lineWidth = isPinch ? 1.4 : 0.8;
+                    ctx.strokeStyle = isPinch ? 'rgba(52, 211, 153, 0.75)' : 'rgba(52, 211, 153, 0.28)';
+                    ctx.beginPath();
+                    ctx.moveTo(ix, iy);
+                    ctx.lineTo(ox, oy);
+                    ctx.stroke();
+
+                    // Streaming charges: moving fast & concentrated in pinch! Dual streams
+                    const speed = isPinch ? 2.0 : 0.9;
+                    [0, 50].forEach(phase => {
+                        const f = ((t * 32 * speed + i * 20 + phase) % 100) / 100;
+                        const px = ix + (ox - ix) * f;
+                        const py = iy + (oy - iy) * f;
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(px, py, isPinch ? 2.2 : 1.7, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = isPinch ? '#34d399' : '#059669';
+                        ctx.beginPath();
+                        ctx.arc(px, py, isPinch ? 1.4 : 1.0, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                }
+            }
+
+            // Inner Offset Solid Core (+Q)
+            const rodGrad = ctx.createRadialGradient(innerX - 3, innerY - 3, 2, innerX, innerY, rInner);
+            rodGrad.addColorStop(0, '#a7f3d0');
+            rodGrad.addColorStop(0.5, '#34d399');
+            rodGrad.addColorStop(1, '#059669');
+            ctx.fillStyle = rodGrad;
+            ctx.beginPath();
+            ctx.arc(innerX, innerY, rInner, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#d1fae5';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.fillStyle = '#064e3b';
+            ctx.font = 'bold 10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('+Q', innerX, innerY);
+
+            // Pinch indicator callout
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = 'bold 9px monospace';
+            ctx.fillText('Pinch Gap ➔', innerX - 44, cy - rInner - 8);
+
+        }
+
+        // 4. Confocal Elliptic Cylinders (CENTERED & VIBRANTLY ACTIVE)
+        function drawElliptic(ctx, w, h, isModal = false) {
+            ctx.clearRect(0, 0, w, h);
+            const cx = w / 2, cy = h / 2;
+            const t = STATE.time;
+
+            const c = w * 0.20; // Focal length
+            const u1 = 0.50;
+            const u2 = 1.10;
+
+            const a1 = c * Math.cosh(u1), b1 = c * Math.sinh(u1);
+            const a2 = c * Math.cosh(u2), b2 = c * Math.sinh(u2);
+
+            // Confocal Hyperbolic Field Lines & Active Streaming Charges
+            if (STATE.showFieldLines) {
+                const hypCount = isModal ? 18 : 12;
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(244, 114, 182, 0.42)';
+
+                for (let i = 0; i < hypCount; i++) {
+                    const v = (i / hypCount) * Math.PI * 2;
+                    ctx.beginPath();
+                    for (let u = u1; u <= u2; u += 0.05) {
+                        const px = cx + c * Math.cosh(u) * Math.cos(v);
+                        const py = cy + c * Math.sinh(u) * Math.sin(v);
+                        if (u === u1) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                    ctx.stroke();
+
+                    // Active streaming charge along confocal hyperbola: dual streams
+                    const speed = 1.0 + Math.abs(Math.cos(v)) * 0.9;
+                    [0, 50].forEach(phase => {
+                        const f = ((t * 30 * speed + i * 18 + phase) % 100) / 100;
+                        const u = u1 + f * (u2 - u1);
+                        const px = cx + c * Math.cosh(u) * Math.cos(v);
+                        const py = cy + c * Math.sinh(u) * Math.sin(v);
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(px, py, 2.0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#f472b6';
+                        ctx.beginPath();
+                        ctx.arc(px, py, 1.3, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                }
+            }
+
+            // Outer Ellipse Shield
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, a2, b2, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Inner Ellipse (+Q)
+            ctx.fillStyle = 'rgba(244, 114, 182, 0.25)';
+            ctx.strokeStyle = '#f472b6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, a1, b1, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Foci points
+            ctx.fillStyle = '#fbbf24';
+            [-c, c].forEach(fx => {
+                ctx.beginPath();
+                ctx.arc(cx + fx, cy, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.fillStyle = '#f472b6';
+            ctx.font = '10px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('+Q Core', cx, cy - 12);
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('Foci (±c)', cx, cy + 12);
+
+        }
+
+        // 5. Coaxial Cone-in-Cone (CENTERED & VIBRANTLY ACTIVE)
+        function drawConical(ctx, w, h, isModal = false) {
+            ctx.clearRect(0, 0, w, h);
+            const cx = w * 0.16, cy = h / 2;
+            const t = STATE.time;
+            const L = w * 0.68;
+            const theta1 = 0.18; // Inner cone half-angle
+            const theta2 = 0.56; // Outer cone half-angle
+
+            // Outer Cone Walls
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(-theta2) * L, cy + Math.sin(-theta2) * L);
+            ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(theta2) * L, cy + Math.sin(theta2) * L);
+            ctx.stroke();
+
+            // Inner Cone (+Q)
+            ctx.strokeStyle = '#a855f7';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(-theta1) * L, cy + Math.sin(-theta1) * L);
+            ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(theta1) * L, cy + Math.sin(theta1) * L);
+            ctx.stroke();
+
+            // Spherical Arc Field Lines & Active Streaming Charges
+            if (STATE.showFieldLines) {
+                const arcs = isModal ? 10 : 7;
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(168, 85, 247, 0.45)';
+
+                for (let i = 1; i <= arcs; i++) {
+                    const r = (i / arcs) * L;
+                    // Upper sector
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, -theta2, -theta1);
+                    ctx.stroke();
+
+                    // Lower sector
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, theta1, theta2);
+                    ctx.stroke();
+
+                    // Active streaming charges along angular arc: dual streams
+                    [0, 50].forEach(phase => {
+                        const f1 = ((t * 30 + i * 20 + phase) % 100) / 100;
+                        const a1 = -theta1 + f1 * (-theta2 - (-theta1));
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(cx + Math.cos(a1) * r, cy + Math.sin(a1) * r, 2.0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#a855f7';
+                        ctx.beginPath();
+                        ctx.arc(cx + Math.cos(a1) * r, cy + Math.sin(a1) * r, 1.3, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        const f2 = ((t * 30 + i * 20 + 35 + phase) % 100) / 100;
+                        const a2 = theta1 + f2 * (theta2 - theta1);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(cx + Math.cos(a2) * r, cy + Math.sin(a2) * r, 2.0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#a855f7';
+                        ctx.beginPath();
+                        ctx.arc(cx + Math.cos(a2) * r, cy + Math.sin(a2) * r, 1.3, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                }
+            }
+
+            // Labels
+            ctx.fillStyle = '#a855f7';
+            ctx.font = 'bold 10px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('+Q Inner', cx + Math.cos(-theta1) * L * 0.7, cy + Math.sin(-theta1) * L * 0.7 - 6);
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('Ground Cone', cx + Math.cos(-theta2) * L * 0.8, cy + Math.sin(-theta2) * L * 0.8 - 6);
+            ctx.fillText('Apex (r=0)', cx - 12, cy + 18);
+
+        }
+
+        // 6. Interdigitated Micro-Comb Drive (ACTIVE MEMS HARMONIC ACTUATION)
+        function drawComb(ctx, w, h, isModal = false) {
+            ctx.clearRect(0, 0, w, h);
+            const cy = h / 2;
+            const t = STATE.time;
+            const V = STATE.voltage;
+
+            // Active Harmonic MEMS Actuation! Displacement oscillates dynamically with voltage
+            const baseDeflect = (V / 150) * 14;
+            const harmonic = Math.sin(t * 5.0) * (3.0 + (V / 150) * 4.0);
+            const totalDeflect = Math.max(0, Math.min(26, baseDeflect + harmonic));
+
+            const fingers = 5;
+            const fh = Math.min(16, (h * 0.58) / (fingers * 2));
+            const fl = w * 0.28;
+            const lx = w * 0.20;
+            const rx = w * 0.80 - totalDeflect;
+
+            // Fixed Stator Comb (Gold/Amber +Q)
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillRect(lx - 6, cy - (fingers * fh), 6, fingers * fh * 2);
+            for (let i = 0; i < fingers; i++) {
+                const y = cy - (fingers * fh) + i * fh * 2;
+                ctx.fillRect(lx, y, fl, fh);
+            }
+
+            // Movable Rotor Comb (Sky Blue Ground)
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(rx, cy - (fingers * fh), 6, fingers * fh * 2);
+            for (let i = 0; i < fingers; i++) {
+                const y = cy - (fingers * fh) + i * fh * 2 + fh;
+                ctx.fillRect(rx - fl, y, fl, fh);
+            }
+
+            // Dynamic Fringe Field Lines & Active Streaming Charges
+            if (STATE.showFieldLines) {
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
+
+                const overlapStart = rx - fl + 6;
+                const overlapEnd = lx + fl - 6;
+
+                if (overlapEnd > overlapStart) {
+                    for (let i = 0; i < fingers - 1; i++) {
+                        const yTop = cy - (fingers * fh) + i * fh * 2 + fh;
+                        const yBot = yTop + fh;
+
+                        // Parallel vertical flux rays
+                        for (let x = overlapStart + 8; x < overlapEnd - 4; x += 16) {
+                            ctx.beginPath();
+                            ctx.moveTo(x, yTop);
+                            ctx.lineTo(x, yBot);
+                            ctx.stroke();
+
+                            // Active streaming micro-charges
+                            [0, 50].forEach(phase => {
+                                const f = ((t * 40 + x * 4 + phase) % 100) / 100;
+                                const py = yTop + (yBot - yTop) * f;
+                                ctx.fillStyle = '#ffffff';
+                                ctx.beginPath();
+                                ctx.arc(x, py, 1.8, 0, Math.PI * 2);
+                                ctx.fill();
+                                ctx.fillStyle = '#fbbf24';
+                                ctx.beginPath();
+                                ctx.arc(x, py, 1.1, 0, Math.PI * 2);
+                                ctx.fill();
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Actuation indicator
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = 'bold 9px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('+Q Stator', lx - 6, cy - (fingers * fh) - 8);
+            ctx.fillStyle = '#38bdf8';
+            ctx.textAlign = 'right';
+            ctx.fillText('Rotor (Actuator) ➔', rx + 6, cy - (fingers * fh) - 8);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Drive Force F ∝ V² (Δx = ${totalDeflect.toFixed(1)} µm)`, w / 2, h - 12);
+
+        }
+
+        // ==========================================
+        // INTERACTIVE FIELD PROBE LOGIC
+        // ==========================================
+        let lastProbePos = { x: undefined, y: undefined };
+
+        function updateProbe(clientX, clientY) {
+            const container = document.getElementById('iso-canvas-container');
+            const key = STATE.isolatedKey;
+            if (!container || !key) return;
+
+            if (clientX !== undefined && clientY !== undefined) {
+                lastProbePos = { x: clientX, y: clientY };
+            }
+
+            const rect = container.getBoundingClientRect();
+            let nx = 0.5, ny = 0.5;
+            if (lastProbePos.x !== undefined && lastProbePos.y !== undefined) {
+                nx = Math.max(0, Math.min(1, (lastProbePos.x - rect.left) / rect.width));
+                ny = Math.max(0, Math.min(1, (lastProbePos.y - rect.top) / rect.height));
+            }
+
+            const V0 = STATE.voltage;
+            const dx = nx - 0.5; // -0.5 to +0.5
+            const dy = ny - 0.5; // -0.5 to +0.5
+            const r = Math.sqrt(dx * dx + dy * dy);
+
+            let E_val = 0; // V/m
+            let V_val = 0; // V
+            let squeezePercent = 25;
+            let stressLabel = "Nominal";
+
+            if (key === 'parallel') {
+                const d = 0.02; // 2 cm gap
+                E_val = V0 / d;
+                const xFrac = Math.max(0, Math.min(1, (dx + 0.2) / 0.4));
+                V_val = V0 * (1 - xFrac);
+                squeezePercent = 25;
+                stressLabel = "Uniform (1.0×)";
+            } else if (key === 'cylindrical') {
+                const rNorm = Math.max(0.04, Math.min(0.38, r));
+                const a = 0.05, b = 0.35;
+                E_val = (V0 / (rNorm * Math.log(b / a))) * 0.15;
+                V_val = Math.max(0, Math.min(V0, V0 * (Math.log(b / rNorm) / Math.log(b / a))));
+                const pinchRatio = (0.2 / rNorm);
+                squeezePercent = Math.min(100, Math.max(10, pinchRatio * 32));
+                stressLabel = pinchRatio > 2.0 ? "Core Pinch (3.2×)" : (pinchRatio < 0.8 ? "Shielded (0.6×)" : "Radial 1/r");
+            } else if (key === 'spherical') {
+                const rNorm = Math.max(0.04, Math.min(0.38, r));
+                const a = 0.06, b = 0.34;
+                E_val = (V0 * a * b / (b - a)) / (rNorm * rNorm * 50);
+                V_val = Math.max(0, Math.min(V0, V0 * ((1 / rNorm - 1 / b) / (1 / a - 1 / b))));
+                const pinchRatio = Math.min(5, Math.max(0.2, (0.04 / (rNorm * rNorm))));
+                squeezePercent = Math.min(100, Math.max(10, pinchRatio * 20));
+                stressLabel = pinchRatio > 2.5 ? "Coulomb Spike (4.8×)" : "1/r² Flux";
+            } else if (key === 'eccentric') {
+                // Pinched gap on left (dx < 0), wide gap on right (dx > 0)
+                const isNarrowSide = dx < 0;
+                const squeezeFactor = isNarrowSide ? Math.min(5.2, 1.0 + (Math.abs(dx) / 0.35) * 4.2) : Math.max(0.3, 1.0 - (dx / 0.35) * 0.7);
+                E_val = (V0 / 0.025) * squeezeFactor;
+                V_val = Math.max(0, Math.min(V0, V0 * (0.5 - dx)));
+                squeezePercent = Math.min(100, Math.max(8, squeezeFactor * 22));
+                stressLabel = squeezeFactor > 3.0 ? `SEVERE SQUEEZE (${squeezeFactor.toFixed(1)}×)` : (squeezeFactor < 0.6 ? `Relaxed (${squeezeFactor.toFixed(1)}×)` : `Moderate (${squeezeFactor.toFixed(1)}×)`);
+            } else if (key === 'wedge') {
+                // Vertex throat on left
+                const throatDist = Math.max(0.05, nx);
+                const squeezeFactor = Math.min(4.8, 0.25 / throatDist);
+                E_val = (V0 / (throatDist * 0.6)) * 25;
+                V_val = V0 * (1 - ny);
+                squeezePercent = Math.min(100, Math.max(10, squeezeFactor * 24));
+                stressLabel = squeezeFactor > 2.5 ? `Throat Pinch (${squeezeFactor.toFixed(1)}×)` : `Expanding Gap`;
+            } else if (key === 'wires') {
+                const d1 = Math.sqrt((dx + 0.18) * (dx + 0.18) + dy * dy);
+                const d2 = Math.sqrt((dx - 0.18) * (dx - 0.18) + dy * dy);
+                const minD = Math.max(0.03, Math.min(d1, d2));
+                const squeezeFactor = Math.min(5.0, 0.12 / minD);
+                E_val = (V0 / minD) * 18;
+                V_val = Math.max(0, Math.min(V0, V0 * (0.5 - dx / 0.4)));
+                squeezePercent = Math.min(100, Math.max(15, squeezeFactor * 25));
+                stressLabel = squeezeFactor > 2.8 ? `Wire Proximity (${squeezeFactor.toFixed(1)}×)` : `Inter-Wire Dipole`;
+            } else if (key === 'elliptic') {
+                const focusDist = Math.min(Math.sqrt((dx + 0.22) * (dx + 0.22) + dy * dy), Math.sqrt((dx - 0.22) * (dx - 0.22) + dy * dy));
+                const squeezeFactor = Math.min(4.5, 0.14 / Math.max(0.04, focusDist));
+                E_val = (V0 / 0.03) * squeezeFactor;
+                V_val = Math.max(0, Math.min(V0, V0 * (1 - r / 0.4)));
+                squeezePercent = Math.min(100, Math.max(12, squeezeFactor * 24));
+                stressLabel = squeezeFactor > 2.5 ? `Focal Stress (${squeezeFactor.toFixed(1)}×)` : `Confocal Hyperbolic`;
+            } else if (key === 'conical') {
+                // Apex divergence near (0.16, 0.5)
+                const apexDist = Math.max(0.03, Math.sqrt((nx - 0.16) * (nx - 0.16) + (ny - 0.5) * (ny - 0.5)));
+                const squeezeFactor = Math.min(6.0, 0.10 / apexDist);
+                E_val = (V0 / apexDist) * 35;
+                V_val = Math.max(0, Math.min(V0, V0 * (1 - apexDist / 0.5)));
+                squeezePercent = Math.min(100, Math.max(15, squeezeFactor * 20));
+                stressLabel = squeezeFactor > 3.5 ? `Apex Divergence (${squeezeFactor.toFixed(1)}×)` : `Conical Drop`;
+            } else if (key === 'comb') {
+                // Fringe spike on finger tips
+                const isNearFringe = (Math.abs(dx) > 0.15);
+                const squeezeFactor = isNearFringe ? 3.4 : 1.3;
+                E_val = (V0 / 0.008) * squeezeFactor;
+                V_val = Math.max(0, Math.min(V0, V0 * 0.5));
+                squeezePercent = Math.min(100, isNearFringe ? 82 : 35);
+                stressLabel = isNearFringe ? "Fringe Tip Pinch (3.4×)" : "Channel Gap";
+            }
+
+            // Energy density u_E = 0.5 * EPSILON_0 * E^2
+            const u_val = 0.5 * EPSILON_0 * (E_val * E_val);
+
+            // Format metrics
+            const elE = document.getElementById('probe-metric-e');
+            const elV = document.getElementById('probe-metric-v');
+            const elU = document.getElementById('probe-metric-u');
+            const elFill = document.getElementById('probe-gauge-fill');
+            const elVal = document.getElementById('probe-stress-val');
+
+            if (elE) elE.textContent = E_val >= 1000 ? `${(E_val / 1000).toFixed(2)} kV/m` : `${E_val.toFixed(1)} V/m`;
+            if (elV) elV.textContent = `${V_val.toFixed(1)} V`;
+            if (elU) {
+                if (u_val < 0.001) {
+                    elU.textContent = `${(u_val * 1e6).toFixed(1)} µJ/m³`;
+                } else if (u_val < 1.0) {
+                    elU.textContent = `${(u_val * 1e3).toFixed(2)} mJ/m³`;
+                } else {
+                    elU.textContent = `${u_val.toFixed(2)} J/m³`;
+                }
+            }
+            if (elFill) elFill.style.width = `${squeezePercent}%`;
+            if (elVal) elVal.textContent = stressLabel;
+        }
+
+        function initProbeForSystem(key) {
+            lastProbePos = { x: undefined, y: undefined };
+            const hintMap = {
+                parallel: "Interactive Field Probe — Hover across uniform gap d (E is completely constant)",
+                cylindrical: "Interactive Field Probe — Drag radially from inner core (steep) to outer shield (flat)",
+                spherical: "Interactive Field Probe — Measure Coulomb inverse-square field near inner sphere",
+                eccentric: "Interactive Field Probe — Move across narrow left gap vs wide right gap: WATCH IT SQUEEZE!",
+                wedge: "Interactive Field Probe — Hover toward inner apex throat to inspect 1/r field intensification",
+                wires: "Interactive Field Probe — Probe bipolar field peaks adjacent to each wire surface",
+                elliptic: "Interactive Field Probe — Inspect field stress concentrating around confocal focal points",
+                conical: "Interactive Field Probe — Drag cursor near sharp cone apex where geometric field diverges",
+                comb: "Interactive Field Probe — Hover along finger tips to observe high fringing field density"
+            };
+            const hintEl = document.getElementById('probe-hint-title');
+            if (hintEl) hintEl.textContent = hintMap[key] || "Interactive Field Probe — Inspect local electric field stress";
+            updateProbe(); // Initialize with nominal center values
+        }
+
+        // ==========================================
+        // ISOLATION MODAL MANAGEMENT
+        // ==========================================
+        function isolateSystem(key) {
+            const sys = SYSTEMS[key];
+            if (!sys) return;
+            STATE.isolatedKey = key;
+
+            playChime(440);
+
+            document.getElementById('iso-title').textContent = sys.title;
+            document.getElementById('iso-title').style.color = sys.color;
+
+            safeKaTeX(sys.gaussMath, document.getElementById('iso-math-gauss'));
+            document.getElementById('iso-explain-gauss').textContent = sys.gaussExplain;
+
+            safeKaTeX(sys.potentialMath, document.getElementById('iso-math-potential'));
+            document.getElementById('iso-explain-potential').textContent = sys.potentialExplain;
+
+            safeKaTeX(sys.capMath, document.getElementById('iso-math-cap'));
+            document.getElementById('iso-explain-cap').textContent = sys.capExplain;
+
+            safeKaTeX(sys.energyMath, document.getElementById('iso-math-energy'));
+            document.getElementById('iso-explain-energy').textContent = sys.energyExplain;
+
+            document.getElementById('iso-explain-intuition').textContent = sys.intuition;
+
+            // Parameter Table
+            const tbody = document.getElementById('iso-table-body');
+            tbody.innerHTML = '';
+            sys.mapping.forEach(([sym, qty, unit, mean]) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="table-sym"></td>
+                    <td><strong>${qty}</strong></td>
+                    <td><code>${unit}</code></td>
+                    <td>${mean}</td>
+                `;
+                tbody.appendChild(tr);
+                safeKaTeX(sym, tr.querySelector('.table-sym'), false);
+            });
+
+            // Initialize Interactive Probe
+            initProbeForSystem(key);
+
+            // Show Overlay
+            const overlay = document.getElementById('isolation-overlay');
+            overlay.classList.add('visible');
+        }
+
+        function closeIsolation() {
+            document.getElementById('isolation-overlay').classList.remove('visible');
+            STATE.isolatedKey = null;
+            playChime(330);
+        }
+
+        // ==========================================
+        // SCI-FI GENERATIVE MUSIC & AUDIO ENGINE
+        // ==========================================
+        let audioCtx = null;
+        let masterGain = null;
+        let masterFilter = null;
+        let musicTimer = null;
+        let musicStep = 0;
+
+        // Bright, curiosity-evoking scientific pentatonic scale (C, D, E, G, A over 2 octaves)
+        const PENTATONIC = [
+            261.63, // 0: C4
+            293.66, // 1: D4
+            329.63, // 2: E4
+            392.00, // 3: G4
+            440.00, // 4: A4
+            523.25, // 5: C5
+            587.33, // 6: D5
+            659.25, // 7: E5
+            783.99, // 8: G5
+            880.00, // 9: A5
+            1046.50 // 10: C6
+        ];
+
+        // 16-step upbeat, playful sci-fi laboratory melody
+        const MELODY_PATTERN = [0, 2, 4, 7, 5, 4, 2, 4, 7, 9, 7, 5, 7, 5, 2, 3];
+        // 4-bar sub-bass foundation
+        const BASS_PATTERN = [65.41, 82.41, 73.42, 98.00]; // C2, E2, D2, G2
+
+        function ensureAudio() {
+            if (!audioCtx) {
+                const AudioClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioClass();
+
+                masterGain = audioCtx.createGain();
+                masterGain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+
+                masterFilter = audioCtx.createBiquadFilter();
+                masterFilter.type = 'lowpass';
+                masterFilter.Q.setValueAtTime(3.0, audioCtx.currentTime);
+                masterFilter.frequency.setValueAtTime(2200, audioCtx.currentTime);
+
+                masterFilter.connect(masterGain);
+                masterGain.connect(audioCtx.destination);
+            }
+            if (audioCtx.state === 'suspended') {
+                return audioCtx.resume();
+            }
+            return Promise.resolve();
+        }
+
+        // FM Bell/Chime Synthesizer Note (crisp, musical, zero static)
+        function playTone(freq, duration = 0.22, volume = 0.25) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+
+            // Carrier Oscillator
+            const carrier = audioCtx.createOscillator();
+            const carrierGain = audioCtx.createGain();
+
+            // Modulator Oscillator (produces shimmering crystalline sci-fi overtone)
+            const modulator = audioCtx.createOscillator();
+            const modGain = audioCtx.createGain();
+
+            carrier.type = 'sine';
+            carrier.frequency.setValueAtTime(freq, now);
+
+            modulator.type = 'sine';
+            modulator.frequency.setValueAtTime(freq * 2.003, now); // Detuned harmonic
+
+            // FM Depth envelope
+            modGain.gain.setValueAtTime(freq * 0.8, now);
+            modGain.gain.exponentialRampToValueAtTime(1.0, now + duration);
+
+            // Carrier Amplitude envelope (sweet marimba / glass bell strike)
+            carrierGain.gain.setValueAtTime(0.001, now);
+            carrierGain.gain.linearRampToValueAtTime(volume, now + 0.006);
+            carrierGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+            modulator.connect(carrier.frequency);
+            carrier.connect(carrierGain);
+            carrierGain.connect(masterFilter);
+
+            modulator.start(now);
+            carrier.start(now);
+            modulator.stop(now + duration);
+            carrier.stop(now + duration);
+        }
+
+        // Warm Rhythmic Sub-Bass Pulse
+        function playSubBass(freq) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.85, now + 0.35);
+
+            g.gain.setValueAtTime(0.22, now);
+            g.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+            osc.connect(g);
+            g.connect(masterFilter);
+            osc.start(now);
+            osc.stop(now + 0.36);
+        }
+
+        // Dynamic Voltage Modulation: Filter cutoff tracks voltage
+        function updateMusicFilter() {
+            if (!audioCtx || !masterFilter) return;
+            const now = audioCtx.currentTime;
+            const cutoff = 1300 + (STATE.voltage / 150) * 2800;
+            masterFilter.frequency.setTargetAtTime(cutoff, now, 0.08);
+        }
+
+        // Generative Step Sequencer Loop for Background Music
+        function musicTick() {
+            if (!STATE.musicEnabled) return;
+            ensureAudio().then(() => {
+                if (!STATE.musicEnabled) return;
+
+                // Play melodic step
+                const noteIdx = MELODY_PATTERN[musicStep % MELODY_PATTERN.length];
+                const freq = PENTATONIC[noteIdx];
+                playTone(freq, 0.24, 0.20);
+
+                // Play bass kick every 4 steps
+                if (musicStep % 4 === 0) {
+                    const bassIdx = Math.floor(musicStep / 4) % BASS_PATTERN.length;
+                    playSubBass(BASS_PATTERN[bassIdx]);
+                }
+
+                // Add subtle sparkle note on odd steps occasionally
+                if (musicStep % 8 === 3) {
+                    setTimeout(() => {
+                        if (STATE.musicEnabled) {
+                            playTone(PENTATONIC[Math.min(PENTATONIC.length - 1, noteIdx + 3)], 0.18, 0.12);
+                        }
+                    }, 50);
+                }
+
+                musicStep++;
+
+                // Voltage modulates tempo
+                const stepMs = Math.max(120, 185 - (STATE.voltage / 150) * 65);
+                musicTimer = setTimeout(musicTick, stepMs);
+            });
+        }
+
+        function setMusic(active) {
+            STATE.musicEnabled = active;
+            if (active) {
+                if (musicTimer) clearTimeout(musicTimer);
+                musicStep = 0;
+                ensureAudio().then(() => {
+                    updateMusicFilter();
+                    musicTick();
+                });
+            } else {
+                if (musicTimer) {
+                    clearTimeout(musicTimer);
+                    musicTimer = null;
+                }
+            }
+        }
+
+        // Sparkling affirmative Sound FX Chime (Major triad arpeggio)
+        function playChime(baseFreq = 523.25) {
+            if (!STATE.sfxEnabled) return;
+            ensureAudio().then(() => {
+                if (!STATE.sfxEnabled) return;
+                const notes = [baseFreq, baseFreq * 1.25, baseFreq * 1.5];
+                notes.forEach((f, idx) => {
+                    setTimeout(() => {
+                        if (STATE.sfxEnabled) playTone(f, 0.20, 0.20);
+                    }, idx * 45);
+                });
+            });
+        }
+
+        // ==========================================
+        // ANIMATION LOOP (ROBUST RESIZE ENGINE)
+        // ==========================================
+        function loop(timestamp) {
+            STATE.time = timestamp * 0.001;
+
+            // 1. Classical Trio
+            const cPar = getCanvasContext('canvas-parallel');
+            if (cPar) draw3DParallel(cPar.ctx, cPar.w, cPar.h);
+
+            const cCyl = getCanvasContext('canvas-cylindrical');
+            if (cCyl) draw3DCylindrical(cCyl.ctx, cCyl.w, cCyl.h);
+
+            const cSph = getCanvasContext('canvas-spherical');
+            if (cSph) draw3DSpherical(cSph.ctx, cSph.w, cSph.h);
+
+            // 2. Unconventional Geometries (Active & Centered)
+            const cWedge = getCanvasContext('canvas-wedge');
+            if (cWedge) drawWedge(cWedge.ctx, cWedge.w, cWedge.h);
+
+            const cWires = getCanvasContext('canvas-wires');
+            if (cWires) drawWires(cWires.ctx, cWires.w, cWires.h);
+
+            const cEcc = getCanvasContext('canvas-eccentric');
+            if (cEcc) drawEccentric(cEcc.ctx, cEcc.w, cEcc.h);
+
+            const cEll = getCanvasContext('canvas-elliptic');
+            if (cEll) drawElliptic(cEll.ctx, cEll.w, cEll.h);
+
+            const cCon = getCanvasContext('canvas-conical');
+            if (cCon) drawConical(cCon.ctx, cCon.w, cCon.h);
+
+            const cComb = getCanvasContext('canvas-comb');
+            if (cComb) drawComb(cComb.ctx, cComb.w, cComb.h);
+
+            // 3. Isolated View Canvas
+            if (STATE.isolatedKey) {
+                const cIso = getCanvasContext('canvas-isolated');
+                if (cIso) {
+                    const k = STATE.isolatedKey;
+                    if (k === 'parallel') draw3DParallel(cIso.ctx, cIso.w, cIso.h, true);
+                    else if (k === 'cylindrical') draw3DCylindrical(cIso.ctx, cIso.w, cIso.h, true);
+                    else if (k === 'spherical') draw3DSpherical(cIso.ctx, cIso.w, cIso.h, true);
+                    else if (k === 'wedge') drawWedge(cIso.ctx, cIso.w, cIso.h, true);
+                    else if (k === 'wires') drawWires(cIso.ctx, cIso.w, cIso.h, true);
+                    else if (k === 'eccentric') drawEccentric(cIso.ctx, cIso.w, cIso.h, true);
+                    else if (k === 'elliptic') drawElliptic(cIso.ctx, cIso.w, cIso.h, true);
+                    else if (k === 'conical') drawConical(cIso.ctx, cIso.w, cIso.h, true);
+                    else if (k === 'comb') drawComb(cIso.ctx, cIso.w, cIso.h, true);
+                }
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            // Render Math when KaTeX is ready (Zero race conditions & proper escaping)
+            renderMathWhenReady();
+
+            // Voltage Slider
+            const vSlider = document.getElementById('voltage-slider');
+            if (vSlider) {
+                vSlider.addEventListener('input', (e) => {
+                    STATE.voltage = parseFloat(e.target.value);
+                    const disp = document.getElementById('omega-display');
+                    if (disp) disp.textContent = `V = ${STATE.voltage.toFixed(1)} V`;
+                    if (STATE.musicEnabled) updateMusicFilter();
+                    if (STATE.isolatedKey) updateProbe();
+                });
+            }
+
+            // Interactive Field Probe Mouse & Touch Listeners
+            const isoCanvasContainer = document.getElementById('iso-canvas-container');
+            if (isoCanvasContainer) {
+                isoCanvasContainer.addEventListener('mousemove', (e) => {
+                    updateProbe(e.clientX, e.clientY);
+                });
+                isoCanvasContainer.addEventListener('touchmove', (e) => {
+                    if (e.touches && e.touches[0]) {
+                        updateProbe(e.touches[0].clientX, e.touches[0].clientY);
+                    }
+                }, { passive: true });
+                isoCanvasContainer.addEventListener('mouseleave', () => {
+                    updateProbe();
+                });
+            }
+
+            // Toggle Explore 6 Unconventional Shapes (Working Toggle & Hide)
+            const btnUnlock = document.getElementById('btn-unlock-unconv');
+            btnUnlock.addEventListener('click', () => {
+                const wrap = document.getElementById('unconv-wrapper');
+                const isNowVisible = wrap.classList.toggle('visible');
+                if (isNowVisible) {
+                    btnUnlock.textContent = '✕ Hide Unconventional Shapes';
+                    btnUnlock.style.borderColor = '#94a3b8';
+                    btnUnlock.style.color = '#94a3b8';
+                    wrap.scrollIntoView({ behavior: 'smooth' });
+                    playChime(580);
+
+                    // Ensure preview equations and Laplace equation are rendered cleanly
+                    const unconvKeys = ['wedge', 'wires', 'eccentric', 'elliptic', 'conical', 'comb'];
+                    unconvKeys.forEach(k => {
+                        const el = document.getElementById(`math-${k}`);
+                        if (el && SYSTEMS[k] && !el.querySelector('.katex')) {
+                            safeKaTeX(SYSTEMS[k].previewMath, el);
+                        }
+                    });
+                    const laplaceEl = document.getElementById('math-laplace');
+                    if (laplaceEl && !laplaceEl.querySelector('.katex')) {
+                        safeKaTeX("\\nabla^2 V = 0", laplaceEl, false);
+                    }
+                } else {
+                    btnUnlock.textContent = '✦ Explore 6 Unconventional Shapes';
+                    btnUnlock.style.borderColor = 'var(--color-unconv)';
+                    btnUnlock.style.color = 'var(--color-unconv)';
+                    playChime(380);
+                    document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+
+            // Field Lines Toggle
+            const btnLines = document.getElementById('btn-lines');
+            if (btnLines) {
+                btnLines.addEventListener('click', function() {
+                    STATE.showFieldLines = !STATE.showFieldLines;
+                    this.classList.toggle('active', STATE.showFieldLines);
+                    playChime(500);
+                });
+            }
+
+            // Theme Toggle (Deep Space & Obsidian Amber)
+            const themes = [
+                { name: "Deep Space", class: "theme-space" },
+                { name: "Obsidian Amber", class: "theme-amber" }
+            ];
+            let themeIndex = 0;
+            const btnTheme = document.getElementById('btn-theme');
+            if (btnTheme) {
+                btnTheme.addEventListener('click', function() {
+                    themeIndex = (themeIndex + 1) % themes.length;
+                    const nextTheme = themes[themeIndex];
+                    document.body.classList.remove('theme-space', 'theme-amber');
+                    if (nextTheme.class !== 'theme-space') {
+                        document.body.classList.add(nextTheme.class);
+                    } else {
+                        document.body.classList.add('theme-space');
+                    }
+                    this.textContent = `Theme: ${nextTheme.name}`;
+                    playChime(650);
+                });
+            }
+
+            // Music Toggle (Playful Sci-Fi Pentatonic Generative Sequencer)
+            const btnMusic = document.getElementById('btn-music');
+            if (btnMusic) {
+                btnMusic.addEventListener('click', function() {
+                    ensureAudio().then(() => {
+                        const next = !STATE.musicEnabled;
+                        setMusic(next);
+                        this.classList.toggle('active', next);
+                        this.textContent = next ? '🎵 Music: ON' : '🎵 Music: OFF';
+                        if (STATE.sfxEnabled) playChime(659.25);
+                    });
+                });
+            }
+
+            // Sound FX Toggle (Tactile Chimes on Interaction)
+            const btnSfx = document.getElementById('btn-sfx');
+            if (btnSfx) {
+                btnSfx.addEventListener('click', function() {
+                    ensureAudio().then(() => {
+                        STATE.sfxEnabled = !STATE.sfxEnabled;
+                        this.classList.toggle('active', STATE.sfxEnabled);
+                        this.textContent = STATE.sfxEnabled ? '🔔 Sound FX: ON' : '🔔 Sound FX: OFF';
+                        if (STATE.sfxEnabled) playChime(523.25);
+                    });
+                });
+            }
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeIsolation();
+            });
+
+            requestAnimationFrame(loop);
+        });
+</script>
+</body>
+</html>

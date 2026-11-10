@@ -169,7 +169,9 @@
       const ALLOWED_DOMAINS = [
         'gauranshbansal.com',
         'www.gauranshbansal.com',
-        'gauranshbansal.github.io'
+        'gauranshbansal.github.io',
+        'academicportfolio.pages.dev',
+        'pages.dev'
       ];
 
       if (!isLocal && !ALLOWED_DOMAINS.some(d => window.location.hostname === d || window.location.hostname.endsWith('.' + d))) {
@@ -201,12 +203,566 @@
       const noticeStyle = 'font-size: 13px; font-weight: bold; color: #00f0ff; background: #080c16; padding: 6px 10px; border-radius: 4px;';
       const subStyle = 'font-size: 11px; color: #94a3b8; line-height: 1.5;';
       console.log('%câš  PROPRIETARY INTELLECTUAL PROPERTY', noticeStyle);
-      console.log('%cAll source code, simulations, design assets, and architecture are strictly owned by Gauransh Bansal.\nUnauthorized copying, distribution, decompilation, or hosting is prohibited.\nCopyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
+      console.log('%cAll source code, simulations, design assets, and architecture are strictly owned by Gauransh Bansal.
+Unauthorized copying, distribution, decompilation, or hosting is prohibited.
+Copyright (c) 2026 Gauransh Bansal. All rights reserved.', subStyle);
     })();
   </script>
   <!-- End Security Layer -->
 </head>
 <body class="bg-brand-black text-white font-sans antialiased">
+  <canvas id="cavitationCanvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999998;"></canvas>
+
+  
+          <!-- Fullscreen Welcome Gate: Gauransh Bansal Labs (Pure sech2 Soliton Field) -->
+  <style>
+    #welcomeScreen {
+      position: fixed; inset: 0; z-index: 9999; background: #030506;
+      display: flex; flex-direction: column; overflow: hidden;
+      transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.75s ease, filter 0.75s ease;
+      touch-action: none;
+    }
+    #welcomeScreen.dismissed {
+      transform: scale(1.08);
+      opacity: 0;
+      filter: blur(14px) brightness(1.3);
+      pointer-events: none;
+    }
+    #welcomeFieldCanvas {
+      position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+    }
+    .wb-enter-shelf {
+      position: absolute; left: 50%; bottom: 44px; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center;
+      pointer-events: auto; z-index: 25; opacity: 0;
+      transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .wb-enter-shelf.revealed {
+      opacity: 1; transform: translateX(-50%) translateY(0);
+    }
+    .wb-enter-btn {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.16), rgba(129, 140, 248, 0.20));
+      border: 1px solid rgba(56, 189, 248, 0.45); color: #ffffff; padding: 13px 32px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; font-family: 'Fira Code', monospace; letter-spacing: 0.08em;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 10px;
+      box-shadow: 0 10px 30px rgba(56, 189, 248, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(16px); transition: all 0.25s ease;
+      user-select: none; -webkit-tap-highlight-color: transparent;
+    }
+    .wb-enter-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 14px 40px rgba(56, 189, 248, 0.45), 0 0 24px rgba(56, 189, 248, 0.5);
+      border-color: #38bdf8;
+    }
+    .wb-enter-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+    @media (max-width: 680px) {
+      .wb-enter-shelf { bottom: 28px; width: 88%; }
+      .wb-enter-btn { width: 100%; justify-content: center; padding: 13px 20px; font-size: 12px; }
+    }
+  </style>
+
+  <div id="welcomeScreen">
+    <canvas id="welcomeFieldCanvas" aria-label="Flowing topographic lines forming Gauransh Bansal Labs"></canvas>
+
+    <div class="wb-enter-shelf" id="wbEnterShelf">
+      <button class="wb-enter-btn" id="wbEnterBtn">
+        <span>ENTER SIMULATIONS LIBRARY</span>
+        <span style="color:#38bdf8;">➔</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+  (() => {
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const canvas = document.getElementById('welcomeFieldCanvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const enterShelf = document.getElementById('wbEnterShelf');
+    const enterBtn = document.getElementById('wbEnterBtn');
+
+    const mask = document.createElement('canvas');
+    const mctx = mask.getContext('2d', { willReadFrequently: true });
+    let W = 0, H = 0, D = 1, pixels;
+    let time = 0, last = 0, raf = 0, reveal = 0;
+    let px = -9999, py = -9999;
+    let pointerInside = false;
+    let dismissed = false;
+
+    // Active KdV Solitons & Small Quick EXP 27A Shockwaves
+    let solitons = [];
+    let shocks = [];
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const smooth = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+
+    function drawSpacedText(str, x, y, extraSpace, align) {
+      if ('letterSpacing' in mctx) {
+        mctx.letterSpacing = `${extraSpace}px`;
+        mctx.textAlign = align;
+        mctx.fillText(str, x, y);
+        return;
+      }
+      const chars = str.split('');
+      const widths = [];
+      let totalW = 0;
+      for (let i = 0; i < chars.length; i++) {
+        const w = mctx.measureText(chars[i]).width;
+        widths.push(w);
+        totalW += w + (i < chars.length - 1 ? extraSpace : 0);
+      }
+      let curX = align === 'center' ? x - totalW / 2 : (align === 'right' ? x - totalW : x);
+      mctx.textAlign = 'left';
+      for (let i = 0; i < chars.length; i++) {
+        mctx.fillText(chars[i], curX, y);
+        curX += widths[i] + extraSpace;
+      }
+    }
+
+    function measureSpacedText(str, extraSpace) {
+      if ('letterSpacing' in mctx) {
+        mctx.letterSpacing = `${extraSpace}px`;
+        return mctx.measureText(str).width;
+      }
+      let totalW = 0;
+      for (let i = 0; i < str.length; i++) {
+        totalW += mctx.measureText(str[i]).width + (i < str.length - 1 ? extraSpace : 0);
+      }
+      return totalW;
+    }
+
+    function makeMask() {
+      mask.width = Math.ceil(W);
+      mask.height = Math.ceil(H);
+      mctx.clearRect(0, 0, W, H);
+
+      const narrow = W < 768;
+      // High-impact, enlarged typography
+      let titleSize = Math.min(W * (narrow ? 0.096 : 0.092), H * 0.170);
+      let labsSize  = Math.min(W * (narrow ? 0.145 : 0.135), H * 0.230);
+      let extraSpace = Math.max(3, Math.round(titleSize * 0.08));
+
+      mctx.fillStyle = '#ffffff';
+      mctx.font = `900 ${titleSize}px Impact, "Arial Black", "Arial Narrow", sans-serif`;
+      let wTitle = measureSpacedText('GAURANSH BANSAL', extraSpace);
+
+      if (wTitle > W * 0.88) {
+        const scale = (W * 0.88) / wTitle;
+        titleSize *= scale;
+        labsSize *= scale;
+        extraSpace = Math.max(2, Math.round(titleSize * 0.07));
+        mctx.font = `900 ${titleSize}px Impact, "Arial Black", "Arial Narrow", sans-serif`;
+        wTitle = measureSpacedText('GAURANSH BANSAL', extraSpace);
+      }
+
+      const startX = (W - wTitle) / 2;
+      const endX = startX + wTitle;
+
+      mctx.textBaseline = 'middle';
+      // Line 1: GAURANSH BANSAL
+      drawSpacedText('GAURANSH BANSAL', startX, H * 0.40, extraSpace, 'left');
+
+      // Line 2: LABS right aligned
+      mctx.font = `900 ${labsSize}px Impact, "Arial Black", "Arial Narrow", sans-serif`;
+      const labsSpace = Math.max(3, Math.round(labsSize * 0.10));
+      drawSpacedText('LABS', endX, H * 0.60, labsSpace, 'right');
+
+      const raw = mctx.getImageData(0, 0, mask.width, mask.height);
+      pixels = raw.data;
+    }
+
+    function resize() {
+      const rect = welcomeScreen.getBoundingClientRect();
+      W = rect.width; H = rect.height;
+      D = Math.min(window.devicePixelRatio || 1, 1.35);
+      canvas.width = Math.round(W * D);
+      canvas.height = Math.round(H * D);
+      ctx.setTransform(D, 0, 0, D, 0, 0);
+      makeMask();
+    }
+
+    function maskAlpha(x, y) {
+      const ix = x | 0, iy = y | 0;
+      if (ix < 0 || iy < 0 || ix >= mask.width || iy >= mask.height) return 0;
+      return pixels[(iy * mask.width + ix) * 4 + 3];
+    }
+
+    let v1, v2, v3;
+    function updateVortices() {
+      v1 = [W * 0.20, H * 0.29, W * 0.20,  1.0,  (W * 0.20) * (W * 0.20) * 0.16, 1 / ((W * 0.20) * (W * 0.20) * 1.8)];
+      v2 = [W * 0.79, H * 0.54, W * 0.17, -0.85, (W * 0.17) * (W * 0.17) * 0.16, 1 / ((W * 0.17) * (W * 0.17) * 1.8)];
+      v3 = [W * 0.46, H * 0.88, W * 0.25,  0.65, (W * 0.25) * (W * 0.25) * 0.16, 1 / ((W * 0.25) * (W * 0.25) * 1.8)];
+    }
+
+    function flow(x, y, t) {
+      const nx = x / W, ny = y / H;
+      let dx = 0, dy = 0;
+
+      const vorList = [v1, v2, v3];
+      for (let i = 0; i < 3; i++) {
+        const v = vorList[i];
+        const ax = x - v[0], ay = y - v[1];
+        const d2 = ax * ax + ay * ay;
+        const rr = d2 + v[4];
+        const influence = Math.exp(-d2 * v[5]) * v[3];
+        const invR = 1 / Math.sqrt(rr);
+        dx += (-ay * invR) * influence * 24;
+        dy += ( ax * invR) * influence * 24;
+      }
+
+      dx += Math.sin(ny * 9.0 + t * 0.55) * 13 + Math.sin((nx + ny) * 7.0 - t * 0.3) * 7;
+      dy += Math.sin(nx * 8.0 - t * 0.42) * 13 + Math.cos((nx - ny) * 6.0 + t * 0.25) * 8;
+
+      const sLen = solitons.length;
+      if (sLen > 0) {
+        for (let i = 0; i < sLen; i++) {
+          const s = solitons[i];
+          const ax = x - s.x, ay = y - s.y;
+          const dist = Math.hypot(ax, ay);
+          const diff = Math.abs(dist - s.radius);
+          if (diff < 35) {
+            const u = diff * s.kappa;
+            const c = Math.cosh(u);
+            const sech2 = 1 / (c * c);
+            const elevation = 2 * Math.pow(s.kappa * 15, 2) * sech2 * s.amp;
+            const invDist = 1 / Math.max(1, dist);
+            dx += (ax * invDist) * elevation * 0.38;
+            dy += (ay * invDist) * elevation * 0.38;
+          }
+        }
+      }
+
+      return [dx, dy];
+    }
+
+    function color(y) {
+      const p = y / H;
+      let r, g, b;
+      if (p < 0.47) {
+        r = 255; g = Math.round(72 + p * 340); b = 20;
+      } else if (p < 0.76) {
+        r = Math.round(255 - (p - 0.47) * 720); g = 225; b = Math.round(40 + (p - 0.47) * 610);
+      } else {
+        r = 0; g = Math.round(210 - (p - 0.76) * 250); b = 255;
+      }
+      return [clamp(r, 0, 255), clamp(g, 0, 255), clamp(b, 0, 255)];
+    }
+
+    let ptsX = new Float32Array(800);
+    let ptsY = new Float32Array(800);
+
+    function draw(now) {
+      if (dismissed) return;
+      if (now - last < 16 && !reduced) { raf = requestAnimationFrame(draw); return; }
+      const dt = Math.min((now - last) / 1000, 0.04);
+      last = now;
+      if (!reduced) time += dt;
+
+      for (let i = solitons.length - 1; i >= 0; i--) {
+        const s = solitons[i];
+        s.radius += s.speed;
+        s.amp *= 0.982;
+        if (s.amp < 0.05 || s.radius > Math.max(W, H) * 1.1) solitons.splice(i, 1);
+      }
+
+      const target = pointerInside ? 1 : 0;
+      reveal += (target - reveal) * (reduced ? 1 : 1 - Math.exp(-dt * 5.2));
+
+      ctx.fillStyle = '#030506';
+      ctx.fillRect(0, 0, W, H);
+
+      const spacing = Math.max(8.5, Math.min(11.5, H / 75));
+      const count = Math.ceil(H / spacing);
+      const step = Math.max(3.2, Math.min(4.8, W / 260));
+      const numSteps = Math.ceil((W + step * 2) / step);
+
+      if (ptsX.length < numSteps + 2) {
+        ptsX = new Float32Array(numSteps + 4);
+        ptsY = new Float32Array(numSteps + 4);
+      }
+
+      const hasReveal = reveal > 0.003;
+      const minWH = Math.min(W, H);
+      const pFieldRadius = minWH * 0.03;
+      const pFieldInv = 1 / (minWH * 0.15);
+
+      for (let row = -2; row <= count + 2; row++) {
+        const base = row * spacing;
+        const col = color(base);
+
+        let ptIdx = 0;
+        for (let x = -step; x <= W + step; x += step) {
+          const [dx, dy] = flow(x, base, time);
+          ptsX[ptIdx] = x + dx;
+          ptsY[ptIdx] = base + dy;
+          ptIdx++;
+        }
+
+        // Pass 1: Background streamline with natural contrast modulation
+        ctx.beginPath();
+        ctx.moveTo(ptsX[0], ptsY[0]);
+        for (let j = 1; j < ptIdx; j++) {
+          ctx.lineTo(ptsX[j], ptsY[j]);
+        }
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        const bgAlpha = Math.max(0.18, 0.62 * (1 - reveal * 0.65));
+        ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${bgAlpha})`;
+        ctx.lineWidth = 1.05;
+        ctx.stroke();
+
+        // Pass 2: Re-trace text mask with sub-stepping & stem continuity
+        if (hasReveal) {
+          ctx.beginPath();
+          let active = false;
+          let segLen = 0;
+          let lastX = 0, lastY = 0;
+
+          for (let j = 0; j < ptIdx; j++) {
+            const xx = ptsX[j], yy = ptsY[j];
+            const a = maskAlpha(xx, yy);
+
+            let strength = 0;
+            if (a > 20) {
+              strength = (a / 255) * reveal;
+            } else {
+              const radius = Math.hypot(px - xx, py - yy);
+              const pointerField = 1 - smooth((radius - pFieldRadius) * pFieldInv);
+              strength = reveal * pointerField * 0.14;
+            }
+
+            if (strength > 0.12) {
+              if (!active) {
+                ctx.moveTo(xx, yy);
+                active = true;
+                segLen = 1;
+              } else {
+                ctx.lineTo(xx, yy);
+                segLen++;
+              }
+              lastX = xx; lastY = yy;
+            } else if (active) {
+              active = false;
+              if (segLen === 1) ctx.lineTo(lastX + 1.6, lastY);
+              ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${0.65 + 0.35 * reveal})`;
+              ctx.lineWidth = 1.8 + 1.4 * reveal;
+              ctx.stroke();
+              ctx.beginPath();
+              segLen = 0;
+            }
+          }
+          if (active) {
+            if (segLen === 1) ctx.lineTo(lastX + 1.6, lastY);
+            ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${0.65 + 0.35 * reveal})`;
+            ctx.lineWidth = 1.8 + 1.4 * reveal;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Handled globally by cavitationCanvas shockwave engine
+
+      if (reveal > 0.35) enterShelf.classList.add('revealed');
+
+      raf = requestAnimationFrame(draw);
+    }
+
+    // Ambient fade in for center enter button after 2.2s
+    setTimeout(() => {
+      if (enterShelf) enterShelf.classList.add('revealed');
+    }, 2200);
+
+    // =========================================================================
+    // EXP 27A-style cavitation click: compact, snappy, single-canvas engine.
+    // - One <canvas>, one rAF loop, time-based (identical speed on 60/120/144Hz)
+    // - No DOM nodes, no CSS box-shadow transitions, no ctx.shadowBlur
+    //   (those were the main sources of jank). Glow = cheap radial gradients.
+    // =========================================================================
+    const cavCanvas = document.getElementById('cavitationCanvas');
+    const cavCtx = cavCanvas ? cavCanvas.getContext('2d') : null;
+    let cavEvents = [];
+    let cavRaf = null;
+    let cavDpr = 1;
+
+    // Timeline (ms): expand -> implosion -> flash + shockwave
+    const T_EXPAND = 85, T_COLLAPSE = 35, T_SHOCK = 400, T_FLASH = 110;
+    const T_BURST = T_EXPAND + T_COLLAPSE;
+    const R_BUBBLE = 17, R_SHOCK = 62;
+
+    const easeOut = q => 1 - Math.pow(1 - q, 3);
+    const easeIn  = q => q * q * q;
+
+    function resizeCavCanvas() {
+      if (!cavCanvas) return;
+      cavDpr = Math.min(window.devicePixelRatio || 1, 2);
+      cavCanvas.width = Math.round(window.innerWidth * cavDpr);
+      cavCanvas.height = Math.round(window.innerHeight * cavDpr);
+      cavCtx.setTransform(cavDpr, 0, 0, cavDpr, 0, 0);
+    }
+    window.addEventListener('resize', resizeCavCanvas, { passive: true });
+    resizeCavCanvas();
+
+    function glow(x, y, r, a, cyanMix) {
+      if (a <= 0.003 || r <= 0.5) return;
+      const g = cavCtx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, `rgba(255,255,255,${a})`);
+      g.addColorStop(cyanMix, `rgba(6,182,212,${a * 0.55})`);
+      g.addColorStop(1, 'rgba(6,182,212,0)');
+      cavCtx.fillStyle = g;
+      cavCtx.beginPath();
+      cavCtx.arc(x, y, r, 0, 6.2832);
+      cavCtx.fill();
+    }
+
+    function renderCav(now) {
+      cavRaf = null;
+      const c = cavCtx;
+      c.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      for (let i = cavEvents.length - 1; i >= 0; i--) {
+        const ev = cavEvents[i];
+        const age = now - ev.t0;
+        if (age < 0) continue;
+        if (age > T_BURST + T_SHOCK) { cavEvents.splice(i, 1); continue; }
+
+        // ---- Bubble: expansion then violent implosion ----
+        if (age < T_BURST) {
+          let r, fillA, white;
+          if (age < T_EXPAND) {
+            const q = easeOut(age / T_EXPAND);
+            r = 3 + (R_BUBBLE - 3) * q;
+            fillA = 0.35; white = 0;
+          } else {
+            const q = easeIn((age - T_EXPAND) / T_COLLAPSE);
+            r = R_BUBBLE - (R_BUBBLE - 1.2) * q;
+            fillA = 0.35 + 0.65 * q; white = q;
+          }
+          c.globalCompositeOperation = 'lighter';
+          glow(ev.x, ev.y, r * 2.4, 0.35 + 0.5 * white, 0.35);
+          c.globalCompositeOperation = 'source-over';
+          c.fillStyle = `rgba(${Math.round(120 + 135 * white)},${Math.round(220 + 35 * white)},255,${fillA * 0.55})`;
+          c.beginPath(); c.arc(ev.x, ev.y, r, 0, 6.2832); c.fill();
+          c.strokeStyle = 'rgba(255,255,255,0.92)';
+          c.lineWidth = 1.5;
+          c.stroke();
+        }
+
+        // ---- Sonoluminescent flash ----
+        const fa = age - T_BURST;
+        if (fa >= 0 && fa < T_FLASH) {
+          const q = fa / T_FLASH;
+          c.globalCompositeOperation = 'lighter';
+          glow(ev.x, ev.y, 10 + 30 * easeOut(q), 1 - q, 0.25);
+          c.globalCompositeOperation = 'source-over';
+        }
+
+        // ---- Radial shockwave ----
+        if (fa >= 0) {
+          const q = Math.min(fa / T_SHOCK, 1);
+          const r = 5 + R_SHOCK * easeOut(q);
+          const alpha = Math.pow(1 - q, 1.6);
+          // soft halo (cheap replacement for shadowBlur)
+          c.strokeStyle = `rgba(6,182,212,${alpha * 0.16})`;
+          c.lineWidth = 5 * alpha + 1;
+          c.beginPath(); c.arc(ev.x, ev.y, r, 0, 6.2832); c.stroke();
+          // crisp primary ring
+          c.strokeStyle = `rgba(6,182,212,${alpha * 0.95})`;
+          c.lineWidth = 0.8 + 1.5 * alpha;
+          c.beginPath(); c.arc(ev.x, ev.y, r, 0, 6.2832); c.stroke();
+          // secondary rebound ring
+          if (r > 16) {
+            c.strokeStyle = `rgba(255,255,255,${alpha * 0.65})`;
+            c.lineWidth = 0.8;
+            c.beginPath(); c.arc(ev.x, ev.y, r * 0.65, 0, 6.2832); c.stroke();
+          }
+        }
+      }
+
+      if (cavEvents.length) cavRaf = requestAnimationFrame(renderCav);
+      else c.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    }
+
+    window.triggerGlobalCavitation = function(clickX, clickY) {
+      if (!cavCtx) return;
+      if (cavEvents.length >= 8) cavEvents.shift();
+      // t0 = event timestamp so the animation starts the instant of the click
+      cavEvents.push({ x: clickX, y: clickY, t0: performance.now() });
+      if (!cavRaf) cavRaf = requestAnimationFrame(renderCav);
+    };
+
+    // Pointer & Touch Interaction
+    welcomeScreen.addEventListener('pointermove', e => {
+      const r = welcomeScreen.getBoundingClientRect();
+      px = e.clientX - r.left;
+      py = e.clientY - r.top;
+      pointerInside = Math.hypot(px - W / 2, py - H * 0.50) < Math.min(W, H) * 0.44;
+    });
+
+    welcomeScreen.addEventListener('pointerleave', () => {
+      pointerInside = false;
+      px = -9999; py = -9999;
+    });
+
+    // Global instantaneous tactile click response
+    window.addEventListener('pointerdown', e => {
+      window.triggerGlobalCavitation(e.clientX, e.clientY);
+    }, { passive: true });
+
+    function dismissWelcome() {
+      if (dismissed) return;
+      dismissed = true;
+      
+      welcomeScreen.classList.add('dismissed');
+      setTimeout(() => {
+        welcomeScreen.style.display = 'none';
+      }, 750);
+    
+    }
+
+    enterBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const rect = enterBtn.getBoundingClientRect();
+      window.triggerGlobalCavitation(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      setTimeout(dismissWelcome, 240);
+    });
+
+    // === Scroll to Open Feature (Mouse Wheel & Mobile Touch Swipe) ===
+    window.addEventListener('wheel', e => {
+      if (!dismissed && e.deltaY > 15) {
+        dismissWelcome();
+      }
+    }, { passive: true });
+
+    let touchStartY = null;
+    window.addEventListener('touchstart', e => {
+      if (e.touches && e.touches.length > 0) {
+        touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', e => {
+      if (!dismissed && touchStartY !== null && e.touches && e.touches.length > 0) {
+        const diffY = touchStartY - e.touches[0].clientY;
+        if (diffY > 35) { // Swiped up / scrolled down
+          dismissWelcome();
+        }
+      }
+    }, { passive: true });
+
+    window.addEventListener('keydown', e => {
+      if (!dismissed && (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'PageDown')) {
+        dismissWelcome();
+      }
+    });
+
+    window.addEventListener('resize', () => { resize(); updateVortices(); });
+    resize(); updateVortices(); raf = requestAnimationFrame(draw);
+  })();
+  </script>
+
+
 
   <!-- Deep Space Watery Fluidity Canvas & Ambient Overlays -->
   <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -229,6 +785,11 @@
         <a href="#featured" class="text-sm font-medium tracking-wide text-neutral-400 hover:text-white transition-colors duration-300">Featured</a>
         <a href="#library" class="text-sm font-medium tracking-wide text-neutral-400 hover:text-white transition-colors duration-300">Library</a>
         <a href="./about.html" class="text-sm font-medium tracking-wide text-neutral-400 hover:text-white transition-colors duration-300">About</a>
+        <a href="https://academicportfolio.pages.dev" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 hover:border-cyan-400/60 text-xs font-medium text-cyan-300 hover:text-white transition-all">
+          <iconify-icon icon="lucide:graduation-cap" width="13"></iconify-icon>
+          <span>Academic Portfolio</span>
+          <iconify-icon icon="lucide:arrow-up-right" width="11"></iconify-icon>
+        </a>
       </div>
 
       <div class="flex items-center gap-3">
@@ -250,6 +811,11 @@
         <a href="#featured" class="text-sm font-medium tracking-wide text-neutral-400 hover:text-white transition-colors py-2">Featured</a>
         <a href="#library" class="text-sm font-medium tracking-wide text-neutral-400 hover:text-white transition-colors py-2">Library</a>
         <a href="./about.html" class="text-sm font-medium tracking-wide text-neutral-400 hover:text-white transition-colors py-2">About</a>
+        <a href="https://academicportfolio.pages.dev" target="_blank" rel="noopener noreferrer" class="text-sm font-medium tracking-wide text-cyan-400 hover:text-cyan-300 transition-colors py-2 flex items-center gap-1.5">
+          <iconify-icon icon="lucide:graduation-cap" width="15"></iconify-icon>
+          <span>Academic Portfolio</span>
+          <iconify-icon icon="lucide:arrow-up-right" width="13"></iconify-icon>
+        </a>
       </div>
     </div>
   </nav>
@@ -383,6 +949,18 @@
         year: "2026"
       },
       {
+        title: "THE WORLD OF CAPACITORS",
+        subtitle: "From Canonical Geometries to Unconventional Quantum Realities",
+        badge: "Electrostatics & Nanotechnology",
+        description: "An interactive laboratory exploring parallel plate, cylindrical, and spherical capacitors with step-by-step Gauss-Laplace derivations, plus 6 unconventional frontiers: MEMS comb drives, Hilbert fractals, EDLC quantum capacitance, ferroelectric negative capacitance, liquid metal morphing, and Casimir vacuum cavities.",
+        image: "./world_of_capacitors.png",
+        url: "./unconventional_capacitors.html",
+        featured: true,
+        tags: ["Electrostatics", "Field Theory", "Nanotechnology", "KaTeX Derivations"],
+        category: "Universal Dynamics",
+        year: "2026"
+      },
+      {
         title: "GEIGER-MÜLLER VIRTUAL LABORATORY",
         subtitle: "Coupled Electrostatics, Townsend Avalanches, Space Charge & Detection Physics",
         badge: "Nuclear & Plasma Physics",
@@ -489,6 +1067,18 @@
         featured: false,
         tags: ["Three.js", "Artificial Life", "Web Audio", "Spatial Synthesis", "3D Boids"],
         category: "Artificial Life & Audio",
+        year: "2026"
+      },
+      {
+        title: "4D MANIFOLD PROJECTION & RELATIVISTIC DYNAMICS",
+        subtitle: "Higher-dimensional stereographic projections, geodesic particle flows, and phase-space sonification",
+        badge: "Differential Geometry & Relativity",
+        description: "A real-time four-dimensional dynamical systems simulator projecting Riemannian hypercubes, Hopf fibrations, and Schwarzschild event horizon geodesics with 12,000 relativistic nodes, 4K snapshot export, and Web Audio synthesis.",
+        image: "./manifold_working.png",
+        url: "./manifold_4d_projection.html",
+        featured: false,
+        tags: ["4D Geometry", "Differential Geometry", "General Relativity", "Web Audio API", "Singularities"],
+        category: "Differential Geometry & Relativity",
         year: "2026"
       }
     ];
@@ -656,7 +1246,7 @@
         card.innerHTML = `
           <div>
             <div class="relative aspect-video overflow-hidden bg-brand-gray">
-              <img src="${sim.image}" alt="${sim.title}" class="w-full h-full ${sim.imageClass || 'object-cover'} transition-transform duration-700 group-hover:scale-105" loading="lazy">
+              <img src="${sim.image}" alt="${sim.title}" class="w-full h-full ${sim.imageClass || 'object-cover'} transition-transform duration-700 group-hover:scale-105" loading="lazy" onerror="if(this.src.indexOf('Screenshot.png')!==-1){this.src='./landscape_of_futures.png';}">
               ${isFeatured ? `<div class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-white text-black text-[9px] font-semibold tracking-wider uppercase shadow-button-physical">Featured</div>` : ''}
               <div class="card-overlay absolute inset-0 bg-black/40 flex items-center justify-center">
                 <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-button-physical transform scale-75 group-hover:scale-100 transition-transform duration-tactile">

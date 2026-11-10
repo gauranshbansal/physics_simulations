@@ -108,15 +108,28 @@ python -m http.server 8000
 * **Features:** Step-by-step tangent line geometry visualization, convergence animation, failure modes (local extrema cycles, inflection traps), and complex fractal basin boundaries.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
+### 11. ⚡ [The World of Capacitors (Unconventional Geometries & Dielectrics)](unconventional_capacitors.html)
+* **File:** `unconventional_capacitors.html`
+* **Topic:** Electromagnetism, Electrostatic Fields, Gauss's Law & Dielectric Breakdown
+* **Features:** Interactive electrostatic laboratory featuring parallel-plate, coaxial cylindrical, concentric spherical, and eccentric cylindrical configurations. Real-time electric field streamlines, equipotential contour rendering, dielectric polarization, stored electrostatic energy calculations, and catastrophic dielectric breakdown simulations with animated electrical arcs and energetic discharge.
+
+### 12. 🌀 [4D Manifold Projection & Relativistic Dynamics](manifold_4d_projection.html)
+* **File:** `manifold_4d_projection.html`
+* **Topic:** Differential Geometry, Higher-Dimensional Topology & Relativistic Spacetime
+* **Features:** Real-time 4D-to-3D stereographic and perspective projection of hyper-dimensional manifolds (Tesseract, Clifford Torus, 120-Cell, Hypersphere). Features full 6-plane 4D rotation tensors ($xy, xz, xw, yz, yw, zw$), relativistic geodesic trajectory tracing, Riemann curvature metric visualization, and interactive gravitational distortion fields.
+
 ---
 
 ## 🛠️ Tech Stack & Architecture
 
-* **Visual Engine:** HTML5 2D Canvas & Three.js WebGL with responsive high-DPI scaling.
+* **Visual Engine:** HTML5 2D Canvas & Three.js WebGL with responsive high-DPI retina scaling.
+* **Fullscreen Welcome Gate & Soliton Wavefield:** Mathematical $\text{sech}^2$ nonlinear soliton wavefield and topographic streamline simulation with interactive cursor distortion, glyph emergence, and seamless gateway transition into the simulation library. Also accessible standalone via [`welcome.html`](welcome.html).
+* **Pure Canvas Acoustic Cavitation & Sonoluminescence Engine:** High-performance, zero-DOM-churn click feedback engine running on a dedicated hardware-accelerated canvas layer. Employs precise clock-based timing (85ms bubble expansion, 35ms rapid collapse with fluid void color shifts, 110ms decoupled sonoluminescence flash, and 400ms dual-stroke optical halo shockwaves with `'lighter'` additive blending).
 * **Ambient String-Frame Wave Physics:** Custom 2D harmonic wave-mesh and spring-damper string engine (`water-fluidity.js`) featuring Hooke's restoring tension, interactive cursor plucking/ripples on desktop, and autonomous flowy ambient undulation on mobile devices.
-* **UI/UX Design:** Custom Tailwind CSS with a dark glassmorphic theme.
-* **Numerical Mathematics:** Custom numerical integrators (Euler-Cromer, RK4, Symplectic Verlet, Newton-Raphson solvers).
-* **Audio Sonification:** Native Web Audio API polyphonic synthesizers with pentatonic scales.
+* **Dynamic Catalog Controls:** Instant real-time search query filtering, category classification tabs (*All, Astrophysics & Space, Nonlinear Dynamics & Chaos, Numerical & Mathematical Physics, Geophysics & Earth Systems, Quantum & Nuclear*), and live Grid / Row view layout switching.
+* **UI/UX Design:** Custom Tailwind CSS with dark glassmorphic styling and refined typography.
+* **Numerical Mathematics:** Custom numerical integrators (Euler-Cromer, RK4, Symplectic Verlet, Newton-Raphson solvers, 4D rotation matrices).
+* **Audio Sonification:** Native Web Audio API polyphonic synthesizers with pentatonic and microtonal frequency mapping.
 * **Security & IP Protection:** Built-in anti-framing framebusting, domain locking, and anti-scraping protections.
 * **Portability:** Zero build tools or npm dependencies; 100% portable single-file architecture.
 
