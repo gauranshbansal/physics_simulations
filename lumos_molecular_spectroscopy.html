@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0d0c0b">
     <meta name="color-scheme" content="dark">
     <title>LUMOS — Magical Spectroscopy Laboratory</title>
@@ -545,6 +545,102 @@
             background: rgba(120, 82, 38, 0.45);
             border-radius: 3px;
         }
+    </style>
+
+    <script>
+    /* Mobile detection (runs before first paint). Add ?mobile=1 to force mobile UI, ?mobile=0 to force desktop. */
+    (function () {
+        var q = new URLSearchParams(location.search).get('mobile');
+        var touch = (navigator.maxTouchPoints || 0) > 0 || 'ontouchstart' in window;
+        var coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+        var ua = /Android|iPhone|iPad|iPod|Mobile|Silk/i.test(navigator.userAgent || '') ||
+                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var mobile = q === '1' || (q !== '0' && touch && (coarse || ua));
+        if (mobile) document.documentElement.classList.add('is-mobile');
+    })();
+    </script>
+
+    <style id="mobile-ui-css">
+        /* ===== MOBILE INTERFACE (only active when <html class="is-mobile">) ===== */
+        html.is-mobile, html.is-mobile body { overscroll-behavior: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+        html.is-mobile kbd { display: none !important; }
+        html.is-mobile #cursor-hint { display: none !important; }
+        html.is-mobile #lock-status-dot { display: none; }
+        html.is-mobile .arcane-btn:hover { transform: none; }
+        html.is-mobile #game-hud {
+            padding: calc(env(safe-area-inset-top, 0px) + 8px) calc(env(safe-area-inset-right, 0px) + 10px)
+                     calc(env(safe-area-inset-bottom, 0px) + 8px) calc(env(safe-area-inset-left, 0px) + 10px) !important;
+        }
+        html.is-mobile #acquisition-panel { top: calc(env(safe-area-inset-top, 0px) + 64px) !important; right: calc(env(safe-area-inset-right, 0px) + 10px) !important; }
+
+        /* SHINE becomes a big round thumb button */
+        html.is-mobile #shine-action-btn {
+            position: fixed; z-index: 12;
+            right: calc(env(safe-area-inset-right, 0px) + 22px);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 26px);
+            width: 92px; height: 92px; padding: 0 !important; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; touch-action: none;
+        }
+        html.is-mobile #shine-action-btn::before { border-radius: 50%; }
+        html.is-mobile #shine-action-btn > div { flex-direction: column; gap: 7px; align-items: center; }
+        html.is-mobile #shine-action-btn .space-x-3 > * { margin: 0 !important; }
+        html.is-mobile #shine-status-title { font-size: 11px !important; letter-spacing: 0.14em !important; }
+        html.is-mobile #shine-action-btn.lumos-active-hud { transform: scale(1.06); }
+
+        /* Contextual target banner floats above the thumb controls */
+        html.is-mobile #target-context-hud {
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 132px) !important;
+            max-width: calc(100vw - 24px);
+        }
+        html.is-mobile #target-context-hud .arcane-panel { padding: 8px 16px; }
+        html.is-mobile #target-context-action-btn { padding: 8px 4px; font-size: 12px; min-height: 36px; }
+
+        /* Crosshair pinned to true screen centre (the hit-test ray is cast from the centre) */
+        html.is-mobile #wand-reticle-container {
+            left: 50% !important; top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+        }
+
+        /* Controls layer */
+        #mob-controls { display: none; }
+        html.is-mobile #mob-controls { display: block; }
+        #mob-controls.mob-hidden { display: none !important; }
+        #mob-joy-base, #mob-joy-knob { position: fixed; pointer-events: none; border-radius: 50%; z-index: 11; }
+        #mob-joy-base {
+            width: 124px; height: 124px; margin: -62px 0 0 -62px;
+            border: 1px solid rgba(184,153,104,0.45);
+            background: radial-gradient(circle, rgba(184,153,104,0.10), rgba(12,10,8,0.30));
+            box-shadow: inset 0 0 18px rgba(184,153,104,0.12);
+            opacity: 0.38; transition: opacity .2s ease;
+        }
+        #mob-joy-base.active { opacity: 0.9; transition: none; }
+        #mob-joy-knob {
+            width: 54px; height: 54px; margin: -27px 0 0 -27px;
+            background: radial-gradient(circle at 35% 30%, #f3dfae, #b89968 60%, #6e5530);
+            border: 1px solid #fff3d6; box-shadow: 0 0 14px rgba(224,197,148,0.45);
+            opacity: 0.55;
+        }
+        #mob-joy-base.active + #mob-joy-knob { opacity: 0.95; }
+        .mob-act {
+            position: fixed; z-index: 12; width: 62px; height: 62px; border-radius: 50%;
+            font-size: 10px; display: flex; align-items: center; justify-content: center;
+            text-align: center; touch-action: none; padding: 0; line-height: 1.2;
+        }
+        .mob-act:active { background: rgba(224,197,148,0.25); border-color: #fff6e5; transform: scale(0.94); }
+        #mob-read { right: calc(env(safe-area-inset-right, 0px) + 124px); bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); }
+        #mob-grab { right: calc(env(safe-area-inset-right, 0px) + 38px);  bottom: calc(env(safe-area-inset-bottom, 0px) + 126px); }
+
+        /* Intro + scroll modal fit small screens */
+        html.is-mobile #intro-overlay { overflow-y: auto; padding: 12px; }
+        html.is-mobile #intro-overlay > div { padding: 1.25rem 1rem; }
+        html.is-mobile #intro-overlay h1 { font-size: 1.35rem; margin-bottom: .5rem; }
+        html.is-mobile #intro-overlay p.italic { margin-bottom: 1rem; font-size: 1.05rem; }
+        html.is-mobile #intro-overlay p.mt-8 { margin-top: 1rem; line-height: 1.9; }
+        html.is-mobile #scroll-modal { padding: 8px; }
+        html.is-mobile #parchment-sheet-container { max-height: calc(100dvh - 16px); }
+        html.is-mobile .parchment-scroll-body { padding-left: 1rem; padding-right: 1rem; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+        html.is-mobile #cast-revelio-btn, html.is-mobile #close-scroll-btn { min-height: 40px; }
+        html.is-mobile .mode-btn { min-height: 30px; }
     </style>
 </head>
 <body>
@@ -6837,6 +6933,197 @@
                 box.classList.add('flex');
             }
         };
+    </script>
+
+    <script>
+    /* ===== MOBILE CONTROLS: floating joystick (left), look-drag (right), tap-to-aim, action buttons ===== */
+    (function () {
+        if (!document.documentElement.classList.contains('is-mobile')) return;
+        var $ = function (id) { return document.getElementById(id); };
+
+        // Block pinch / double-tap zoom (iOS Safari ignores user-scalable=no)
+        ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (t) {
+            document.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false });
+        });
+
+        // Controls DOM
+        var root = document.createElement('div');
+        root.id = 'mob-controls';
+        root.className = 'mob-hidden';
+        root.innerHTML =
+            '<div id="mob-joy-base"></div><div id="mob-joy-knob"></div>' +
+            '<button id="mob-read" class="mob-act arcane-panel arcane-btn font-cinzel" aria-label="Read scroll">READ</button>' +
+            '<button id="mob-grab" class="mob-act arcane-panel arcane-btn font-cinzel" aria-label="Grab or place scroll">GRAB</button>';
+        document.body.appendChild(root);
+        var base = $('mob-joy-base'), knob = $('mob-joy-knob');
+
+        function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
+
+        // Mobile wording instead of keyboard hints
+        function fixHtml(h) {
+            return h
+                .replace(/Hold <kbd>F<\/kbd> or the mouse to keep recording\./, 'Keep holding SHINE to record.')
+                .replace(/hold <kbd>F<\/kbd>/, 'hold SHINE')
+                .replace(/Press <kbd>E<\/kbd> or click to open the scroll\./, 'Tap READ to open the scroll.')
+                .replace(/Press <kbd>R<\/kbd> to reveal it\./, 'Tap CAST REVELIO to reveal it.')
+                .replace(/Done\. <kbd>Tab<\/kbd> changes compound, <kbd>M<\/kbd> changes mode\./, 'Done. Pick another compound or mode from the top menu.')
+                .replace(/\(OR DROP <kbd>G<\/kbd>\)/, '(TAP TO DROP)')
+                .replace(/<span class="mr-3">READ[\s\S]*PICK UP[\s\S]*<\/span>/, 'TAP TO PICK UP')
+                .replace(/(\s*<kbd>[^<]*<\/kbd>\s*(\/|·)?)+/g, ' ')
+                .replace(/\s+$/, '');
+        }
+        function watch(el) {
+            if (!el) return;
+            var busy = false;
+            function run() {
+                if (busy) return; busy = true;
+                var h = el.innerHTML, n = fixHtml(h);
+                if (n !== h) el.innerHTML = n;
+                busy = false;
+            }
+            new MutationObserver(run).observe(el, { childList: true, characterData: true, subtree: true });
+            run();
+        }
+
+        function init(app) {
+            var cam = app.fpCamera, co = app.coordinator, canvas = app.renderer.domElement;
+
+            ['tutorialText', 'targetActionBtn', 'shineTitle'].forEach(function (k) { watch(co[k]); });
+            ['scroll-blank-prompt', 'cast-revelio-btn', 'close-scroll-btn'].forEach(function (id) {
+                var el = $(id); if (el) el.innerHTML = fixHtml(el.innerHTML);
+            });
+            var help = document.querySelector('#intro-overlay p.mt-8');
+            if (help) help.innerHTML = 'Left thumb &mdash; walk &nbsp;&bull;&nbsp; Right thumb &mdash; look<br>Tap an object to aim at it &nbsp;&bull;&nbsp; Hold SHINE on the molecule<br>Landscape works best';
+
+            // Stop the legacy single-finger look handler; we handle touches ourselves (multi-touch aware)
+            ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function (t) {
+                window.addEventListener(t, function (e) {
+                    if (e.target === canvas) { e.stopPropagation(); if (e.cancelable && t !== 'touchend') e.preventDefault(); }
+                }, { capture: true, passive: false });
+            });
+
+            // Joystick
+            var JOY_R = 56;
+            function placeIdle() {
+                var l = 28 + 62 + (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sal')) || 0);
+                base.style.left = knob.style.left = l + 'px';
+                base.style.top = knob.style.top = (window.innerHeight - 28 - 62) + 'px';
+            }
+            placeIdle();
+            window.addEventListener('resize', function () { if (!st.move) placeIdle(); });
+            window.addEventListener('orientationchange', function () { setTimeout(placeIdle, 250); });
+
+            var st = { move: null, look: null };
+            var keys = cam.moveKeys;
+            function setKeys(f, b, l, r) { keys.forward = f; keys.backward = b; keys.left = l; keys.right = r; }
+            function clampLook() {
+                cam.targetPitch = Math.max(-Math.PI * 0.38, Math.min(Math.PI * 0.44, cam.targetPitch));
+                if (!cam.freeRoam) cam.targetYaw = Math.max(-Math.PI * 0.65, Math.min(Math.PI * 0.65, cam.targetYaw));
+            }
+            function releaseAll() {
+                setKeys(false, false, false, false);
+                st.move = st.look = null;
+                base.classList.remove('active'); placeIdle();
+            }
+            function joyUpdate(x, y) {
+                var dx = x - st.move.sx, dy = y - st.move.sy;
+                var d = Math.hypot(dx, dy);
+                if (d > JOY_R) { dx *= JOY_R / d; dy *= JOY_R / d; }
+                knob.style.left = (st.move.sx + dx) + 'px';
+                knob.style.top = (st.move.sy + dy) + 'px';
+                var nx = dx / JOY_R, ny = dy / JOY_R, T = 0.33;
+                setKeys(ny < -T, ny > T, nx < -T, nx > T);
+            }
+            // Tap-to-aim: turn the view so the tapped point lands on the crosshair (aim is screen-centre)
+            function tapAim(x, y) {
+                var c = cam.camera, t = Math.tan(c.fov * Math.PI / 360);
+                var nx = (x - innerWidth / 2) / (innerWidth / 2), ny = (y - innerHeight / 2) / (innerHeight / 2);
+                cam.targetYaw -= Math.atan(nx * t * c.aspect);
+                cam.targetPitch += Math.atan(-ny * t);
+                clampLook();
+            }
+
+            canvas.addEventListener('pointerdown', function (e) {
+                if (e.pointerType === 'mouse') return;
+                if (cam.isInspectionPaused || !co.hasEnteredChamber) return;
+                e.preventDefault();
+                var rec = { id: e.pointerId, sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, t: performance.now(), moved: false };
+                if (e.clientX < innerWidth * 0.45 && !st.move) {
+                    st.move = rec;
+                    base.style.left = knob.style.left = rec.sx + 'px';
+                    base.style.top = knob.style.top = rec.sy + 'px';
+                    base.classList.add('active');
+                } else if (!st.look) {
+                    st.look = rec;
+                } else return;
+                try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+            });
+            canvas.addEventListener('pointermove', function (e) {
+                if (e.pointerType === 'mouse') return;
+                if (cam.isInspectionPaused) { releaseAll(); return; }
+                var r = (st.move && st.move.id === e.pointerId) ? st.move : (st.look && st.look.id === e.pointerId) ? st.look : null;
+                if (!r) return;
+                e.preventDefault();
+                if (!r.moved && Math.hypot(e.clientX - r.sx, e.clientY - r.sy) > 12) r.moved = true;
+                if (r === st.move) {
+                    if (r.moved) joyUpdate(e.clientX, e.clientY);
+                } else if (r.moved) {
+                    var k = 0.0046 * cam.sensitivity;
+                    cam.targetYaw -= (e.clientX - r.lx) * k;
+                    cam.targetPitch -= (e.clientY - r.ly) * k;
+                    clampLook();
+                }
+                r.lx = e.clientX; r.ly = e.clientY;
+            });
+            function end(e) {
+                if (e.pointerType === 'mouse') return;
+                var r = (st.move && st.move.id === e.pointerId) ? st.move : (st.look && st.look.id === e.pointerId) ? st.look : null;
+                if (!r) return;
+                if (e.type === 'pointerup' && !r.moved && performance.now() - r.t < 300 && !cam.isInspectionPaused) tapAim(e.clientX, e.clientY);
+                if (r === st.move) {
+                    st.move = null; setKeys(false, false, false, false);
+                    base.classList.remove('active'); placeIdle();
+                } else st.look = null;
+            }
+            canvas.addEventListener('pointerup', end);
+            canvas.addEventListener('pointercancel', end);
+            window.addEventListener('blur', releaseAll);
+            document.addEventListener('visibilitychange', function () { if (document.hidden) releaseAll(); });
+
+            // Action buttons
+            function press(el, fn) {
+                el.addEventListener('pointerdown', function (e) {
+                    e.preventDefault(); e.stopPropagation(); buzz(12); fn();
+                });
+            }
+            press($('mob-read'), function () {
+                if (co._isScrollModalOpen()) { co.closeScrollModal(); return; }
+                if (co.carriedScroll) { co.handleGrabOrPlaceAction(); return; }
+                if (co.currentHoveredTarget === 'scroll' && co.currentHoveredScroll) { co.openDeliveredScroll(co.currentHoveredScroll); return; }
+                if (co.hedwig && (co.hedwig.scrollLanded || co.hedwig.landedScrolls.length > 0)) co.openDeliveredScroll();
+            });
+            press($('mob-grab'), function () { co.handleGrabOrPlaceAction(); });
+            // Haptic tick when SHINE is pressed
+            if (co.shineBtn) co.shineBtn.addEventListener('pointerdown', function () { buzz(15); });
+
+            // Show controls only while exploring (not on intro / scroll / puzzle-complete screens)
+            function modalOpen(id) {
+                var m = $(id); return !!m && !m.classList.contains('hidden') && !m.classList.contains('hidden-overlay');
+            }
+            setInterval(function () {
+                var hide = !co.hasEnteredChamber || co._isScrollModalOpen() || modalOpen('puzzle-complete-modal');
+                if (hide !== root.classList.contains('mob-hidden')) {
+                    root.classList.toggle('mob-hidden', hide);
+                    if (hide) releaseAll();
+                }
+            }, 120);
+        }
+
+        (function wait() {
+            var a = window.lumosApp;
+            if (a && a.coordinator && a.fpCamera) init(a); else setTimeout(wait, 100);
+        })();
+    })();
     </script>
 </body>
 </html>

@@ -1,12 +1,32 @@
-# 🌌 Interactive Physics & Computational Simulations Suite
+# 🌌 Gauransh Bansal Labs — Interactive Physics & Computational Simulations
+
+<p align="center">
+  <img src="hero_labs.jpg" alt="Gauransh Bansal Labs — Interactive Physics Simulation Suite" width="920" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 16px 40px rgba(0,0,0,0.6);">
+</p>
 
 > **A curated collection of client-side computational physics engines, generative ecosystems, numerical solvers, and interactive virtual laboratories engineered by [Gauransh Bansal](https://www.linkedin.com/in/gauransh-bansal-a71223239/).**
 
 Built entirely with modern **HTML5 Canvas, WebGL, Three.js, Tailwind CSS, Web Audio API, and Vanilla JavaScript** — zero dependencies, fully portable, and running natively in any modern browser.
 
 <p align="center">
-  <img src="Screenshot.png" alt="Interactive Physics Simulation Suite Overview" width="900" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  <a href="index.html"><img src="https://img.shields.io/badge/Live%20Library-13%20Simulations-blue.svg?style=flat-square" alt="13 Simulations"></a>
+  <img src="https://img.shields.io/badge/Architecture-100%25%20Client--Side-green.svg?style=flat-square" alt="Client-Side">
+  <img src="https://img.shields.io/badge/Engines-Three.js%20%7C%20Canvas2D%20%7C%20WebAudio-orange.svg?style=flat-square" alt="Engines">
+  <img src="https://img.shields.io/badge/Author-M.Sc.%20Physics%20(DU)-purple.svg?style=flat-square" alt="Author">
 </p>
+
+---
+
+## 🌟 Featured Simulation
+
+<p align="center">
+  <img src="lumos_featured_laboratory.jpg" alt="Featured Simulation — LUMOS: Molecular Spectroscopy Laboratory" width="920" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 16px 40px rgba(0,0,0,0.6);">
+</p>
+
+### 🔮 [LUMOS: Molecular Spectroscopy Laboratory](lumos_molecular_spectroscopy.html)
+* **File:** [`lumos_molecular_spectroscopy.html`](lumos_molecular_spectroscopy.html)
+* **Topic:** Quantum Chemistry, Molecular Spectroscopy, Rotational Microwave & Vibrational Infrared Quantum Transitions
+* **Features:** An immersive first-person 3D alchemical laboratory where students wield a magical wand to interrogate diatomic molecules ($^1\text{H}^{35}\text{Cl}$, $^1\text{H}^{79}\text{Br}$, $^1\text{H}^{127}\text{I}$, $^{12}\text{C}^{16}\text{O}$), reveal blackboard derivations, decode Hedwig's experimental parchment scrolls, and solve the 4-compound archive vault puzzle.
 
 ---
 
@@ -43,7 +63,7 @@ Over the past month, I have dedicated myself tirelessly to building, refining, a
 
 ## 🚀 Live Hub / Gallery
 
-To explore all simulations in an interactive glassmorphic UI, simply open **[`index.html`](index.html)** in any browser or visit the **[About Me](about.html)** page to explore the author's background and pursuits.
+To explore all 13 simulations in an interactive glassmorphic UI, simply open **[`index.html`](index.html)** in any browser or visit the **[About Me](about.html)** page to explore the author's background and pursuits.
 
 ```bash
 # Optional: serve locally
@@ -53,49 +73,49 @@ python -m http.server 8000
 
 ---
 
-## 🧪 Simulation Catalog
+## 🧪 Simulation Catalog (13 Laboratories)
 
-### 1. 🌿 [AETHERIA: Terrarium (2D Generative Artificial Life)](aetheria_terrarium_2d.html)
+### 1. 🔮 [LUMOS: Molecular Spectroscopy Laboratory](lumos_molecular_spectroscopy.html)
 <p align="center">
-  <img src="aetheria_terrarium_2d.png" alt="AETHERIA 2D Terrarium Simulation" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+  <img src="lumos_molecular_spectroscopy.png" alt="LUMOS Molecular Spectroscopy 3D Lab" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
 </p>
 
-* **File:** [`aetheria_terrarium_2d.html`](aetheria_terrarium_2d.html)
-* **Topic:** Artificial Life, Craig Reynolds Flocking, Autonomous Agents & Generative Harmonics
-* **Features:** Flocking herbivore boids with quadtree-accelerated spatial awareness, neural apex predators, multi-segment inverse-kinematics sinusoidal leviathans, nutrient spore flora lifecycle, genetic mutation inheritance across generations, and an ambient pentatonic generative Web Audio synthesizer.
+* **File:** [`lumos_molecular_spectroscopy.html`](lumos_molecular_spectroscopy.html)
+* **Badge:** Quantum Chemistry & Spectroscopy
+* **Description:** First-person 3D quantum laboratory with wand-directed light beams, diatomic potential curves, rotational/vibrational energy level excitation, and blackboard derivations.
 
 ---
 
-### 2. 🌌 [AETHERIA: Cosmos (3D Generative Ecosystem)](aetheria_cosmos_3d.html)
+### 2. ⚖️ [Same Equation, Different Reality](same_equation_different_reality.html)
 <p align="center">
-  <img src="aetheria_cosmos_3d.png" alt="AETHERIA 3D Cosmos Simulation" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+  <img src="same_equation_different_reality.png" alt="Same Equation, Different Reality" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
 </p>
 
-* **File:** [`aetheria_cosmos_3d.html`](aetheria_cosmos_3d.html)
-* **Topic:** 3D WebGL, N-Body Orbital Mechanics, Spatial Ecosystem Dynamics
-* **Features:** Built with Three.js WebGL: 3D multi-tiered gravitational wells, volumetric stardust fields, celestial flocking swarms with 3D obstacle avoidance, luminous energy bloom shaders, cosmic spine leviathans, interactive orbital controls, and spatial audio sonification.
-
----
-
-### 3. 🌊 [Glacial Lake Outburst Flood (GLOF) Simulator](glacier_outburst_simulation.html)
-<p align="center">
-  <img src="glacier_outburst_simulation.png" alt="Glacial Lake Outburst Flood Simulator" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
-</p>
-
-* **File:** [`glacier_outburst_simulation.html`](glacier_outburst_simulation.html)
-* **Topic:** Geophysics, Hydrodynamics, Dam-Break Outburst Modeling (*Trishuli River Valley*)
-* **Features:** Real-time moraine dam breach mechanics, fluid surge wave propagation, elevation profile graphing, downstream discharge rates, and valley impact modeling.
+* **File:** [`same_equation_different_reality.html`](same_equation_different_reality.html)
+* **Badge:** Universal Systems Lab
+* **Features:** Explores how a single second-order differential equation ($\ddot{x} + 2\gamma\dot{x} + \omega_0^2 x = F(t)$) manifests identically across mechanics (damped pendulum), electronics (RLC circuits), optics (Lorentz oscillator), and acoustic resonance.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
+
+---
+
+### 3. ⚡ [The World of Capacitors](unconventional_capacitors.html)
+<p align="center">
+  <img src="world_of_capacitors.png" alt="The World of Capacitors Simulation" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+</p>
+
+* **File:** [`unconventional_capacitors.html`](unconventional_capacitors.html)
+* **Badge:** Electrostatics & Nanotechnology
+* **Features:** From canonical parallel-plate, cylindrical, and spherical geometries to unconventional fractal and quantum capacitance realities. Interactive field-line plotting, dielectric boundary conditions, and dielectric breakdown thresholds.
 
 ---
 
 ### 4. ☢️ [Geiger-Müller Virtual Physics Laboratory](geiger_muller_laboratory.html)
 <p align="center">
-  <img src="geiger_muller_laboratory.jpeg" alt="Geiger-Müller Virtual Physics Laboratory" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+  <img src="geiger_muller_laboratory.jpeg" alt="Geiger-Müller Virtual Physics Laboratory" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
 </p>
 
 * **File:** [`geiger_muller_laboratory.html`](geiger_muller_laboratory.html)
-* **Topic:** Nuclear Physics, Radiation Detection & Statistical Physics
+* **Badge:** Nuclear & Plasma Physics
 * **Features:** Full voltage characteristic curves (starting potential, Geiger plateau, continuous discharge), Townsend avalanche multiplication, dead time kinetics, inverse-square law verification, Poisson/Gaussian statistics, and selectable isotopes ($\alpha, \beta, \gamma$).
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
@@ -103,54 +123,58 @@ python -m http.server 8000
 
 ### 5. 🎵 [Chaos as Music & Nonlinear Attractors](chaos_as_music.html)
 <p align="center">
-  <img src="chaos_as_music.png" alt="Chaos as Music & Nonlinear Attractors" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+  <img src="chaos_as_music.png" alt="Chaos as Music & Nonlinear Attractors" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
 </p>
 
 * **File:** [`chaos_as_music.html`](chaos_as_music.html)
-* **Topic:** Nonlinear Dynamics, Chaos Theory & Algorithmic Audio Sonification
+* **Badge:** Scientific Instrument & Sonification
 * **Features:** Real-time Lorenz and Rössler attractor trajectory calculations, 3D phase-space visualization, Web Audio API synthesizer mapped to dynamical coordinates ($x, y, z$), and Lyapunov exponent tracking.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
 ---
 
 ### 6. 🌐 [Landscape of Futures (Chaos & Complexity)](lof.html)
+<p align="center">
+  <img src="landscape_of_futures.png" alt="Landscape of Futures Simulation" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+</p>
+
 * **File:** [`lof.html`](lof.html)
-* **Topic:** Chaos Theory, Sensitive Dependence on Initial Conditions & Three.js
+* **Badge:** WebGL Ultra Edition
 * **Features:** Visual exploration of deterministic chaotic systems and bifurcation regimes, demonstrating how microscopic perturbations in initial states cascade into divergent macro-scale trajectories.
 
 ---
 
 ### 7. 🌀 [Phase Space Laboratory](phase_space_lab.html)
 <p align="center">
-  <img src="phase_space_lab.png" alt="Phase Space Laboratory" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+  <img src="phase_space_lab.png" alt="Phase Space Laboratory" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
 </p>
 
 * **File:** [`phase_space_lab.html`](phase_space_lab.html)
-* **Topic:** Classical Mechanics, Hamiltonian Systems & Dynamical Systems
+* **Badge:** Dynamical Systems Lab
 * **Features:** Interactive vector field mapping, multi-particle trajectory tracing, energy conservation validation, limit cycles, and Hamiltonian flow phase portraits.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
 ---
 
-### 8. ⚖️ [Same Equation, Different Reality](same_equation_different_reality.html)
+### 8. 🌊 [Glacial Lake Outburst Flood (GLOF) Simulator](glacier_outburst_simulation.html)
 <p align="center">
-  <img src="same_equation_different_reality.png" alt="Same Equation, Different Reality" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+  <img src="glacier_outburst_simulation.png" alt="Glacial Lake Outburst Flood Simulator" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
 </p>
 
-* **File:** [`same_equation_different_reality.html`](same_equation_different_reality.html)
-* **Topic:** Harmonic Oscillators Across Physical Domains
-* **Features:** Explores how a single second-order differential equation ($\ddot{x} + 2\gamma\dot{x} + \omega_0^2 x = F(t)$) manifests identically across mechanics (damped pendulum), electronics (RLC circuits), optics (Lorentz oscillator), and acoustic resonance.
+* **File:** [`glacier_outburst_simulation.html`](glacier_outburst_simulation.html)
+* **Badge:** Environmental Geophysics
+* **Features:** Real-time moraine dam breach mechanics, fluid surge wave propagation, elevation profile graphing, downstream discharge rates, and valley impact modeling across the *Trishuli River Valley*.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
 ---
 
 ### 9. 📐 [ODE Numerical Integration Methods](ode_methods_simulator.html)
 <p align="center">
-  <img src="ode_methods_simulator.png" alt="ODE Numerical Integration Methods Benchmark" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+  <img src="ode_methods_simulator.png" alt="ODE Numerical Integration Methods Benchmark" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
 </p>
 
 * **File:** [`ode_methods_simulator.html`](ode_methods_simulator.html)
-* **Topic:** Computational Physics & Numerical Analysis
+* **Badge:** Numerical Methods
 * **Features:** Real-time side-by-side benchmark comparison of integration algorithms: **Euler**, **Euler-Cromer**, **Runge-Kutta 4th Order (RK4)**, and **Verlet/Leapfrog**, with phase drift and global truncation error metrics.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
@@ -158,41 +182,56 @@ python -m http.server 8000
 
 ### 10. 🎯 [Newton-Raphson & Root-Finding Simulator](newton_raphson_simulator.html)
 <p align="center">
-  <img src="newton_raphson_simulator.png" alt="Newton-Raphson Root-Finding Simulator" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+  <img src="newton_raphson_simulator.png" alt="Newton-Raphson Root-Finding Simulator" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
 </p>
 
 * **File:** [`newton_raphson_simulator.html`](newton_raphson_simulator.html)
-* **Topic:** Numerical Mathematics & Convergence Basins
+* **Badge:** Numerical Methods
 * **Features:** Step-by-step tangent line geometry visualization, convergence animation, failure modes (local extrema cycles, inflection traps), and complex fractal basin boundaries.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
-### 11. ⚡ [The World of Capacitors (Unconventional Geometries & Dielectrics)](unconventional_capacitors.html)
-* **File:** `unconventional_capacitors.html`
-* **Topic:** Electromagnetism, Electrostatic Fields, Gauss's Law & Dielectric Breakdown
-* **Features:** Interactive electrostatic laboratory featuring parallel-plate, coaxial cylindrical, concentric spherical, and eccentric cylindrical configurations. Real-time electric field streamlines, equipotential contour rendering, dielectric polarization, stored electrostatic energy calculations, and catastrophic dielectric breakdown simulations with animated electrical arcs and energetic discharge.
+---
 
-### 12. 🌀 [4D Manifold Projection & Relativistic Dynamics](manifold_4d_projection.html)
-* **File:** `manifold_4d_projection.html`
-* **Topic:** Differential Geometry, Higher-Dimensional Topology & Relativistic Spacetime
-* **Features:** Real-time 4D-to-3D stereographic and perspective projection of hyper-dimensional manifolds (Tesseract, Clifford Torus, 120-Cell, Hypersphere). Features full 6-plane 4D rotation tensors ($xy, xz, xw, yz, yw, zw$), relativistic geodesic trajectory tracing, Riemann curvature metric visualization, and interactive gravitational distortion fields.
+### 11. 🌿 [AETHERIA: Living Digital Terrarium (2D Generative Life)](aetheria_terrarium_2d.html)
+<p align="center">
+  <img src="aetheria_terrarium_2d.png" alt="AETHERIA 2D Terrarium Simulation" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+</p>
+
+* **File:** [`aetheria_terrarium_2d.html`](aetheria_terrarium_2d.html)
+* **Badge:** Emergence & Sonification
+* **Features:** Flocking herbivore boids with quadtree-accelerated spatial awareness, neural apex predators, multi-segment inverse-kinematics sinusoidal leviathans, nutrient spore flora lifecycle, genetic mutation inheritance across generations, and an ambient pentatonic generative Web Audio synthesizer.
 
 ---
 
-### 13. 🔮 [LUMOS: Magical Molecular Spectroscopy Laboratory](lumos_molecular_spectroscopy.html)
-* **File:** `lumos_molecular_spectroscopy.html`
-* **Topic:** Quantum Chemistry, Molecular Spectroscopy, Microwave & Infrared Transitions
-* **Features:** Immersive first-person 3D laboratory exploring pure rotational (microwave) and vibrational (infrared) molecular spectroscopy across diatomic molecules ($^1\text{H}^{35}\text{Cl}$, $^1\text{H}^{79}\text{Br}$, $^1\text{H}^{127}\text{I}$, $^{12}\text{C}^{16}\text{O}$). Cast the *Lumos* beam with an articulated wizard hand and wand to interrogate quantum states, reveal chalk derivations on the modular blackboard, decode Hedwig's experimental parchment scrolls, and solve the 4-compound alchemical archive vault puzzle.
+### 12. 🌌 [AETHERIA 3D: The Infinite Cosmos](aetheria_cosmos_3d.html)
+<p align="center">
+  <img src="aetheria_cosmos_3d.png" alt="AETHERIA 3D Cosmos Simulation" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+</p>
+
+* **File:** [`aetheria_cosmos_3d.html`](aetheria_cosmos_3d.html)
+* **Badge:** WebGL & 3D Spatial Audio
+* **Features:** Built with Three.js WebGL: 3D multi-tiered gravitational wells, volumetric stardust fields, celestial flocking swarms with 3D obstacle avoidance, luminous energy bloom shaders, cosmic spine leviathans, interactive orbital controls, and spatial audio sonification.
+
+---
+
+### 13. 🔮 [4D Manifold Projection & Relativistic Dynamics](manifold_4d_projection.html)
+<p align="center">
+  <img src="manifold_4d_projection.png" alt="4D Manifold Projection & Relativistic Dynamics" width="850" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);">
+</p>
+
+* **File:** [`manifold_4d_projection.html`](manifold_4d_projection.html)
+* **Badge:** Differential Geometry & Relativity
+* **Features:** Higher-dimensional stereographic projections, geodesic particle flows, 4D rotation hyperplanes (SO(4) rotation transformations), and phase-space sonification.
+
+---
 
 ## 🛠️ Tech Stack & Architecture
 
-* **Visual Engine:** HTML5 2D Canvas & Three.js WebGL with responsive high-DPI retina scaling.
-* **Fullscreen Welcome Gate & Soliton Wavefield:** Mathematical $\text{sech}^2$ nonlinear soliton wavefield and topographic streamline simulation with interactive cursor distortion, glyph emergence, and seamless gateway transition into the simulation library. Also accessible standalone via [`welcome.html`](welcome.html).
-* **Pure Canvas Acoustic Cavitation & Sonoluminescence Engine:** High-performance, zero-DOM-churn click feedback engine running on a dedicated hardware-accelerated canvas layer. Employs precise clock-based timing (85ms bubble expansion, 35ms rapid collapse with fluid void color shifts, 110ms decoupled sonoluminescence flash, and 400ms dual-stroke optical halo shockwaves with `'lighter'` additive blending).
+* **Visual Engine:** HTML5 2D Canvas & Three.js WebGL with responsive high-DPI scaling.
 * **Ambient String-Frame Wave Physics:** Custom 2D harmonic wave-mesh and spring-damper string engine (`water-fluidity.js`) featuring Hooke's restoring tension, interactive cursor plucking/ripples on desktop, and autonomous flowy ambient undulation on mobile devices.
-* **Dynamic Catalog Controls:** Instant real-time search query filtering, category classification tabs (*All, Astrophysics & Space, Nonlinear Dynamics & Chaos, Numerical & Mathematical Physics, Geophysics & Earth Systems, Quantum & Nuclear*), and live Grid / Row view layout switching.
-* **UI/UX Design:** Custom Tailwind CSS with dark glassmorphic styling and refined typography.
-* **Numerical Mathematics:** Custom numerical integrators (Euler-Cromer, RK4, Symplectic Verlet, Newton-Raphson solvers, 4D rotation matrices).
-* **Audio Sonification:** Native Web Audio API polyphonic synthesizers with pentatonic and microtonal frequency mapping.
+* **UI/UX Design:** Custom Tailwind CSS with a dark glassmorphic theme.
+* **Numerical Mathematics:** Custom numerical integrators (Euler-Cromer, RK4, Symplectic Verlet, Newton-Raphson solvers).
+* **Audio Sonification:** Native Web Audio API polyphonic synthesizers with pentatonic scales.
 * **Security & IP Protection:** Built-in anti-framing framebusting, domain locking, and anti-scraping protections.
 * **Portability:** Zero build tools or npm dependencies; 100% portable single-file architecture.
 
@@ -204,6 +243,7 @@ python -m http.server 8000
 *M.Sc. Physics — Department of Physics & Astrophysics, University of Delhi*  
 * **LinkedIn:** [linkedin.com/in/gauransh-bansal-a71223239](https://www.linkedin.com/in/gauransh-bansal-a71223239/)  
 * **GitHub:** [github.com/gauranshbansal](https://github.com/gauranshbansal)  
+* **Academic Portfolio:** [academicportfolio.pages.dev](https://academicportfolio.pages.dev)  
 * **Story & Profile:** Open [`about.html`](about.html) for more about the author.
 
 ---
