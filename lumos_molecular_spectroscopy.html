@@ -3779,11 +3779,11 @@
                 // Place scroll into slot
                 slot.scroll = scrollItem;
 
-                // Attach scroll group into the slot anchor
+                // Attach scroll group into the slot anchor standing upright
                 slot.anchor.add(scrollItem.group);
-                scrollItem.group.position.set(0, 0, 0);
+                scrollItem.group.position.set(0, 0.12, 0);
                 scrollItem.group.rotation.set(0, 0, Math.PI * 0.5);
-                scrollItem.targetPos.set(0, 0, 0);
+                scrollItem.targetPos.set(0, 0.12, 0);
                 scrollItem.targetRotY = 0;
                 scrollItem.colliderMesh.userData.interactableType = 'archived_scroll';
 
@@ -5130,6 +5130,18 @@
                                 if (this.molecule) this.molecule.setExcited(true);
                             }, 450);
                         }
+                        if (window.location.search.includes('altar=1')) {
+                            setTimeout(() => {
+                                const cursorHintEl = document.getElementById('cursor-hint');
+                                if (cursorHintEl) cursorHintEl.style.display = 'none';
+                                const scroll = this.hedwig.createScrollItem(this.hedwig.createScrollRecord(COMPOUNDS.HCl, 'rotational'));
+                                this.puzzleBox.placeScroll(scroll);
+                                this.fpCamera.camera.position.set(-1.45, 1.35, -0.45);
+                                this.fpCamera.camera.lookAt(-2.35, 0.95, -1.35);
+                                this.fpCamera.targetYaw = this.fpCamera.yaw = Math.atan2(-2.35 - (-1.45), -1.35 - (-0.45));
+                                this.fpCamera.targetPitch = this.fpCamera.pitch = -0.32;
+                            }, 450);
+                        }
                     }, 150);
                 }
 
@@ -6298,9 +6310,6 @@
                                 const placed = this.puzzleBox.placeScroll(this.carriedScroll);
                                 if (placed) {
                                     this.audio.playScanCompleteChime();
-                                    if (this.carriedScroll.group.parent) {
-                                        this.carriedScroll.group.parent.remove(this.carriedScroll.group);
-                                    }
                                     this.carriedScroll = null;
                                     this._refreshTargetContextHUD();
                                     this._updateTutorialBanner();
