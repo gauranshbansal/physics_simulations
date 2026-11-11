@@ -4,13 +4,17 @@
 
 Built entirely with modern **HTML5 Canvas, WebGL, Three.js, Tailwind CSS, Web Audio API, and Vanilla JavaScript** — zero dependencies, fully portable, and running natively in any modern browser.
 
+<p align="center">
+  <img src="Screenshot.png" alt="Interactive Physics Simulation Suite Overview" width="900" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+</p>
+
 ---
 
 ## 📖 The Story & Development Philosophy
 
 Over the past month, I have dedicated myself tirelessly to building, refining, and documenting this simulation suite. This repository reflects a modern, **human-in-the-loop, AI-augmented scientific workflow**:
 
-```
+```text
 ┌───────────────────────────┐      ┌───────────────────────────┐      ┌───────────────────────────┐
 │   Theoretical Rigor       │ ───► │  AI Algorithmic Scaffolding│ ───► │   Iterative Engineering   │
 │ (Derivation, PDEs, ODEs)  │      │  (Google Antigravity / LLM│      │ (Convergence, Integrators)│
@@ -39,7 +43,7 @@ Over the past month, I have dedicated myself tirelessly to building, refining, a
 
 ## 🚀 Live Hub / Gallery
 
-To explore all simulations in an interactive glassmorphism UI, simply open **[`index.html`](index.html)** in any browser or visit the **[About Me](about.html)** page to explore the author's background and pursuits.
+To explore all simulations in an interactive glassmorphic UI, simply open **[`index.html`](index.html)** in any browser or visit the **[About Me](about.html)** page to explore the author's background and pursuits.
 
 ```bash
 # Optional: serve locally
@@ -52,58 +56,112 @@ python -m http.server 8000
 ## 🧪 Simulation Catalog
 
 ### 1. 🌿 [AETHERIA: Terrarium (2D Generative Artificial Life)](aetheria_terrarium_2d.html)
-* **File:** `aetheria_terrarium_2d.html`
+<p align="center">
+  <img src="aetheria_terrarium_2d.png" alt="AETHERIA 2D Terrarium Simulation" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+</p>
+
+* **File:** [`aetheria_terrarium_2d.html`](aetheria_terrarium_2d.html)
 * **Topic:** Artificial Life, Craig Reynolds Flocking, Autonomous Agents & Generative Harmonics
 * **Features:** Flocking herbivore boids with quadtree-accelerated spatial awareness, neural apex predators, multi-segment inverse-kinematics sinusoidal leviathans, nutrient spore flora lifecycle, genetic mutation inheritance across generations, and an ambient pentatonic generative Web Audio synthesizer.
 
+---
+
 ### 2. 🌌 [AETHERIA: Cosmos (3D Generative Ecosystem)](aetheria_cosmos_3d.html)
-* **File:** `aetheria_cosmos_3d.html`
+<p align="center">
+  <img src="aetheria_cosmos_3d.png" alt="AETHERIA 3D Cosmos Simulation" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+</p>
+
+* **File:** [`aetheria_cosmos_3d.html`](aetheria_cosmos_3d.html)
 * **Topic:** 3D WebGL, N-Body Orbital Mechanics, Spatial Ecosystem Dynamics
 * **Features:** Built with Three.js WebGL: 3D multi-tiered gravitational wells, volumetric stardust fields, celestial flocking swarms with 3D obstacle avoidance, luminous energy bloom shaders, cosmic spine leviathans, interactive orbital controls, and spatial audio sonification.
 
+---
+
 ### 3. 🌊 [Glacial Lake Outburst Flood (GLOF) Simulator](glacier_outburst_simulation.html)
-* **File:** `glacier_outburst_simulation.html`
+<p align="center">
+  <img src="glacier_outburst_simulation.png" alt="Glacial Lake Outburst Flood Simulator" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+</p>
+
+* **File:** [`glacier_outburst_simulation.html`](glacier_outburst_simulation.html)
 * **Topic:** Geophysics, Hydrodynamics, Dam-Break Outburst Modeling (*Trishuli River Valley*)
 * **Features:** Real-time moraine dam breach mechanics, fluid surge wave propagation, elevation profile graphing, downstream discharge rates, and valley impact modeling.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
+---
+
 ### 4. ☢️ [Geiger-Müller Virtual Physics Laboratory](geiger_muller_laboratory.html)
-* **File:** `geiger_muller_laboratory.html`
+<p align="center">
+  <img src="geiger_muller_laboratory.jpeg" alt="Geiger-Müller Virtual Physics Laboratory" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+</p>
+
+* **File:** [`geiger_muller_laboratory.html`](geiger_muller_laboratory.html)
 * **Topic:** Nuclear Physics, Radiation Detection & Statistical Physics
 * **Features:** Full voltage characteristic curves (starting potential, Geiger plateau, continuous discharge), Townsend avalanche multiplication, dead time kinetics, inverse-square law verification, Poisson/Gaussian statistics, and selectable isotopes ($\alpha, \beta, \gamma$).
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
+---
+
 ### 5. 🎵 [Chaos as Music & Nonlinear Attractors](chaos_as_music.html)
-* **File:** `chaos_as_music.html`
+<p align="center">
+  <img src="chaos_as_music.png" alt="Chaos as Music & Nonlinear Attractors" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+</p>
+
+* **File:** [`chaos_as_music.html`](chaos_as_music.html)
 * **Topic:** Nonlinear Dynamics, Chaos Theory & Algorithmic Audio Sonification
 * **Features:** Real-time Lorenz and Rössler attractor trajectory calculations, 3D phase-space visualization, Web Audio API synthesizer mapped to dynamical coordinates ($x, y, z$), and Lyapunov exponent tracking.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
+---
+
 ### 6. 🌐 [Landscape of Futures (Chaos & Complexity)](lof.html)
-* **File:** `lof.html`
+* **File:** [`lof.html`](lof.html)
 * **Topic:** Chaos Theory, Sensitive Dependence on Initial Conditions & Three.js
 * **Features:** Visual exploration of deterministic chaotic systems and bifurcation regimes, demonstrating how microscopic perturbations in initial states cascade into divergent macro-scale trajectories.
 
+---
+
 ### 7. 🌀 [Phase Space Laboratory](phase_space_lab.html)
-* **File:** `phase_space_lab.html`
+<p align="center">
+  <img src="phase_space_lab.png" alt="Phase Space Laboratory" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+</p>
+
+* **File:** [`phase_space_lab.html`](phase_space_lab.html)
 * **Topic:** Classical Mechanics, Hamiltonian Systems & Dynamical Systems
 * **Features:** Interactive vector field mapping, multi-particle trajectory tracing, energy conservation validation, limit cycles, and Hamiltonian flow phase portraits.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
+---
+
 ### 8. ⚖️ [Same Equation, Different Reality](same_equation_different_reality.html)
-* **File:** `same_equation_different_reality.html`
+<p align="center">
+  <img src="same_equation_different_reality.png" alt="Same Equation, Different Reality" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+</p>
+
+* **File:** [`same_equation_different_reality.html`](same_equation_different_reality.html)
 * **Topic:** Harmonic Oscillators Across Physical Domains
 * **Features:** Explores how a single second-order differential equation ($\ddot{x} + 2\gamma\dot{x} + \omega_0^2 x = F(t)$) manifests identically across mechanics (damped pendulum), electronics (RLC circuits), optics (Lorentz oscillator), and acoustic resonance.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
+---
+
 ### 9. 📐 [ODE Numerical Integration Methods](ode_methods_simulator.html)
-* **File:** `ode_methods_simulator.html`
+<p align="center">
+  <img src="ode_methods_simulator.png" alt="ODE Numerical Integration Methods Benchmark" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+</p>
+
+* **File:** [`ode_methods_simulator.html`](ode_methods_simulator.html)
 * **Topic:** Computational Physics & Numerical Analysis
 * **Features:** Real-time side-by-side benchmark comparison of integration algorithms: **Euler**, **Euler-Cromer**, **Runge-Kutta 4th Order (RK4)**, and **Verlet/Leapfrog**, with phase drift and global truncation error metrics.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
 
+---
+
 ### 10. 🎯 [Newton-Raphson & Root-Finding Simulator](newton_raphson_simulator.html)
-* **File:** `newton_raphson_simulator.html`
+<p align="center">
+  <img src="newton_raphson_simulator.png" alt="Newton-Raphson Root-Finding Simulator" width="800" style="border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+</p>
+
+* **File:** [`newton_raphson_simulator.html`](newton_raphson_simulator.html)
 * **Topic:** Numerical Mathematics & Convergence Basins
 * **Features:** Step-by-step tangent line geometry visualization, convergence animation, failure modes (local extrema cycles, inflection traps), and complex fractal basin boundaries.
 * **Breakdown:** Documented with video analysis on [LinkedIn](https://www.linkedin.com/in/gauransh-bansal-a71223239/).
