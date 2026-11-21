@@ -1,5 +1,9 @@
 # 🌌 Gauransh Bansal Labs — Interactive Physics & Computational Simulations
 
+**Live website:** [GB Labs on GitHub Pages](https://gauranshbansal.github.io/physics_simulations/) · [GB Labs on Cloudflare Pages](https://gblabs.pages.dev/)
+
+GitHub Pages serves the static site directly from the root of `main`. New pushes to `main` publish automatically; `.nojekyll` preserves the HTML, JavaScript, and assets without Jekyll processing.
+
 <p align="center">
   <img src="hero_labs.jpg" alt="Gauransh Bansal Labs — Interactive Physics Simulation Suite" width="100%">
 </p>
