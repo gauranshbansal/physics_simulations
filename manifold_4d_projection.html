@@ -3,157 +3,107 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4D Manifold Projection & Relativistic Dynamics — Gauransh Bansal</title>
+  <meta name="theme-color" content="#080d16">
+  <title>Manifold — A Four-Dimensional Observatory · Gauransh Bansal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      background-color: #030712;
-    }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-    .serif { font-family: 'Playfair Display', serif; }
-    input[type=range] { accent-color: #38bdf8; }
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-    ::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.4); border-radius: 4px; }
-    #toast { transition: opacity 0.3s ease, transform 0.3s ease; }
+    :root{color-scheme:dark;--ink:#dce4e7;--muted:#93a1aa;--paper:#0c131d;--rule:#26323d;--accent:#d8f571;--night:#080d16;--white:#f4f2e9;--dim:#9aa4ad;--line:#ffffff25;--mono:'JetBrains Mono',monospace;--sans:Inter,system-ui,sans-serif}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:var(--sans);background:var(--night);color:var(--white);user-select:none;-webkit-user-select:none}
+    button,a,input,summary{-webkit-tap-highlight-color:transparent}button,input{font:inherit}button,a,summary{touch-action:manipulation}button{cursor:pointer}a{color:inherit;text-decoration:none}button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:5px}button:disabled{opacity:.45;cursor:wait}
+    .scene{position:fixed;inset:0;background:#030712;z-index:0}.scene canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}.scene-shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#080d1699 0,transparent 24%,transparent 76%,#080d16b3 100%)}
+    .masthead{position:fixed;z-index:10;left:28px;right:28px;top:22px;display:flex;justify-content:space-between;align-items:center;gap:24px;pointer-events:none}.masthead>*{pointer-events:auto}
+    .identity{display:flex;align-items:center;gap:17px}.identity h1{font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:32px;letter-spacing:-1.1px;line-height:1;margin:0}.edition{margin:7px 0 0;color:var(--dim);font:9px/1.4 var(--mono);letter-spacing:1.7px;text-transform:uppercase}
+    .tools{display:flex;align-items:center;gap:5px}.tool{border:1px solid transparent;background:transparent;color:#c5cbd0;min-height:40px;padding:0 13px;display:inline-flex;justify-content:center;align-items:center;gap:8px;font-size:11px;font-weight:500;white-space:nowrap;border-radius:3px;transition:background .16s,border-color .16s,color .16s}.tool:hover{background:#ffffff0b;border-color:var(--line);color:white}.tool iconify-icon{font-size:15px}.tool-muted{color:#99a3aa}.tool-divider{height:20px;width:1px;background:var(--line);margin:0 6px}.tool-primary{background:transparent;color:var(--white);border-color:var(--line)}.tool-primary:hover{background:#ffffff0b;color:var(--white);border-color:#ffffff60}.library{margin-left:8px;border-color:var(--line)}
+    .instrument-panel{position:fixed;z-index:10;left:28px;top:100px;bottom:68px;width:292px;background:var(--paper);color:var(--ink);border-radius:4px;box-shadow:0 18px 50px #0003;display:flex;flex-direction:column;color-scheme:dark}
+    .panel-heading{margin:0;padding:18px 20px 14px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center}.panel-heading h2{font-size:13px;font-weight:600;margin:0;letter-spacing:-.2px}.panel-heading span{font:9px var(--mono);color:var(--muted)}
+    .panel-scroll{overflow-y:auto;overscroll-behavior:contain;min-height:0;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:#5d7251 #101a23;padding:0 20px 16px}.section-heading{margin:19px 0 10px;font:9px var(--mono);letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:flex;gap:10px;align-items:center}.section-heading .section-number{font-size:10px;letter-spacing:0;color:#a5b69b}
+    .model-list{display:grid;gap:5px}.preset-btn{display:flex;align-items:center;width:100%;min-height:45px;gap:12px;text-align:left;padding:8px 10px;border:1px solid transparent;border-radius:3px;background:transparent;color:var(--ink);transition:background .15s,border-color .15s}.preset-btn:hover{background:#17232c;border-color:#405046}.model-icon{width:28px;height:28px;display:grid;place-items:center;border:1px solid #455246;border-radius:50%;font:12px Georgia,serif;flex:none}.model-name{display:block;font-size:11px;line-height:1.4;font-weight:600}.model-subtitle{display:block;font:9px/1.5 var(--mono);color:var(--muted)}.model-indicator{margin-left:auto;width:5px;height:5px;border-radius:50%;background:transparent;flex:none}
+    .preset-btn[class~="bg-cyan-500/20"]{background:#1c2c23!important;border-color:#677e4c!important;color:var(--white)!important}.preset-btn[class~="bg-cyan-500/20"] .model-icon{color:var(--accent);border-color:#d8f57170}.preset-btn[class~="bg-cyan-500/20"] .model-subtitle{color:#b2bbad}.preset-btn[class~="bg-cyan-500/20"] .model-indicator{background:var(--accent)}
+    .parameter{margin-top:15px}.parameter-title{display:flex;justify-content:space-between;align-items:center;gap:10px}.parameter-title label{font-size:11px;font-weight:500}.parameter-title output{color:var(--accent);font:10px var(--mono);background:#d8f5710e;padding:3px 5px;border-radius:2px;min-width:42px;text-align:center}.parameter-endpoints{display:flex;justify-content:space-between;font:8px var(--mono);color:var(--muted);margin-top:0}.parameter-hint{font-size:9px;line-height:1.5;color:var(--muted);margin:5px 0 0}
+    input[type=range]{display:block;appearance:none;-webkit-appearance:none;width:100%;height:24px;margin:5px 0 0;background:transparent;cursor:pointer;accent-color:var(--accent)}input[type=range]::-webkit-slider-runnable-track{height:2px;background:#405045}input[type=range]::-moz-range-track{height:2px;background:#405045}input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;margin-top:-5px;width:12px;height:12px;background:var(--accent);border:2px solid var(--paper);outline:1px solid #8fa45e;border-radius:50%}input[type=range]::-moz-range-thumb{width:10px;height:10px;background:var(--accent);border:2px solid var(--paper);outline:1px solid #8fa45e;border-radius:50%}input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+    .model-notes{margin-top:19px;border-top:1px solid var(--rule);padding-top:12px}.model-notes summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;font-weight:600}.model-notes summary::-webkit-details-marker{display:none}.model-notes summary:after{content:'+';font:16px var(--mono);color:var(--muted)}.model-notes[open] summary:after{content:'−'}.notes-copy{font-size:10px;line-height:1.7;color:#a1adb1;margin:10px 0 0}.notes-copy strong{color:var(--ink);font-weight:600}.model-notes:focus-within{outline-offset:3px}
+    .panel-base{margin-top:auto;border-top:1px solid var(--rule);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--paper);border-radius:0 0 4px 4px}.recenter{border:1px solid #405046;border-radius:3px;min-height:32px;padding:0 9px;display:flex;align-items:center;gap:6px;background:transparent;color:var(--ink);font-size:10px;font-weight:500}.recenter:hover{background:#17251e}.recenter:focus-visible{outline-color:var(--accent)}.panel-base span{font:8px var(--mono);color:var(--muted)}
+    .scene-heading{position:fixed;z-index:5;top:105px;left:352px;max-width:390px;pointer-events:none}.scene-heading .eyebrow{font:9px var(--mono);letter-spacing:1.7px;text-transform:uppercase;color:var(--accent);margin:0 0 8px}.scene-heading h2{font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:22px;line-height:1.25;letter-spacing:-.35px;color:var(--white);margin:0}.scene-heading p{font-size:11px;color:#9ba5af;line-height:1.7;max-width:320px;margin:10px 0 0}
+    .telemetry{position:fixed;z-index:6;bottom:86px;right:28px;width:300px;background:#0c131ded;border:1px solid var(--line);border-radius:3px;overflow:hidden;pointer-events:auto}.telemetry-heading{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.telemetry-heading h2{margin:0;font:9px var(--mono);letter-spacing:1.4px;text-transform:uppercase;color:#a4afb7}.live-badge{font:8px var(--mono);letter-spacing:1px;color:var(--accent);display:flex;align-items:center;gap:5px}.live-badge:before{content:'';width:4px;height:4px;border-radius:50%;background:var(--accent)}
+    .telemetry dl{margin:0}.telemetry-row{padding:11px 14px;display:flex;align-items:baseline;justify-content:space-between;gap:14px;border-bottom:1px solid #ffffff0e}.telemetry-row dt{font:9px var(--mono);color:#7d8995}.telemetry-row dd{font:10px/1.6 var(--mono);text-align:right;color:#d5dbde;margin:0;max-width:200px;overflow-wrap:anywhere}.matrix-block{padding:13px 14px 15px}.matrix-block h3{font:8px/1.6 var(--mono);letter-spacing:.5px;color:#8e9b9f;font-weight:400;margin:0 0 7px}.matrix-block p{font:10px/1.8 var(--mono);color:var(--accent);margin:0;overflow-wrap:anywhere;user-select:text}
+    .statusbar{position:fixed;z-index:6;bottom:0;left:28px;right:28px;height:48px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:20px;pointer-events:none}.interaction-guide{display:flex;align-items:center;gap:18px;color:#85939e;font:9px var(--mono)}.interaction-guide span{display:flex;align-items:center;gap:7px}.interaction-guide b{font-weight:400;color:#d4dbde}.credit{font:8px var(--mono);color:#74838f;letter-spacing:.4px}.credit strong{font-weight:400;color:#bac4c9}
+    #toast{position:fixed;z-index:50;bottom:66px;left:50%;display:flex;align-items:center;gap:9px;padding:12px 17px;background:var(--paper);color:var(--ink);border:1px solid #4e6044;border-radius:3px;font:10px var(--mono);pointer-events:none;transition:opacity .2s,transform .2s;transform:translateX(-50%)}#toast.opacity-0{opacity:0}#toast.opacity-100{opacity:1}#toast iconify-icon{color:var(--accent)}.hidden{display:none!important}
+
+    .panel-scroll::-webkit-scrollbar{width:7px}
+    .panel-scroll::-webkit-scrollbar-track{background:#101a23;border-radius:8px;margin-block:12px}
+    .panel-scroll::-webkit-scrollbar-thumb{background:#5d7251;border:2px solid #101a23;border-radius:8px;min-height:36px}
+    .panel-scroll::-webkit-scrollbar-thumb:hover{background:#a3b674}
+    .panel-scroll::-webkit-scrollbar-button{display:none;width:0;height:0}
+    .panel-scroll::-webkit-scrollbar-corner{background:transparent}
+    @supports selector(::-webkit-scrollbar){.panel-scroll{scrollbar-width:auto;scrollbar-color:auto}}
+    .math-symbol{font-family:'Cambria Math','STIX Two Math',Georgia,serif;font-style:italic;font-size:1.13em;letter-spacing:0}
+    .matrix-block sub,.matrix-block sup,.scene-heading sub,.scene-heading sup,.telemetry sub,.telemetry sup{font-size:.72em;line-height:0;position:relative;vertical-align:baseline;letter-spacing:0}
+    .matrix-block sub,.scene-heading sub,.telemetry sub{bottom:-.25em;font-style:normal}
+    .matrix-block sup,.scene-heading sup,.telemetry sup{top:-.5em;font-style:normal}
+    @media(min-width:1600px){.masthead{left:40px;right:40px;top:28px}.instrument-panel{left:40px;top:114px;bottom:88px;width:310px}.scene-heading{left:390px;top:122px}.telemetry{right:40px;bottom:106px;width:320px}.statusbar{left:40px;right:40px;height:58px}.identity h1{font-size:38px}.panel-scroll{padding:0 23px 20px}.preset-btn{min-height:52px}.parameter{margin-top:22px}}
+    @media(max-width:1050px){.masthead{left:20px;right:20px;top:18px}.identity h1{font-size:28px}.edition{font-size:8px;letter-spacing:1.1px}.tool{padding:0 9px;font-size:10px}.library{margin-left:0}.tool-divider{margin:0 2px}.instrument-panel{left:20px;top:90px;width:260px;bottom:62px}.panel-scroll{padding-left:16px;padding-right:16px}.panel-heading,.panel-base{padding-left:16px;padding-right:16px}.scene-heading{left:308px;top:99px;max-width:250px}.scene-heading h2{font-size:19px}.scene-heading p{max-width:245px;font-size:10px}.telemetry{right:20px;bottom:80px;width:262px}.statusbar{left:20px;right:20px}.credit{max-width:140px;text-align:right;line-height:1.7}.interaction-guide{gap:12px;font-size:8px}}
+    @media(max-width:760px){.masthead{top:14px;left:16px;right:16px;align-items:flex-start;gap:10px}.identity{gap:10px}.identity h1{font-size:24px}.edition{font-size:7px;letter-spacing:.7px}.tools{gap:2px;flex-wrap:wrap;justify-content:flex-end;max-width:200px}.tool{min-height:32px;padding:0 7px;gap:5px;font-size:9px}.tool-divider{display:none}.tool .button-label{display:none}.tool-primary .button-label{display:inline}.library .button-label{display:inline}.instrument-panel{left:16px;right:16px;top:auto;bottom:48px;width:auto;max-height:43vh;max-height:43dvh}.panel-heading{padding:10px 14px}.panel-heading h2{font-size:11px}.panel-scroll{padding:0 14px 12px}.section-heading{margin-top:13px}.model-list{grid-template-columns:1fr 1fr;gap:4px}.preset-btn{min-height:43px;padding:5px 7px;gap:8px}.model-icon{width:22px;height:22px;font-size:11px}.model-name{font-size:10px}.model-subtitle{font-size:7px}.parameters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.parameter{margin-top:2px}.parameter-title{align-items:flex-start;flex-direction:column;gap:5px}.parameter-title label{font-size:9px}.parameter-title output{font-size:9px;padding:2px 4px;min-width:35px}.parameter-endpoints{font-size:7px}.parameter-hint{display:none}.model-notes{margin-top:12px;padding-top:9px}.model-notes summary{font-size:9px}.notes-copy{font-size:10px}.panel-base{padding:8px 14px}.recenter{min-height:28px;font-size:9px}.scene-heading{left:17px;right:17px;top:88px;max-width:none}.scene-heading .eyebrow{font-size:7px;margin-bottom:5px}.scene-heading h2{font-size:18px}.scene-heading p{font-size:9px;line-height:1.6;margin-top:6px;max-width:240px}.telemetry{top:90px;bottom:auto;right:16px;width:148px;background:#0c131db3}.telemetry-heading{padding:8px}.telemetry-heading h2{font-size:7px;letter-spacing:.8px}.live-badge{font-size:6px}.telemetry-row{padding:6px 8px;gap:5px}.telemetry-row dt{font-size:7px}.telemetry-row dd{font-size:7px;line-height:1.5;max-width:92px}.matrix-block{padding:7px 8px}.matrix-block h3{font-size:6px}.matrix-block p{font-size:7px;line-height:1.5}.scene-heading{right:176px}.scene-heading p{max-width:100%}.statusbar{left:16px;right:16px;height:38px}.interaction-guide{gap:9px;font-size:7px}.interaction-guide .guide-secondary{display:none}.credit{font-size:6px;max-width:130px}#toast{bottom:50%;max-width:85vw;width:max-content;font-size:9px}}
+    @media(max-width:380px){.edition{display:none}.tools{max-width:174px}.identity h1{font-size:21px}.instrument-panel{left:10px;right:10px}.model-subtitle{font-size:6px}.model-name{font-size:9px}.preset-btn{gap:6px}.scene-heading{left:12px;right:164px}.telemetry{right:10px;width:140px}.scene-heading h2{font-size:16px}.parameter-title label{font-size:8px}}
+    @media(max-height:540px) and (min-width:761px){.masthead{top:12px}.identity h1{font-size:24px}.edition{margin-top:4px}.instrument-panel{top:70px;bottom:48px}.scene-heading{top:81px}.telemetry{bottom:65px}.statusbar{height:34px}.panel-heading{padding-top:10px;padding-bottom:10px}.panel-base{padding-top:8px;padding-bottom:8px}}
+    @media(prefers-reduced-motion:reduce){button,a,#toast{transition:none!important}}
+    .sonification-volume{display:flex;align-items:center;gap:8px;padding:0 9px;color:var(--dim);font:9px var(--mono)}.sonification-volume input[type=range]{width:82px;height:24px;margin:0}.sonification-volume output{min-width:33px;text-align:right;color:var(--ink)}@media(max-width:760px){.sonification-volume{flex-basis:100%;justify-content:flex-end;order:1;padding:5px 7px}.sonification-volume input[type=range]{width:80px}}
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen overflow-hidden select-none flex flex-col justify-between">
+<body>
+  <div class="scene"><canvas id="cosmosCanvas" aria-label="Interactive four-dimensional geometry. Drag to rotate and apply an attraction effect."></canvas><div class="scene-shade"></div></div>
 
-  <!-- Background Canvas Container -->
-  <div class="fixed inset-0 z-0 bg-[#030712] overflow-hidden">
-    <canvas id="cosmosCanvas" class="w-full h-full cursor-crosshair"></canvas>
-    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-slate-950/45 pointer-events-none"></div>
-  </div>
-
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 translate-y-[-10px] bg-slate-900/90 border border-cyan-500/50 backdrop-blur-xl px-4 py-2.5 rounded-full shadow-[0_0_25px_rgba(6,182,212,0.3)] flex items-center gap-2 text-xs mono text-cyan-200">
-    <iconify-icon icon="lucide:check-circle-2" width="16" class="text-cyan-400"></iconify-icon>
-    <span id="toastMessage">Notification</span>
-  </div>
-
-  <!-- Top Navigation & Status Bar -->
-  <header class="relative z-10 p-4 sm:p-6 flex flex-col md:flex-row justify-between items-start gap-4 pointer-events-none">
-    <div class="pointer-events-auto bg-slate-900/85 backdrop-blur-2xl border border-cyan-500/30 rounded-2xl p-4 shadow-[0_0_35px_rgba(6,182,212,0.15)] max-w-lg">
-      <div class="flex items-center justify-between gap-3 mb-1">
-        <div class="flex items-center gap-2.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
-          <h1 class="text-lg font-black tracking-wider bg-gradient-to-r from-cyan-300 via-sky-400 to-indigo-400 bg-clip-text text-transparent uppercase">
-            4D Manifold Projection
-          </h1>
-        </div>
-        <a href="./index.html" class="flex items-center gap-1.5 text-xs font-medium text-neutral-400 hover:text-white px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/10 hover:border-cyan-500/40 transition-all">
-          <iconify-icon icon="lucide:arrow-left" width="13"></iconify-icon>
-          <span>Library</span>
-        </a>
-      </div>
-      <p id="manifoldDesc" class="text-xs text-slate-300 leading-relaxed font-light mt-1">
-        Four-dimensional Euclidean rotations mapped via perspective projection. Drag across spacetime to rotate hyperplanes; hold cursor to generate gravitational singularity.
-      </p>
-      <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] mono text-cyan-400/80">
-        <div>TOPOLOGY: <span id="dimLabel" class="text-cyan-200 font-bold">Tesseract (32 Edges)</span></div>
-        <div>NODES: <span id="particleCount" class="text-cyan-200 font-bold">12,000</span></div>
-        <div>INVARIANT: <span id="invariantVal" class="text-cyan-200 font-bold">SO(4) Euclidean</span></div>
-      </div>
+  <header class="masthead">
+    <div class="identity">
+      <div><h1>Manifold</h1><p class="edition">A four-dimensional observatory</p></div>
     </div>
-
-    <!-- Quick Audio & Utility Controls -->
-    <div class="pointer-events-auto flex flex-col items-end gap-2">
-      <div class="bg-slate-900/85 backdrop-blur-2xl border border-cyan-500/30 rounded-2xl p-2 flex items-center gap-2 shadow-lg">
-        <button id="audioToggleBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 transition-all active:scale-95 text-xs font-semibold">
-          <iconify-icon id="soundIconOn" icon="lucide:volume-2" width="15" class="hidden"></iconify-icon>
-          <iconify-icon id="soundIconOff" icon="lucide:volume-x" width="15"></iconify-icon>
-          <span id="audioText">Sonification: OFF</span>
-        </button>
-
-        <button id="snapshotBtn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-cyan-500/50 text-slate-200 transition-all active:scale-95 text-xs font-semibold flex items-center gap-1.5" title="Export High-Resolution 4K Render">
-          <iconify-icon icon="lucide:camera" width="14" class="text-cyan-400"></iconify-icon>
-          <span>4K Snapshot</span>
-        </button>
-
-        <button id="shareBtn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-cyan-500/50 text-slate-200 transition-all active:scale-95 text-xs font-semibold flex items-center gap-1.5" title="Share Parameter Preset via URL">
-          <iconify-icon icon="lucide:share-2" width="14" class="text-cyan-400"></iconify-icon>
-          <span>Share Preset</span>
-        </button>
-
-        <button id="resetFieldBtn" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-all active:scale-95 text-xs font-semibold flex items-center gap-1" title="Perturb Field">
-          <iconify-icon icon="lucide:refresh-cw" width="13"></iconify-icon>
-        </button>
-      </div>
-
-      <!-- Realtime Metric Display -->
-      <div class="bg-slate-900/70 backdrop-blur-md border border-slate-800 rounded-xl px-3 py-2 text-[10px] mono text-slate-400 max-w-[340px]">
-        <div id="metricHeader" class="text-cyan-400/90 font-semibold mb-0.5">METRIC & TENSOR STATE:</div>
-        <div id="matrixDisplay" class="text-slate-300 tracking-wider">SO(4) \in O(4): det(R) = +1</div>
-      </div>
-    </div>
+    <nav class="tools" aria-label="Experience tools">
+      <button id="audioToggleBtn" class="tool" title="Toggle generative sonification" aria-label="Toggle generative sonification"><iconify-icon id="soundIconOn" icon="lucide:volume-2" class="hidden"></iconify-icon><iconify-icon id="soundIconOff" icon="lucide:volume-x"></iconify-icon><span id="audioText" class="button-label">Sonification: OFF</span></button>
+      <div id="sonificationVolumeControl" class="sonification-volume hidden"><label for="sonificationVolume">Volume</label><input id="sonificationVolume" type="range" min="0" max="100" step="1" value="100" aria-label="Sonification volume"><output id="sonificationVolumeValue" for="sonificationVolume">100%</output></div>
+      <span class="tool-divider" aria-hidden="true"></span>
+      <button id="snapshotBtn" class="tool tool-primary" title="Export a 3840 × 2160 image" aria-label="Export 4K snapshot"><iconify-icon icon="lucide:camera"></iconify-icon><span class="button-label">Capture 4K</span></button>
+      <button id="shareBtn" class="tool" title="Copy a URL with the current preset" aria-label="Share current preset"><iconify-icon icon="lucide:link"></iconify-icon><span class="button-label">Share</span></button>
+      <button id="resetFieldBtn" class="tool tool-muted" title="Resample particles and briefly perturb the field" aria-label="Perturb and resample the field"><iconify-icon icon="lucide:shuffle"></iconify-icon><span class="button-label">Perturb</span></button>
+      <a class="tool library" href="./index.html" title="Return to the simulation library"><iconify-icon icon="lucide:arrow-up-left"></iconify-icon><span class="button-label">Library</span></a>
+    </nav>
   </header>
 
-  <!-- Interactive Controls Dock (Bottom) -->
-  <footer class="relative z-10 p-4 sm:p-6 pointer-events-none flex flex-col md:flex-row gap-4 justify-between items-end">
-    <!-- Presets Selector -->
-    <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-2xl border border-slate-800 hover:border-cyan-500/40 transition-colors rounded-2xl p-3 shadow-xl w-full md:w-auto">
-      <div class="text-[11px] mono uppercase tracking-wider text-slate-400 mb-2 font-semibold flex items-center gap-1.5">
-        <iconify-icon icon="lucide:layers" width="14" class="text-cyan-400"></iconify-icon>
-        Dynamical Manifolds
+  <footer class="instrument-panel" aria-label="Simulation control panel">
+    <div class="panel-heading"><h2>Instrument panel</h2></div>
+    <div class="panel-scroll">
+      <h3 class="section-heading"><span class="section-number">01</span> Structure</h3>
+      <nav class="model-list" aria-label="Geometry presets">
+        <button class="preset-btn bg-cyan-500/20" data-mode="tesseract" aria-pressed="true"><span class="model-icon" aria-hidden="true">□</span><span><span class="model-name">Tesseract</span><span class="model-subtitle">16 vertices · 32 edges</span></span><span class="model-indicator"></span></button>
+        <button class="preset-btn" data-mode="hopf" aria-pressed="false"><span class="model-icon" aria-hidden="true">∞</span><span><span class="model-name">Hopf fibers</span><span class="model-subtitle">S³ → S² · linked circles</span></span><span class="model-indicator"></span></button>
+        <button class="preset-btn" data-mode="schwarzschild" aria-pressed="false"><span class="model-icon" aria-hidden="true">◉</span><span><span class="model-name">Black-hole orbits</span><span class="model-subtitle">Stylized orbital illustration</span></span><span class="model-indicator"></span></button>
+        <button class="preset-btn" data-mode="lorenz" aria-pressed="false"><span class="model-icon" aria-hidden="true">λ</span><span><span class="model-name">Lorenz attractor</span><span class="model-subtitle">Canonical flow · 4D embed</span></span><span class="model-indicator"></span></button>
+      </nav>
+
+      <h3 class="section-heading"><span class="section-number">02</span> Projection</h3>
+      <div class="parameters">
+        <div class="parameter"><div class="parameter-title"><label for="xwSlider">XW rotation</label><output id="xwVal" for="xwSlider">1.0x</output></div><input id="xwSlider" type="range" min="0" max="3" step="0.05" value="1.0" aria-label="XW rotation multiplier"><div class="parameter-endpoints"><span>0</span><span>3×</span></div></div>
+        <div class="parameter"><div class="parameter-title"><label for="warpSlider">Projection scale</label><output id="warpVal" for="warpSlider">1.2x</output></div><input id="warpSlider" type="range" min="0.1" max="4" step="0.1" value="1.2" aria-label="Projection scale"><div class="parameter-endpoints"><span>0.1</span><span>4×</span></div></div>
+        <div class="parameter"><div class="parameter-title"><label for="speedSlider">Time evolution</label><output id="speedVal" for="speedSlider">1.0x</output></div><input id="speedSlider" type="range" min="0" max="2.5" step="0.05" value="1.0" aria-label="Time evolution multiplier"><div class="parameter-endpoints"><span>PAUSE</span><span>2.5×</span></div></div>
       </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <button class="preset-btn active px-3 py-2 rounded-xl text-xs font-medium border bg-cyan-500/20 border-cyan-400/60 text-cyan-200 transition-all hover:scale-105" data-mode="tesseract">
-          Tesseract (32 Edges)
-        </button>
-        <button class="preset-btn px-3 py-2 rounded-xl text-xs font-medium border bg-slate-800/60 border-slate-700/80 text-slate-300 transition-all hover:border-cyan-500/40 hover:scale-105" data-mode="hopf">
-          Hopf Fibers (S3→S2)
-        </button>
-        <button class="preset-btn px-3 py-2 rounded-xl text-xs font-medium border bg-slate-800/60 border-slate-700/80 text-slate-300 transition-all hover:border-cyan-500/40 hover:scale-105" data-mode="schwarzschild">
-          Schwarzschild Geodesic
-        </button>
-        <button class="preset-btn px-3 py-2 rounded-xl text-xs font-medium border bg-slate-800/60 border-slate-700/80 text-slate-300 transition-all hover:border-cyan-500/40 hover:scale-105" data-mode="lorenz">
-          Lorenz + 4D Embed
-        </button>
-      </div>
+
+      <details class="model-notes"><summary>Model notes</summary><div class="notes-copy"><p><strong>Geometry, then projection.</strong> Points live in four Euclidean coordinates. Plane rotations preserve their 4D length; perspective maps them onto this screen.</p><p><strong>Read each model on its own terms.</strong> Hopf fibers lie on the unit 3-sphere. Lorenz is a numerically integrated 3D flow with an added display coordinate. Black-hole motion is a stylized illustration, not a relativistic geodesic solver.</p><p><strong>Interaction changes the field.</strong> Holding or dragging applies an artistic attraction that can deform the ideal structures. Perturb resamples the particles and briefly applies that effect.</p></div></details>
     </div>
-
-    <!-- Parameter Sliders -->
-    <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-2xl border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-wrap sm:flex-nowrap gap-6 w-full md:w-auto items-center">
-      <div class="flex flex-col gap-1 w-28 sm:w-32">
-        <div class="flex justify-between text-[11px] mono text-slate-400">
-          <span>Rot (XW)</span>
-          <span id="xwVal" class="text-cyan-300 font-bold">1.0x</span>
-        </div>
-        <input id="xwSlider" type="range" min="0" max="3" step="0.05" value="1.0" class="w-full h-1 bg-slate-700 rounded-lg cursor-pointer">
-      </div>
-
-      <div class="flex flex-col gap-1 w-28 sm:w-32">
-        <div class="flex justify-between text-[11px] mono text-slate-400">
-          <span>Projection Scale</span>
-          <span id="warpVal" class="text-cyan-300 font-bold">1.2x</span>
-        </div>
-        <input id="warpSlider" type="range" min="0.1" max="4" step="0.1" value="1.2" class="w-full h-1 bg-slate-700 rounded-lg cursor-pointer">
-      </div>
-
-      <div class="flex flex-col gap-1 w-28 sm:w-32">
-        <div class="flex justify-between text-[11px] mono text-slate-400">
-          <span>Time Evolution</span>
-          <span id="speedVal" class="text-cyan-300 font-bold">1.0x</span>
-        </div>
-        <input id="speedSlider" type="range" min="0" max="2.5" step="0.05" value="1.0" class="w-full h-1 bg-slate-700 rounded-lg cursor-pointer">
-      </div>
-
-      <!-- Recenter Axis Button -->
-      <button id="resetCamBtn" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:border-slate-500 transition-all active:scale-95 text-xs mono flex items-center gap-1" title="Recenter All Rotation Planes">
-        <iconify-icon icon="lucide:crosshair" width="14"></iconify-icon>
-        <span>Recenter</span>
-      </button>
-    </div>
+    <div class="panel-base"><button id="resetCamBtn" class="recenter" title="Recenter rotation planes and restore projection scale"><iconify-icon icon="lucide:crosshair"></iconify-icon> Recenter view</button><span>SCENE / 12K</span></div>
   </footer>
+
+  <section class="scene-heading" aria-label="Current model">
+    <p class="eyebrow">Field of observation</p><h2 id="dimLabel">Tesseract (32 Edges)</h2><p id="manifoldDesc">Discrete 32-edge skeleton and 16 vertices of a 4D hypercube rotated across Euclidean planes.</p>
+  </section>
+
+  <header class="telemetry" aria-label="Live mathematical readout">
+    <div class="telemetry-heading"><h2>Live readout</h2><span class="live-badge">RUNNING</span></div>
+    <dl><div class="telemetry-row"><dt>NODES</dt><dd id="particleCount">12,000</dd></div><div class="telemetry-row"><dt>REFERENCE</dt><dd id="invariantVal">SO(4) Euclidean</dd></div></dl>
+    <div class="matrix-block"><h3 id="metricHeader">4D EUCLIDEAN ROTATION SO(4)</h3><p id="matrixDisplay">SO(4) ∈ O(4): det(R) = +1</p></div>
+  </header>
+
+  <div class="statusbar"><div class="interaction-guide"><span><b>DRAG</b> rotate + attract</span><span class="guide-secondary"><b>HOLD</b> attract</span><span><b>TIME 0</b> pause</span></div><p class="credit"><strong>Gauransh Bansal</strong></p></div>
+  <div id="toast" class="opacity-0" role="status" aria-live="polite"><iconify-icon icon="lucide:check"></iconify-icon><span id="toastMessage">Notification</span></div>
 
   <!-- Simulation & Mathematics Engine -->
   <script>
@@ -188,6 +138,8 @@
     let audioCtx = null;
     let isAudioPlaying = false;
     let masterGain = null;
+    let volumeGain = null;
+    let sonificationVolume = 1;
     let filter = null;
     let delayNode = null;
     let oscillators = [];
@@ -226,7 +178,10 @@
         compressor.release.setValueAtTime(0.25, audioCtx.currentTime);
 
         masterGain.connect(compressor);
-        compressor.connect(audioCtx.destination);
+        volumeGain = audioCtx.createGain();
+        volumeGain.gain.setValueAtTime(sonificationVolume, audioCtx.currentTime);
+        compressor.connect(volumeGain);
+        volumeGain.connect(audioCtx.destination);
 
         const voiceGains = [0.55, 0.42, 0.35, 0.28];
         oscillators = harmonicFrequencies.slice(0, 4).map((freq, idx) => {
@@ -277,18 +232,30 @@
       const iconOn = document.getElementById('soundIconOn');
       const iconOff = document.getElementById('soundIconOff');
       const text = document.getElementById('audioText');
+      const volumeControl = document.getElementById('sonificationVolumeControl');
+      document.getElementById('audioToggleBtn').setAttribute('aria-pressed', String(isAudioPlaying));
       if (isAudioPlaying) {
+        volumeControl.classList.remove('hidden');
         iconOn.classList.remove('hidden');
         iconOff.classList.add('hidden');
         text.innerText = 'Sonification: ACTIVE';
         text.classList.add('text-cyan-300');
       } else {
+        volumeControl.classList.add('hidden');
         iconOn.classList.add('hidden');
         iconOff.classList.remove('hidden');
         text.innerText = 'Sonification: OFF';
         text.classList.remove('text-cyan-300');
       }
     }
+
+    document.getElementById('sonificationVolume').addEventListener('input', (event) => {
+      const value = Number(event.target.value);
+      if (!Number.isFinite(value)) return;
+      sonificationVolume = Math.max(0, Math.min(100, value)) / 100;
+      document.getElementById('sonificationVolumeValue').textContent = Math.round(sonificationVolume * 100) + '%';
+      if (volumeGain && audioCtx) volumeGain.gain.setTargetAtTime(sonificationVolume, audioCtx.currentTime, 0.02);
+    });
 
     function modulateAudio(pitchFactor) {
       if (!isAudioPlaying || !filter || !audioCtx) return;
@@ -371,8 +338,8 @@
         } else if (currentMode === 'hopf') {
           const fiberIdx = this.index % NUM_HOPF_FIBERS;
           const { theta, phi } = hopfBasePoints[fiberIdx];
-          const psi = ((this.index / TOTAL_PARTICLES) * 2 * Math.PI * (TOTAL_PARTICLES / NUM_HOPF_FIBERS)) % (2 * Math.PI);
-          const r = 1.5;
+          const psi = 2 * Math.PI * Math.floor(this.index / NUM_HOPF_FIBERS) / Math.ceil(TOTAL_PARTICLES / NUM_HOPF_FIBERS);
+          const r = 1.0;
           const cosHalf = Math.cos(theta / 2) * r;
           const sinHalf = Math.sin(theta / 2) * r;
           this.x = cosHalf * Math.cos(psi + phi);
@@ -405,7 +372,7 @@
         if (currentMode === 'hopf') {
           this.psi = (this.psi + dt * 0.8 * timeSpeed) % (Math.PI * 2);
           const { theta, phi } = hopfBasePoints[this.index % NUM_HOPF_FIBERS];
-          const r = 1.5;
+          const r = 1.0;
           const cosHalf = Math.cos(theta / 2) * r;
           const sinHalf = Math.sin(theta / 2) * r;
           this.x = cosHalf * Math.cos(this.psi + phi);
@@ -438,7 +405,7 @@
           
           this.x += dx * dt * 0.05 * timeSpeed;
           this.y += dy * dt * 0.05 * timeSpeed;
-          this.z += (dz - 20) * dt * 0.05 * timeSpeed;
+          this.z += dz * dt * 0.05 * timeSpeed;
           this.w = Math.cos(this.x * 0.1 + time) * 1.2;
 
           if (isNaN(this.x) || Math.abs(this.x) > 35) this.reset();
@@ -522,9 +489,9 @@
       const screenX = renderW / 2 + x3D * factor3D * scale;
       const screenY = renderH / 2 + y3D * factor3D * scale;
       const depth = factor3D;
-      const redshift = (point.w + 1.5) / 3.0;
+      const depthColor = (point.w + 1.5) / 3.0;
 
-      return { screenX, screenY, depth, redshift, z3D, w: point.w };
+      return { screenX, screenY, depth, depthColor, z3D, w: point.w };
     }
 
     function showToast(msg) {
@@ -567,7 +534,8 @@
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
-        const rotated = rotate4D(p, rotXY, rotXZ, rotXW, rotYZ, rotYW, rotZW);
+        const displayPoint = currentMode === 'lorenz' ? {x:p.x/16,y:p.y/16,z:(p.z-25)/16,w:p.w} : p;
+        const rotated = rotate4D(displayPoint, rotXY, rotXZ, rotXW, rotYZ, rotYW, rotZW);
         const proj = project4Dto2D(rotated, targetW, targetH);
 
         if (isNaN(proj.screenX) || isNaN(proj.screenY) || proj.screenX < -100 || proj.screenX > targetW + 100 || proj.screenY < -100 || proj.screenY > targetH + 100) {
@@ -575,7 +543,7 @@
         }
 
         const alpha = Math.max(0.15, Math.min(1.0, proj.depth * 1.8));
-        const hue = ((Math.floor(p.hue + time * 15 + proj.redshift * 100) % 360) + 360) % 360;
+        const hue = ((Math.floor(p.hue + time * 15 + proj.depthColor * 100) % 360) + 360) % 360;
         const radius = Math.max(1.5, p.size * proj.depth * (p.isVertex ? 7.0 : 4.5));
 
         offCtx.fillStyle = `hsla(${hue}, 85%, ${p.isVertex ? 80 : 55}%, ${alpha})`;
@@ -661,20 +629,20 @@
       const labels = {
         tesseract: 'Tesseract (32 Edges)',
         hopf: 'Hopf Fibers (S3→S2)',
-        schwarzschild: 'Schwarzschild Geodesic',
+        schwarzschild: 'Black-hole Orbital Illustration',
         lorenz: 'Lorenz + 4D Embed'
       };
       const descriptions = {
         tesseract: 'Discrete 32-edge skeleton and 16 vertices of a 4D hypercube rotated across Euclidean planes.',
         hopf: 'Genuine Hopf fibration mapping S3 to S2 base sphere via interlocking S1 circular fibers.',
-        schwarzschild: 'Relativistic geodesic orbital dynamics with gravitational redshift and ISCO plunge.',
+        schwarzschild: 'Stylized orbits with an ISCO marker at 3rₛ and prescribed plunge; motion and colors are illustrative.',
         lorenz: 'Canonical non-linear dynamical chaos system embedded into four-dimensional coordinate space.'
       };
       const invariants = {
         tesseract: 'SO(4) Euclidean',
         hopf: 'S3 Round Metric',
-        schwarzschild: 'Schwarzschild g_{\\mu\\nu}',
-        lorenz: 'Lyapunov Spectrum'
+        schwarzschild: 'Illustrative ISCO marker',
+        lorenz: 'Canonical Lorenz parameters'
       };
 
       document.getElementById('dimLabel').innerText = labels[currentMode] || currentMode;
@@ -731,7 +699,8 @@
         const p = particles[i];
         p.update(dt);
 
-        const rotated = rotate4D(p, rotXY, rotXZ, rotXW, rotYZ, rotYW, rotZW);
+        const displayPoint = currentMode === 'lorenz' ? {x:p.x/16,y:p.y/16,z:(p.z-25)/16,w:p.w} : p;
+        const rotated = rotate4D(displayPoint, rotXY, rotXZ, rotXW, rotYZ, rotYW, rotZW);
         const proj = project4Dto2D(rotated, width, height);
 
         if (isNaN(proj.screenX) || isNaN(proj.screenY) || proj.screenX < -30 || proj.screenX > width + 30 || proj.screenY < -30 || proj.screenY > height + 30) {
@@ -740,7 +709,7 @@
 
         const depthClamped = Math.max(0.1, Math.min(2.5, proj.depth));
         const alpha = Math.max(0.15, Math.min(1.0, depthClamped * (p.isVertex ? 1.8 : 1.2)));
-        const hue = ((Math.floor(p.hue + time * 15 + proj.redshift * 100) % 360) + 360) % 360;
+        const hue = ((Math.floor(p.hue + time * 15 + proj.depthColor * 100) % 360) + 360) % 360;
         const radius = Math.max(0.8, p.size * depthClamped * (p.isVertex ? 2.5 : 1.8));
 
         ctx.fillStyle = `hsla(${hue}, 85%, ${p.isVertex ? 75 : 55}%, ${alpha})`;
@@ -751,12 +720,12 @@
 
       if (frameCount % 8 === 0) {
         if (currentMode === 'schwarzschild') {
-          const rAvg = 1.8 + Math.sin(time) * 0.4;
+          const rAvg = particles.length ? particles.reduce((sum,p)=>sum+(p.r || 0),0)/particles.length : 1.8;
           const rs = 0.6;
           const g_tt = -(1 - rs / rAvg).toFixed(3);
           const g_rr = (1 / (1 - rs / rAvg)).toFixed(3);
-          document.getElementById('metricHeader').innerText = 'SCHWARZSCHILD METRIC TENSOR:';
-          document.getElementById('matrixDisplay').innerText = `g_tt = ${g_tt},  g_rr = ${g_rr},  r_s = ${rs}m`;
+          document.getElementById('metricHeader').innerText = 'REFERENCE METRIC AT MEAN r (ILLUSTRATIVE MOTION):';
+          document.getElementById('matrixDisplay').innerText = `g_tt = ${g_tt},  g_rr = ${g_rr},  r_s = ${rs} (scaled units)`;
         } else if (currentMode === 'hopf') {
           document.getElementById('metricHeader').innerText = 'HOPF MAP S^3 -> S^2:';
           document.getElementById('matrixDisplay').innerText = `|z_1|^2 + |z_2|^2 = 1.00,  S^1 fiber linked`;
@@ -765,7 +734,7 @@
           document.getElementById('matrixDisplay').innerText = `R_{XW}=${(Math.cos(rotXW)).toFixed(2)}, R_{YW}=${(Math.cos(rotYW)).toFixed(2)}, R_{XZ}=${(Math.cos(rotXZ)).toFixed(2)}`;
         } else if (currentMode === 'lorenz') {
           document.getElementById('metricHeader').innerText = 'LORENZ DYNAMICAL SYSTEM:';
-          document.getElementById('matrixDisplay').innerText = `\\sigma=10, \\rho=28, \\beta=2.67,  dim_L=2.06`;
+          document.getElementById('matrixDisplay').innerText = `\\sigma=10, \\rho=28, \\beta=2.67,  dimension not estimated here`;
         }
       }
 
@@ -892,5 +861,44 @@
     loadPresetFromURL();
     requestAnimationFrame(render);
   </script>
+
+<!-- Presentation-only adapter: preserve the engine's events and selected-state classes. -->
+<script>
+  (() => {
+    const buttons = document.querySelectorAll('.preset-btn');
+    const sync = () => buttons.forEach(button => button.setAttribute('aria-pressed', String(button.classList.contains('bg-cyan-500/20'))));
+    const observer = new MutationObserver(sync);
+    buttons.forEach(button => observer.observe(button, {attributes:true, attributeFilter:['class']}));
+    sync();
+    const speed = document.getElementById('speedSlider');
+    const badge = document.querySelector('.live-badge');
+    const syncSpeed = () => { badge.textContent = Number(speed.value) === 0 ? 'PAUSED' : 'RUNNING'; };
+    speed.addEventListener('input', syncSpeed);
+    syncSpeed();
+
+    // Native mathematical typography: no font-renderer/CDN dependency.
+    function mathMarkup(raw) {
+      return String(raw).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\\+sigma/g,'σ').replace(/\\+rho/g,'ρ').replace(/\\+beta/g,'β').replace(/\\+in\b/g,'∈')
+        .replace(/R_\{([A-Z]{2})\}/g,'<span class="math-symbol">R<sub>$1</sub></span>')
+        .replace(/\b(g)_(tt|rr)\b/g,'<span class="math-symbol">$1<sub>$2</sub></span>')
+        .replace(/\b(r)_s\b/g,'<span class="math-symbol">$1<sub>s</sub></span>')
+        .replace(/\b(z)_([12])\b/g,'<span class="math-symbol">$1<sub>$2</sub></span>')
+        .replace(/\bS\^?([123])\b/g,'S<sup>$1</sup>')
+        .replace(/\^2\b/g,'<sup>2</sup>').replace(/-&gt;/g,'→');
+    }
+    const mathematicalNodes = ['matrixDisplay','metricHeader','invariantVal','dimLabel'].map(id=>document.getElementById(id));
+    const renderedMarkup = new WeakMap();
+    const typesetReadouts = () => mathematicalNodes.forEach(node => {
+      if(renderedMarkup.has(node) && node.innerHTML === renderedMarkup.get(node))return;
+      const formatted=mathMarkup(node.textContent || node.innerText || '');
+      renderedMarkup.set(node,formatted);
+      if(node.innerHTML!==formatted)node.innerHTML=formatted;
+    });
+    const mathObserver=new MutationObserver(typesetReadouts);
+    mathematicalNodes.forEach(node=>mathObserver.observe(node,{childList:true,characterData:true,subtree:true}));
+    typesetReadouts();
+  })();
+</script>
 </body>
 </html>
