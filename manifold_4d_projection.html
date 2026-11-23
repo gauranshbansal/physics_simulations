@@ -64,7 +64,6 @@
       <span class="tool-divider" aria-hidden="true"></span>
       <button id="snapshotBtn" class="tool tool-primary" title="Export a 3840 × 2160 image" aria-label="Export 4K snapshot"><iconify-icon icon="lucide:camera"></iconify-icon><span class="button-label">Capture 4K</span></button>
       <button id="shareBtn" class="tool" title="Copy a URL with the current preset" aria-label="Share current preset"><iconify-icon icon="lucide:link"></iconify-icon><span class="button-label">Share</span></button>
-      <button id="resetFieldBtn" class="tool tool-muted" title="Resample particles and briefly perturb the field" aria-label="Perturb and resample the field"><iconify-icon icon="lucide:shuffle"></iconify-icon><span class="button-label">Perturb</span></button>
       <a class="tool library" href="./index.html" title="Back to the simulation library" aria-label="Back to the simulation library"><iconify-icon icon="lucide:arrow-left"></iconify-icon><span class="button-label">Back to library</span></a>
     </nav>
   </header>
@@ -87,7 +86,7 @@
         <div class="parameter"><div class="parameter-title"><label for="speedSlider">Time evolution</label><output id="speedVal" for="speedSlider">1.0x</output></div><input id="speedSlider" type="range" min="0" max="2.5" step="0.05" value="1.0" aria-label="Time evolution multiplier"><div class="parameter-endpoints"><span>PAUSE</span><span>2.5×</span></div></div>
       </div>
 
-      <details class="model-notes"><summary>Model notes</summary><div class="notes-copy"><p><strong>Geometry, then projection.</strong> Points live in four Euclidean coordinates. Plane rotations preserve their 4D length; perspective maps them onto this screen.</p><p><strong>Read each model on its own terms.</strong> Hopf fibers lie on the unit 3-sphere. Lorenz is a numerically integrated 3D flow with an added display coordinate. Black-hole motion is a stylized illustration, not a relativistic geodesic solver.</p><p><strong>Interaction changes the field.</strong> Holding or dragging applies an artistic attraction that can deform the ideal structures. Perturb resamples the particles and briefly applies that effect.</p></div></details>
+      <details class="model-notes"><summary>Model notes</summary><div class="notes-copy"><p><strong>Geometry, then projection.</strong> Points live in four Euclidean coordinates. Plane rotations preserve their 4D length; perspective maps them onto this screen.</p><p><strong>Read each model on its own terms.</strong> Hopf fibers lie on the unit 3-sphere. Lorenz is a numerically integrated 3D flow with an added display coordinate. Black-hole motion is a stylized illustration, not a relativistic geodesic solver.</p><p><strong>Interaction changes the field.</strong> Holding or dragging applies an artistic attraction that can deform the ideal structures.</p></div></details>
     </div>
     <div class="panel-base"><button id="resetCamBtn" class="recenter" title="Recenter rotation planes and restore projection scale"><iconify-icon icon="lucide:crosshair"></iconify-icon> Recenter view</button><span>SCENE / 12K</span></div>
   </footer>
@@ -842,15 +841,6 @@
       showToast('Projection planes recentered');
     });
 
-    document.getElementById('resetFieldBtn').addEventListener('click', () => {
-      initParticles();
-      singularityActive = true;
-      singularityStrength = 2.0;
-      setTimeout(() => {
-        singularityActive = false;
-        singularityStrength = 0;
-      }, 500);
-    });
 
     document.getElementById('audioToggleBtn').addEventListener('click', toggleAudio);
     document.getElementById('snapshotBtn').addEventListener('click', export4KSnapshot);
