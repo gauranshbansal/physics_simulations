@@ -270,6 +270,8 @@
     </div>
   </div>
 
+  <script src="welcome-portrait-texture.js"></script>
+  <script src="welcome-portrait.js"></script>
   <script>
   (() => {
     const welcomeScreen = document.getElementById('welcomeScreen');
@@ -277,6 +279,7 @@
     const ctx = canvas.getContext('2d', { alpha: false });
     const enterShelf = document.getElementById('wbEnterShelf');
     const enterBtn = document.getElementById('wbEnterBtn');
+    const portrait = globalThis.createWelcomePortrait?.();
 
     const mask = document.createElement('canvas');
     const mctx = mask.getContext('2d', { willReadFrequently: true });
@@ -291,6 +294,8 @@
     let shocks = [];
 
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const coarsePointer = matchMedia('(pointer: coarse)');
+    let isMobile = false;
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
     const smooth = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 
@@ -375,12 +380,12 @@
     function resize() {
       const rect = welcomeScreen.getBoundingClientRect();
       W = rect.width; H = rect.height;
-      D = Math.min(window.devicePixelRatio || 1, 1.35);
+      isMobile = W <= 820 || coarsePointer.matches || 'ontouchstart' in window;
+      D = Math.min(window.devicePixelRatio || 1, isMobile ? 1.15 : 1.35);
       canvas.width = Math.round(W * D);
       canvas.height = Math.round(H * D);
       ctx.setTransform(D, 0, 0, D, 0, 0);
       makeMask();
-      const isMobile = (W <= 820) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || ('ontouchstart' in window);
       if (isMobile) {
         reveal = 1.0;
         if (enterShelf) enterShelf.classList.add('revealed');
@@ -458,9 +463,14 @@
     let ptsY = new Float32Array(800);
 
     function draw(now) {
+      raf = 0;
       if (dismissed) return;
-      if (now - last < 16 && !reduced) { raf = requestAnimationFrame(draw); return; }
-      const dt = Math.min((now - last) / 1000, 0.04);
+      const frameInterval = isMobile ? 1000 / 30 : 1000 / 60;
+      if (last && now - last < frameInterval - 1.5 && !reduced) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
+      const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       if (!reduced) time += dt;
 
@@ -471,11 +481,6 @@
         if (s.amp < 0.05 || s.radius > Math.max(W, H) * 1.1) solitons.splice(i, 1);
       }
 
-      // Detect mobile mode: screen width <= 820 or touch screen devices
-      const isMobile = (W > 0 && W <= 820) || 
-                       (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
-                       ('ontouchstart' in window);
-
       // On mobile view: name is visible by default (target = 1) because mobile has no cursor hover.
       // On desktop: target responds dynamically to mouse pointer hover.
       const target = isMobile ? 1.0 : (pointerInside ? 1.0 : 0.0);
@@ -483,17 +488,19 @@
 
       ctx.fillStyle = '#030506';
       ctx.fillRect(0, 0, W, H);
+      const portraitActive = !reduced && portrait?.draw(ctx, now, W, H);
+      const textOpacity = portraitActive ? portrait.textOpacity() : 1;
 
       // --- DYNAMIC LINE DENSITY (Substantially denser lines on mobile for razor-sharp legibility) ---
       // On mobile viewports, letters have smaller pixel heights, requiring tightly spaced streamlines
       // so each glyph is rendered across 10-14 lines rather than 3-4 lines.
       const spacing = isMobile ? Math.max(3.8, Math.min(5.2, H / 170)) : Math.max(8.5, Math.min(11.5, H / 75));
       const count = Math.ceil(H / spacing);
-      const step = isMobile ? Math.max(2.0, Math.min(3.0, W / 160)) : Math.max(3.2, Math.min(4.8, W / 260));
+      const step = isMobile ? Math.max(3.5, Math.min(4.5, W / 130)) : Math.max(3.2, Math.min(4.8, W / 260));
 
       // Generous overshoot margin so lines never end near the corners or edges of the screen
-      const padX = Math.max(120, Math.ceil(W * 0.22));
-      const padY = Math.max(120, Math.ceil(H * 0.22));
+      const padX = isMobile ? 96 : Math.max(120, Math.ceil(W * 0.22));
+      const padY = isMobile ? 96 : Math.max(120, Math.ceil(H * 0.22));
 
       const numSteps = Math.ceil((W + padX * 2) / step) + 16;
       if (ptsX.length < numSteps + 4) {
@@ -501,7 +508,8 @@
         ptsY = new Float32Array(numSteps + 16);
       }
 
-      const hasReveal = reveal > 0.003;
+      const hasReveal = reveal > 0.003 && textOpacity > 0.035;
+      const hasPointer = px >= 0 && py >= 0;
       const minWH = Math.min(W, H);
       const pFieldRadius = minWH * 0.03;
       const pFieldInv = 1 / (minWH * 0.15);
@@ -518,6 +526,7 @@
           const [dx, dy] = flow(x, base, time);
           ptsX[ptIdx] = x + dx;
           ptsY[ptIdx] = base + dy;
+          if (portraitActive) portrait.bend(ptsX, ptsY, ptIdx);
           ptIdx++;
         }
 
@@ -538,6 +547,7 @@
 
         // Pass 2: Re-trace text mask with sub-stepping & stem continuity
         if (hasReveal) {
+          ctx.globalAlpha = textOpacity;
           ctx.beginPath();
           let active = false;
           let segLen = 0;
@@ -550,7 +560,7 @@
             let strength = 0;
             if (a > 20) {
               strength = (a / 255) * reveal;
-            } else {
+            } else if (hasPointer) {
               const radius = Math.hypot(px - xx, py - yy);
               const pointerField = 1 - smooth((radius - pFieldRadius) * pFieldInv);
               strength = reveal * pointerField * 0.14;
@@ -569,19 +579,14 @@
             } else if (active) {
               active = false;
               if (segLen === 1) ctx.lineTo(lastX + (isMobile ? 1.2 : 1.6), lastY);
-              ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${0.65 + 0.35 * reveal})`;
-              ctx.lineWidth = isMobile ? (2.2 + 0.6 * reveal) : (1.8 + 1.4 * reveal);
-              ctx.stroke();
-              ctx.beginPath();
               segLen = 0;
             }
           }
-          if (active) {
-            if (segLen === 1) ctx.lineTo(lastX + (isMobile ? 1.2 : 1.6), lastY);
-            ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${0.65 + 0.35 * reveal})`;
-            ctx.lineWidth = isMobile ? (2.2 + 0.6 * reveal) : (1.8 + 1.4 * reveal);
-            ctx.stroke();
-          }
+          if (active && segLen === 1) ctx.lineTo(lastX + (isMobile ? 1.2 : 1.6), lastY);
+          ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${0.65 + 0.35 * reveal})`;
+          ctx.lineWidth = isMobile ? (2.2 + 0.6 * reveal) : (1.8 + 1.4 * reveal);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
         }
       }
 
@@ -589,7 +594,11 @@
 
       if (reveal > 0.35) enterShelf.classList.add('revealed');
 
-      raf = requestAnimationFrame(draw);
+      if (!reduced) raf = requestAnimationFrame(draw);
+    }
+
+    function redrawStaticField() {
+      if (reduced && !dismissed && !raf) raf = requestAnimationFrame(draw);
     }
 
     // Ambient fade in for center enter button after 2.2s
@@ -604,11 +613,13 @@
       px = e.clientX - r.left;
       py = e.clientY - r.top;
       pointerInside = Math.hypot(px - W / 2, py - H * 0.50) < Math.min(W, H) * 0.44;
+      redrawStaticField();
     });
 
     welcomeScreen.addEventListener('pointerleave', () => {
       pointerInside = false;
       px = -9999; py = -9999;
+      redrawStaticField();
     });
 
     function dismissWelcome() {
@@ -616,6 +627,10 @@
       dismissed = true;
       
       welcomeScreen.classList.add('dismissed');
+      // Start the library's background once the welcome screen begins to clear.
+      const fluidity = document.createElement('script');
+      fluidity.src = './water-fluidity.js';
+      document.body.append(fluidity);
       setTimeout(() => {
         welcomeScreen.style.display = 'none';
       }, 750);
@@ -655,7 +670,12 @@
       }
     });
 
-    window.addEventListener('resize', () => { resize(); updateVortices(); });
+    window.addEventListener('resize', () => {
+      if (dismissed) return;
+      resize();
+      updateVortices();
+      redrawStaticField();
+    });
     resize(); updateVortices(); raf = requestAnimationFrame(draw);
   })();
   </script>
@@ -1225,6 +1245,5 @@
   </script>
 
   <!-- Deep Space Fluidity & Interactive Ripples Engine -->
-  <script src="./water-fluidity.js"></script>
 </body>
 </html>
