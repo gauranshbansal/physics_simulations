@@ -498,10 +498,12 @@
 
         /* Authentic Researcher's Parchment Scroll Document */
         .parchment-scroll-sheet {
+            --scroll-color: #8c6b3f;
             background:
-                radial-gradient(circle at 20% 20%, rgba(244, 232, 206, 0.98), rgba(226, 209, 177, 0.98) 60%, rgba(201, 178, 140, 0.99) 100%);
+                radial-gradient(circle at 20% 20%, #f4e8ce, transparent 75%),
+                color-mix(in srgb, #e2d1b1 68%, var(--scroll-color));
             color: #2b1d12;
-            border: 2px solid #8c6b3f;
+            border: 2px solid var(--scroll-color);
             box-shadow:
                 0 30px 80px rgba(0, 0, 0, 0.95),
                 inset 0 0 60px rgba(120, 82, 38, 0.35),
@@ -715,7 +717,13 @@
         html.is-mobile #intro-overlay p.mt-8 { margin-top: 1rem; line-height: 1.9; }
         html.is-mobile #scroll-modal { padding: 8px; }
         html.is-mobile #parchment-sheet-container { max-height: calc(100dvh - 16px); }
-        html.is-mobile .parchment-scroll-body { padding-left: 1rem; padding-right: 1rem; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+        html.is-mobile .parchment-scroll-body {
+            min-height: 0;
+            padding-inline: 1rem;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+        }
         html.is-mobile #cast-revelio-btn, html.is-mobile #close-scroll-btn { min-height: 40px; }
         html.is-mobile .mode-btn { min-height: 30px; }
     </style>
@@ -878,7 +886,7 @@
          Starts BLANK upon opening. Casting REVELIO progressively reveals
          handwritten ink equations, energy-level diagrams, spectrum, and derivations.
          ========================================== -->
-    <div id="scroll-modal" role="dialog" aria-modal="true" aria-labelledby="scroll-header-title" class="fixed inset-0 z-[25] flex items-center justify-center p-4 md:p-8 bg-[#070605]/90 overlay-fade hidden-overlay">
+    <div id="scroll-modal" role="dialog" aria-modal="true" aria-labelledby="scroll-header-title" inert class="fixed inset-0 z-[25] flex items-center justify-center p-4 md:p-8 bg-[#070605]/90 overlay-fade hidden-overlay">
         <div class="max-w-4xl w-full flex flex-col items-center pointer-events-auto relative">
             <!-- Top Wooden Scroll Roller -->
             <div class="parchment-roller w-[103%]"></div>
@@ -1713,7 +1721,7 @@
             }
 
             requestPointerLock() {
-                if (this.isInspectionPaused) return;
+                if (this.isInspectionPaused || document.documentElement.classList.contains('is-mobile')) return;
                 try {
                     if (this.domElement.requestPointerLock) {
                         const result = this.domElement.requestPointerLock();
@@ -2631,24 +2639,28 @@
         const COMPOUNDS = {
             HCl: {
                 key: 'HCl', short: 'HCl', name: 'Hydrogen chloride', formula: '¹H³⁵Cl', bond: 'H–Cl',
+                scrollColor: '#4b8261',
                 symA: 'Cl', massA: 34.968853, colorA: 0x2e8f66, emissiveA: 0x0d3322, radiusA: 0.068,
                 symB: 'H', massB: 1.007825, colorB: 0xf4eee1, emissiveB: 0x3a3222, radiusB: 0.038,
                 B_cm: 10.5934, nu0_cm: 2885.9, dipole_D: 1.11
             },
             HBr: {
                 key: 'HBr', short: 'HBr', name: 'Hydrogen bromide', formula: '¹H⁷⁹Br', bond: 'H–Br',
+                scrollColor: '#ae5932',
                 symA: 'Br', massA: 78.918338, colorA: 0xa4472b, emissiveA: 0x3a1409, radiusA: 0.074,
                 symB: 'H', massB: 1.007825, colorB: 0xf4eee1, emissiveB: 0x3a3222, radiusB: 0.038,
                 B_cm: 8.4649, nu0_cm: 2558.5, dipole_D: 0.82
             },
             HI: {
                 key: 'HI', short: 'HI', name: 'Hydrogen iodide', formula: '¹H¹²⁷I', bond: 'H–I',
+                scrollColor: '#78589e',
                 symA: 'I', massA: 126.904473, colorA: 0x7a4cb0, emissiveA: 0x24123f, radiusA: 0.082,
                 symB: 'H', massB: 1.007825, colorB: 0xf4eee1, emissiveB: 0x3a3222, radiusB: 0.038,
                 B_cm: 6.4263, nu0_cm: 2229.7, dipole_D: 0.45
             },
             CO: {
                 key: 'CO', short: 'CO', name: 'Carbon monoxide', formula: '¹²C¹⁶O', bond: 'C≡O',
+                scrollColor: '#3b729b',
                 symA: 'O', massA: 15.994915, colorA: 0xc4382f, emissiveA: 0x401411, radiusA: 0.056,
                 symB: 'C', massB: 12.0, colorB: 0x45464d, emissiveB: 0x141416, radiusB: 0.062,
                 B_cm: 1.9313, nu0_cm: 2143.3, dipole_D: 0.11
@@ -3383,13 +3395,21 @@
                         roughness: 0.3,
                         metalness: 0.85
                     }),
-                    crimsonWax: new THREE.MeshStandardMaterial({
+                    wax: new THREE.MeshStandardMaterial({
                         color: 0x8a1c1c,
                         roughness: 0.38,
                         metalness: 0.08
                     }),
                     collider: new THREE.MeshBasicMaterial({ visible: false })
                 };
+                this._compoundScrollMats = Object.fromEntries(Object.values(COMPOUNDS).map(({ key, scrollColor }) => {
+                    const tint = new THREE.Color(scrollColor);
+                    const parchment = this._scrollMats.parchment.clone();
+                    parchment.color.lerp(tint, 0.58);
+                    const wax = this._scrollMats.wax.clone();
+                    wax.color.copy(tint).multiplyScalar(0.72);
+                    return [key, { parchment, wax }];
+                }));
             }
 
             createScrollItem(record = null) {
@@ -3398,7 +3418,8 @@
                 scrollGroup.position.copy(this.targetDeskPosition);
                 scrollGroup.rotation.y = -0.38;
 
-                const rollMesh = new THREE.Mesh(this._scrollGeos.rollGeo, this._scrollMats.parchment);
+                const materials = this._compoundScrollMats[record?.dataset?.compound?.key] || this._scrollMats;
+                const rollMesh = new THREE.Mesh(this._scrollGeos.rollGeo, materials.parchment);
                 rollMesh.castShadow = true;
                 rollMesh.receiveShadow = true;
                 scrollGroup.add(rollMesh);
@@ -3413,10 +3434,10 @@
                     scrollGroup.add(finial);
                 });
 
-                const ribbon = new THREE.Mesh(this._scrollGeos.ribbonGeo, this._scrollMats.crimsonWax);
+                const ribbon = new THREE.Mesh(this._scrollGeos.ribbonGeo, materials.wax);
                 scrollGroup.add(ribbon);
 
-                const waxSeal = new THREE.Mesh(this._scrollGeos.waxSealGeo, this._scrollMats.crimsonWax);
+                const waxSeal = new THREE.Mesh(this._scrollGeos.waxSealGeo, materials.wax);
                 waxSeal.position.set(0, 0.020, 0.012);
                 scrollGroup.add(waxSeal);
 
@@ -5710,6 +5731,9 @@
 
                 this.fpCamera.isInspectionPaused = true;
                 this.audio.playJournalOpen();
+                const scrollColor = COMPOUNDS[scroll.record.dataset.compound.key]?.scrollColor;
+                document.getElementById('parchment-sheet-container').style.setProperty('--scroll-color', scrollColor || '');
+                this.scrollModal.inert = false;
                 this.scrollModal.classList.remove('hidden-overlay');
                 this._setCursorHint(false);
                 document.getElementById('scroll-body-content').scrollTop = 0;
@@ -5734,6 +5758,7 @@
 
             closeScrollModal() {
                 if (!this._isScrollModalOpen()) return;
+                this.scrollModal.inert = true;
                 this.scrollModal.classList.add('hidden-overlay');
                 this.fpCamera.isInspectionPaused = false;
                 this.audio.playJournalClose();
@@ -6483,7 +6508,7 @@
                                 const placed = this.puzzleBox.placeScroll(this.carriedScroll);
                                 if (placed) {
                                     this.audio.playScanCompleteChime();
-                                    this.carriedScroll = null;
+                                    this.setCarriedScroll(null);
                                     this._refreshTargetContextHUD();
                                     this._updateTutorialBanner();
                                     return;
@@ -6513,9 +6538,14 @@
                 }
             }
 
+            setCarriedScroll(scroll) {
+                this.carriedScroll = scroll;
+                this.onCarriedScrollChange?.(scroll);
+            }
+
             pickUpScroll(scrollItem) {
                 if (!scrollItem || this.carriedScroll) return;
-                this.carriedScroll = scrollItem;
+                this.setCarriedScroll(scrollItem);
 
                 const idx = this.hedwig.landedScrolls.indexOf(scrollItem);
                 if (idx !== -1) {
@@ -6545,7 +6575,7 @@
 
                 this.hedwig.landedScrolls.push(this.carriedScroll);
                 this.audio.playScrollThud();
-                this.carriedScroll = null;
+                this.setCarriedScroll(null);
 
                 this._refreshTargetContextHUD();
                 this._updateTutorialBanner();
@@ -7030,7 +7060,7 @@
         root.innerHTML =
             '<div id="mob-joy-base"></div><div id="mob-joy-knob"></div>' +
             '<button id="mob-read" class="mob-act arcane-panel arcane-btn font-cinzel" aria-label="Read scroll">READ</button>' +
-            '<button id="mob-grab" class="mob-act arcane-panel arcane-btn font-cinzel" aria-label="Grab or place scroll">GRAB</button>';
+            '<button id="mob-grab" class="mob-act arcane-panel arcane-btn font-cinzel">GRAB</button>';
         document.body.appendChild(root);
         var base = $('mob-joy-base'), knob = $('mob-joy-knob');
 
@@ -7098,8 +7128,14 @@
                 if (!cam.freeRoam) cam.targetYaw = Math.max(-Math.PI * 0.65, Math.min(Math.PI * 0.65, cam.targetYaw));
             }
             function releaseAll() {
+                var pointers = [st.move, st.look];
                 setKeys(false, false, false, false);
                 st.move = st.look = null;
+                pointers.forEach(function (pointer) {
+                    if (pointer && canvas.hasPointerCapture(pointer.id)) canvas.releasePointerCapture(pointer.id);
+                });
+                co.releaseShine('btn');
+                co.releaseShine('target');
                 base.classList.remove('active'); placeIdle();
             }
             function joyUpdate(x, y) {
@@ -7122,7 +7158,7 @@
 
             canvas.addEventListener('pointerdown', function (e) {
                 if (e.pointerType === 'mouse') return;
-                if (cam.isInspectionPaused || !co.hasEnteredChamber) return;
+                if (cam.isInspectionPaused || root.classList.contains('mob-hidden')) return;
                 e.preventDefault();
                 var rec = { id: e.pointerId, sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY, t: performance.now(), moved: false };
                 if (e.clientX < innerWidth * 0.45 && !st.move) {
@@ -7164,36 +7200,46 @@
             }
             canvas.addEventListener('pointerup', end);
             canvas.addEventListener('pointercancel', end);
+            canvas.addEventListener('lostpointercapture', end);
             window.addEventListener('blur', releaseAll);
             document.addEventListener('visibilitychange', function () { if (document.hidden) releaseAll(); });
 
             // Action buttons
             function press(el, fn) {
                 el.addEventListener('pointerdown', function (e) {
-                    e.preventDefault(); e.stopPropagation(); buzz(12); fn();
+                    e.preventDefault(); e.stopPropagation();
+                    if (cam.isInspectionPaused || root.classList.contains('mob-hidden')) return;
+                    buzz(12); fn();
                 });
             }
             press($('mob-read'), function () {
-                if (co._isScrollModalOpen()) { co.closeScrollModal(); return; }
                 if (co.carriedScroll) { co.handleGrabOrPlaceAction(); return; }
                 if (co.currentHoveredTarget === 'scroll' && co.currentHoveredScroll) { co.openDeliveredScroll(co.currentHoveredScroll); return; }
                 if (co.hedwig && (co.hedwig.scrollLanded || co.hedwig.landedScrolls.length > 0)) co.openDeliveredScroll();
             });
-            press($('mob-grab'), function () { co.handleGrabOrPlaceAction(); });
+            var grab = $('mob-grab');
+            co.onCarriedScrollChange = function (scroll) {
+                grab.textContent = scroll ? 'PLACE' : 'GRAB';
+                grab.setAttribute('aria-label', scroll ? 'Place scroll' : 'Grab scroll');
+            };
+            co.onCarriedScrollChange(co.carriedScroll);
+            press(grab, function () { co.handleGrabOrPlaceAction(); });
             // Haptic tick when SHINE is pressed
             if (co.shineBtn) co.shineBtn.addEventListener('pointerdown', function () { buzz(15); });
 
             // Show controls only while exploring (not on intro / scroll / puzzle-complete screens)
-            function modalOpen(id) {
-                var m = $(id); return !!m && !m.classList.contains('hidden') && !m.classList.contains('hidden-overlay');
+            var puzzleModal = $('puzzle-complete-modal');
+            function syncControls() {
+                var puzzleOpen = !puzzleModal.classList.contains('hidden') && !puzzleModal.classList.contains('hidden-overlay');
+                var hide = !co.hasEnteredChamber || co._isScrollModalOpen() || puzzleOpen;
+                if (hide && !root.classList.contains('mob-hidden')) releaseAll();
+                root.classList.toggle('mob-hidden', hide);
             }
-            setInterval(function () {
-                var hide = !co.hasEnteredChamber || co._isScrollModalOpen() || modalOpen('puzzle-complete-modal');
-                if (hide !== root.classList.contains('mob-hidden')) {
-                    root.classList.toggle('mob-hidden', hide);
-                    if (hide) releaseAll();
-                }
-            }, 120);
+            var overlayObserver = new MutationObserver(syncControls);
+            [co.introOverlay, co.scrollModal, puzzleModal].forEach(function (overlay) {
+                overlayObserver.observe(overlay, { attributes: true, attributeFilter: ['class'] });
+            });
+            syncControls();
         }
 
         (function wait() {
