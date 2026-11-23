@@ -1,0 +1,1336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#141319">
+<meta name="author" content="Gauransh Bansal">
+<title>Airwave Simulator</title>
+<meta name="description" content="A browser-based audio deck you can play with your hands.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#141319;--panel:#1c1a23;--line:#38343f;--ink:#f3eff7;--muted:#bdb4c8;--violet:#d1b1fb;--lime:#e2ff88;--mono:"IBM Plex Mono",monospace}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 70% 0%,#211928 0%,transparent 55%),var(--bg);color:var(--ink);font:16px "Space Grotesk",system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer;color:inherit;border:none}button:disabled,input:disabled{opacity:.46;cursor:default}button:focus-visible,input:focus-visible{outline:2px solid var(--lime);outline-offset:4px}button:not(:disabled):hover{filter:brightness(1.12)}p,h1,h2{margin:0}header{border-bottom:1px solid var(--line)}.top,main{max-width:1280px;margin:auto;padding:0 40px}.top{height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:12px;font-weight:700;font-size:25px;letter-spacing:-.07em}.privacy{font-size:14px;color:var(--muted)}.intro{padding:35px 0 27px;display:flex;align-items:end;justify-content:space-between;gap:20px}.intro h1{font-size:clamp(36px,5vw,62px);line-height:1.05;letter-spacing:-.07em;margin-bottom:8px}.intro p,.hint,.small{color:var(--muted)}.actions,.transport,.row,.cal-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.button{min-height:40px;padding:9px 15px;border:1px solid var(--line);background:#2a2531;border-radius:8px;font-weight:600;white-space:nowrap}.primary{background:var(--lime);color:#1d2114;border-color:var(--lime)}.accent{background:var(--violet);color:#241832;border-color:var(--violet)}.deck{border:1px solid var(--line);border-radius:15px;background:var(--panel);overflow:hidden}.trackbar{padding:15px 18px;justify-content:space-between}.track{display:flex;align-items:center;gap:12px;min-width:0;flex:1}.track-icon{color:var(--violet);font-size:21px;background:#30263b;width:41px;height:41px;display:grid;place-items:center;border-radius:8px;flex:none}.track-title{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.track-text{min-width:0}.small{font-size:13px}.mono{font-family:var(--mono);font-size:13px}.transport .button{min-width:44px}.wave-wrap{position:relative;background:#18151f;border-block:1px solid var(--line);height:90px}.wave-wrap canvas{width:100%;height:100%;display:block}.wave-wrap input{position:absolute;inset:0;margin:0;width:100%;height:100%;appearance:none;background:transparent;cursor:ew-resize;border-radius:0}.wave-wrap input::-webkit-slider-thumb{appearance:none;width:2px;height:87px;background:transparent}.wave-wrap input::-moz-range-thumb{width:2px;height:87px;background:transparent;border:0}.timeline{display:flex;justify-content:space-between;padding:8px 18px;color:var(--muted)}.workspace{display:grid;grid-template-columns:1.7fr 1fr;gap:18px;margin:21px 0}.camera,.mixer{background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden}.section-head{padding:15px 18px;justify-content:space-between}.section-head h2{font-size:19px;letter-spacing:-.035em}.status{color:var(--muted);display:flex;gap:7px;align-items:center}.status:before{content:"";width:7px;height:7px;border-radius:50%;background:#82788c}.status[data-live=true]{color:var(--lime)}.status[data-live=true]:before{background:var(--lime)}.stage{margin:0 13px;aspect-ratio:16/9;position:relative;overflow:hidden;border:1px solid #3d3349;border-radius:11px;background:radial-gradient(ellipse,#30253d 0%,#1b1625 71%)}.stage:before{content:"";position:absolute;inset:0;background:linear-gradient(#a580c01b 1px,transparent 1px),linear-gradient(90deg,#a580c01b 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse,#000,transparent 79%)}.stage video,.stage canvas{width:100%;height:100%;position:absolute;inset:0;object-fit:contain}.stage video{transform:scaleX(-1);background:#0e0d12}.stage canvas{pointer-events:none}.empty{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:7px;text-align:center;padding:12px}.empty svg{width:68px;height:68px;color:var(--violet);margin-bottom:5px}.empty p{font-weight:600;font-size:18px}.empty span{color:var(--muted);font-size:14px}.gesture{position:absolute;left:10px;bottom:10px;background:#181421e8;border:1px solid #665779;padding:6px 9px;border-radius:6px;color:var(--lime)}[hidden]{display:none!important}.cam-actions{padding:13px;justify-content:space-between}.hint{font-size:14px;padding:0 14px 14px;min-height:32px}.mixer .section-head{border-bottom:1px solid var(--line)}.effect-list{display:grid;gap:7px;padding:10px}.effect{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;text-align:left;background:#24212c;border:1px solid #3c3545;border-radius:8px;padding:8px 10px;width:100%}.effect[aria-pressed=true]{background:#332841;border-color:#9c7cba}.fx-icon{height:30px;width:30px;display:grid;place-items:center;border-radius:6px;color:var(--violet);background:#3b3049;font-size:17px}.effect[aria-pressed=true] .fx-icon{background:var(--violet);color:#211529}.fx-text strong,.fx-text span{display:block}.fx-text strong{font-size:15px}.fx-value{color:var(--violet);font-family:var(--mono);font-size:13px}.adjust{display:grid;grid-template-columns:1fr auto;gap:8px;padding:0 12px 12px}.adjust input{width:100%;accent-color:var(--violet)}.guide{display:grid;grid-template-columns:repeat(3,1fr);margin:0 0 26px;border:1px solid var(--line);border-radius:11px;background:#1a1821}.guide>div{padding:12px 15px}.guide>div+div{border-left:1px solid var(--line)}.guide strong{display:block;font-size:14px;color:var(--violet);margin-bottom:3px}.guide span{font-size:14px;color:var(--muted)}.dragging{outline:2px dashed var(--lime);outline-offset:4px}#notice{color:var(--lime);margin-top:8px;font-size:14px}.active-value{color:var(--lime)}
+@media(max-width:830px){.top,main{padding-inline:22px}.workspace{grid-template-columns:1.35fr 1fr}.intro{align-items:start;flex-direction:column;gap:14px}.stage{aspect-ratio:4/3}}
+@media(max-width:620px){.top,main{padding-inline:14px}.top{height:60px}.workspace{grid-template-columns:1fr}.stage{aspect-ratio:4/3}.guide{grid-template-columns:1fr}.guide>div+div{border-left:0;border-top:1px solid var(--line)}.intro{padding-top:25px}.trackbar,.section-head{padding-inline:12px}.privacy{font-size:12px}.trackbar{flex-wrap:nowrap}.transport{flex-wrap:nowrap}.wave-wrap{height:72px}.wave-wrap input::-webkit-slider-thumb{height:70px}}
+.performance {display:grid;align-content:start;gap:16px;min-width:0}
+#visual {
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+body {
+  --accent-hue:272;
+  --music:0;
+  --pulse:0;
+  background:#141018;
+  isolation:isolate;
+}
+header {
+  background:#17131cc9;
+  border-color:hsl(var(--accent-hue) 50% 70% / calc(.19 + var(--music)*.13));
+}
+.deck,.camera,.mixer,.guide {
+  background:hsl(265 24% 11% / .89);
+  border-color:hsl(var(--accent-hue) 55% 70% / calc(.24 + var(--music)*.14 + var(--pulse)*.16));
+}
+.deck,.mixer {
+  box-shadow:0 7px 30px #0b081837, 0 0 29px hsl(var(--accent-hue) 80% 62% / calc(var(--music)*.08 + var(--pulse)*.11));
+}
+.wave-wrap {background:#181321df}
+.effect {background:#292232e8}
+.effect[aria-pressed=true] {
+  background:hsl(var(--accent-hue) 31% 25% / .96);
+  border-color:hsl(var(--accent-hue) 73% 77% / calc(.68 + var(--pulse)*.29));
+  box-shadow:inset 0 0 19px hsl(var(--accent-hue) 91% 67% / calc(.03 + var(--pulse)*.13));
+}
+
+
+.button:not(:disabled),.effect {transition:transform .13s ease,filter .13s ease}
+.button:not(:disabled):active,.effect:active {transform:scale(.97)}
+.backdrop-controls {
+  border:1px solid hsl(var(--accent-hue) 55% 70% / calc(.24 + var(--music)*.14));
+  background:#1a1523db;
+  border-radius:11px;
+  padding:10px 12px;
+}
+.backdrop-controls h2 {font-size:15px}
+.picker {
+  position:absolute;
+  display:grid;
+  grid-template:repeat(3,minmax(0,1fr))/repeat(4,minmax(0,1fr));
+  gap:5px;
+  pointer-events:none;
+}
+.picker-tile {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#1a1429e8;
+  border:1px solid #9d77c982;
+  color:#f3eafb;
+  border-radius:7px;
+  text-align:center;
+  font-weight:700;
+  font-size:clamp(10px,1.48vw,17px);
+  overflow-wrap:anywhere;
+  padding-inline:3px;
+}
+.picker-tile[data-active=true] {border-color:#e2ff88}
+.picker-tile[data-target=true] {
+  background:#ead5ff;
+  color:#241733;
+  border-color:white;
+  box-shadow:0 0 14px #dfafffaa;
+}
+.picker-dot {
+  position:absolute;
+  left:var(--picker-x);
+  top:var(--picker-y);
+  width:12px;
+  height:12px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:#e2ff88;
+  border:2px solid #241733;
+  box-shadow:0 0 0 2px #f5ffe4;
+}
+@media(prefers-reduced-motion:reduce) {
+  .button:not(:disabled):active,.effect:active {transform:none}
+  .button:not(:disabled),.effect {transition:none}
+}
+
+.vizModes {display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.vizModes button {min-height:34px;border:1px solid var(--line);border-radius:6px;padding:4px 8px;background:#292332;font-size:13px}
+.vizModes button[aria-pressed=true] {background:var(--violet);color:#211529;border-color:var(--violet)}
+.mixer {align-self:start}
+.mode {background:#292332;color:var(--ink);min-height:40px;border:1px solid var(--line);border-radius:8px;padding:5px 11px;font:600 14px "Space Grotesk",system-ui,sans-serif}
+.guide .selector {color:#e5baff}
+.guide .controller {color:var(--lime)}
+.gesture {white-space:pre-line;max-width:calc(100% - 20px);line-height:1.5}
+.fx-text .small {line-height:1.23}
+.guide strong {font-size:15px}
+@media(max-width:830px){.fx-icon{display:none}.effect{grid-template-columns:1fr auto}}
+@media(max-width:620px){.fx-icon{display:grid}.effect{grid-template-columns:auto 1fr auto}}
+
+@media(prefers-reduced-motion:no-preference) {
+  body[data-shake="active"] .intro h1 {animation:shakeTilt .46s ease-in-out infinite alternate;--shake-angle:-4deg}
+  body[data-shake="active"] .deck {animation:shakePanel .34s ease-in-out infinite alternate;--shake-x:3px;--shake-angle:.37deg}
+  body[data-shake="active"] .camera {animation:shakePanel .42s ease-in-out -.12s infinite alternate;--shake-x:-3px;--shake-angle:-.52deg}
+  body[data-shake="active"] .mixer {animation:shakePanel .47s ease-in-out -.24s infinite alternate;--shake-x:4px;--shake-angle:.53deg}
+  body[data-shake="active"] .backdrop-controls,
+  body[data-shake="active"] .guide {animation:shakePanel .52s ease-in-out -.21s infinite alternate;--shake-x:-3px;--shake-angle:-.45deg}
+  body[data-shake="active"] .fx-icon {animation:shakeTilt .39s ease-in-out infinite alternate;--shake-angle:15deg}
+  body[data-shake="active"] .effect:nth-child(even) .fx-icon {animation-delay:-.39s;--shake-angle:-12deg}
+}
+@keyframes shakeTilt {
+  from {transform:rotate(var(--shake-angle)) scale(.96)}
+  to {transform:rotate(calc(-1 * var(--shake-angle))) scale(1.06)}
+}
+@keyframes shakePanel {
+  0% {transform:translate(calc(-1 * var(--shake-x)),1px) rotate(var(--shake-angle))}
+  65% {transform:translate(var(--shake-x),-3px) rotate(calc(-1 * var(--shake-angle)))}
+  100% {transform:translate(calc(var(--shake-x) * .7),2px) rotate(0)}
+}
+
+.credits {display:flex;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;padding:4px 0 26px;color:var(--muted);font-size:14px}
+.credits nav {display:flex;gap:16px}
+.credits a {color:var(--violet);text-underline-offset:3px}
+.credits a:focus-visible {outline:2px solid var(--lime);outline-offset:4px}
+</style>
+</head>
+<body>
+<canvas id="visual" aria-hidden="true"></canvas>
+<header><div class="top"><div class="brand">Airwave Simulator</div><span class="privacy">Camera and audio stay on your device</span></div></header>
+<main>
+<section class="intro"><div><h1>Airwave Simulator</h1><p>Load a track and mix in midair. Pick effects in the air and play them with your other hand.</p><p id="notice" role="status" hidden></p></div><div class="actions"><button class="button" id="demo">Try demo beat</button><button class="button primary" id="upload">Load audio</button><input id="file" type="file" accept="audio/*,.aac,.aif,.aifc,.aiff,.caf,.flac,.m4a,.m4b,.mp3,.oga,.ogg,.opus,.wav,.wave,.webm" hidden></div></section>
+<section class="deck" id="deck" aria-label="Audio deck">
+  <div class="row trackbar"><div class="track"><span class="track-icon" aria-hidden="true">♫</span><div class="track-text"><h2 class="track-title" id="title">No track loaded</h2><p class="small" id="trackInfo">Drop an audio file here or load the demo beat</p></div></div><div class="transport"><button class="button" id="restart" aria-label="Restart track" title="Restart track" disabled>↺</button><button class="button accent" id="play" aria-label="Play" title="Play" disabled>▶</button></div></div>
+  <div class="wave-wrap"><canvas id="wave" aria-hidden="true"></canvas><input id="seek" type="range" aria-label="Track position" min="0" max="1" step=".001" value="0" disabled></div>
+  <div class="timeline mono"><span id="elapsed">0:00</span><span id="duration">0:00</span></div>
+</section>
+<div class="workspace">
+  <div class="performance">
+  <section class="camera" aria-labelledby="cameraTitle">
+    <div class="section-head row"><h2 id="cameraTitle">Motion camera</h2><span class="status mono" id="camStatus">Camera off</span></div>
+    <div class="stage">
+      <video id="video" muted playsinline hidden></video><canvas id="hand" hidden aria-hidden="true"></canvas>
+      <div class="empty" id="placeholder">
+        <svg viewBox="0 0 72 72" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 25v-9a6 6 0 0 1 6-6h9m22 0h9a6 6 0 0 1 6 6v9m0 22v9a6 6 0 0 1-6 6h-9m-22 0h-9a6 6 0 0 1-6-6v-9" opacity=".55"/><path d="M27 46 20 37a3 3 0 0 1 5-3l4 4V23a3 3 0 0 1 6 0v11-15a3 3 0 0 1 6 0v15-11a3 3 0 0 1 6 0v13-7a3 3 0 0 1 6 0v13c0 9-4 14-12 14h-4c-5 0-8-4-10-10Z" stroke-linejoin="round"/></svg>
+        <p>Enable your camera to mix</p><span>Keep both hands in frame with space between them.</span>
+      </div>
+      <div class="picker" id="picker" aria-hidden="true" hidden><span class="picker-dot" id="pickerDot"></span></div>
+      <div class="gesture mono" id="gesture" hidden></div>
+    </div>
+    <div class="row cam-actions"><button class="button primary" id="camera">Enable camera</button><div class="cal-actions"><select class="mode" id="gestureMode" aria-label="Gesture mode"><option value="dual">Two hands</option><option value="solo">One hand</option></select><button class="button" id="calibrate" disabled>Calibrate</button></div></div>
+    <p class="hint" id="camHint" role="status">Start with the hand you want to use for adjusting effects. Keep it well lit.</p>
+  </section>
+<section class="backdrop-controls row" aria-labelledby="vizTitle">
+      <h2 id="vizTitle">Background</h2><div class="vizModes" id="vizModes" aria-label="Background style">
+        <button type="button" aria-pressed="true">Spectrum</button><button type="button" aria-pressed="false">Scope</button><button type="button" aria-pressed="false">Orbit</button><button type="button" aria-pressed="false">Tunnel</button>
+      </div>
+    </section>
+
+  </div>
+  <section class="mixer" aria-labelledby="fxTitle">
+    <div class="section-head row"><h2 id="fxTitle">Effects rack</h2><button class="button" id="reset">Reset FX</button></div>
+    <div class="effect-list" id="effects"></div>
+    <div class="adjust"><input type="range" id="amount" min="0" max="1" step=".001" aria-label="Effect amount"><button class="button" id="loopToggle" hidden>Loop off</button></div>
+  </section>
+</div>
+<section class="guide" aria-label="Gesture controls">
+  <div><strong class="selector">Selector hand</strong><span id="selectGuide">Open your palm to show the effect grid. Move over a tile and pinch to choose it.</span></div>
+  <div><strong class="controller">Control hand</strong><span>Pinch and move to adjust the effect. Release to leave it set. In Loop mode, release to resume the track.</span></div>
+  <div><strong>Play or pause</strong><span id="playGuide">Hold a fist with your selector hand. Open it before doing it again.</span></div>
+</section>
+  <footer class="credits" aria-label="Project credits">
+    <span>Developed by Gauransh Bansal</span>
+    <nav aria-label="Author profiles">
+      <a href="https://www.linkedin.com/in/gauransh-bansal-a71223239/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      <a href="https://github.com/gauranshbansal" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </nav>
+  </footer>
+</main>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+const clock = seconds => Math.floor(seconds / 60) + ":" + String(Math.floor(seconds % 60)).padStart(2, "0");
+const video = $("video");
+const overlay = $("hand");
+const wave = $("wave");
+const effects = [
+  {name:"Filter", icon:"◒", hint:"Move up for brighter sound", initial:1, axis:"y", read:v => Math.round(cutoff(v)).toLocaleString() + " Hz"},
+  {name:"Speed", icon:"≋", hint:"Move right for faster playback", initial:.5, axis:"x", read:v => speed(v).toFixed(2) + "×"},
+  {name:"Echo", icon:"◌", hint:"Move up to add delay", initial:0, axis:"y", read:v => percent(v)},
+  {name:"Pan", icon:"↔", hint:"Move left or right across stereo", initial:.5, axis:"x", read:v => Math.abs(v-.5)<.006 ? "Center" : percent(Math.abs(v*2-1)) + (v<.5 ? " L" : " R")},
+  {name:"Loop", icon:"⟳", hint:"Pinch to hold a loop · move right to lengthen", initial:.4, axis:"x", read:v => length(v).toFixed(1) + " s"},
+  {name:"Volume", icon:"▥", hint:"Move up to raise the level", initial:.75, axis:"y", read:v => percent(v)},
+  {name:"Crush", icon:"▦", hint:"Move up for gritty digital distortion", initial:0, axis:"y", read:v => percentLevel(v)},
+  {name:"Robot", icon:"⊛", hint:"Move right for metallic ring modulation", initial:0, axis:"x", read:v => v === 0 ? "Off" : Math.round(robotHz(v)) + " Hz"},
+  {name:"Chop", icon:"▥", hint:"Move right for faster rhythmic cuts", initial:0, axis:"x", read:v => v === 0 ? "Off" : chopHz(v).toFixed(1) + " Hz"},
+  {name:"Space", icon:"✧", hint:"Move up for a long reverb tail", initial:0, axis:"y", read:v => percentLevel(v)}
+];
+const cutoff = value => 80 * 250 ** value;
+const speed = value => value <= .5 ? .5 + value : 1 + 2 * (value-.5);
+const length = value => .25 + 3.75 * value;
+const percent = value => Math.round(value*100) + "%";
+const percentLevel = value => value === 0 ? "Off" : percent(value);
+const robotHz = value => 12 * 12 ** value;
+const chopHz = value => 1 + 19 * value ** 1.7;
+
+const loopMode = effects.findIndex(effect => effect.name === "Loop");
+const values = effects.map(effect => effect.initial);
+let active = 0;
+let audio, filter, dry, delay, feedback, wet, pan, master;
+let input, crushDry, crushWet, robot, robotLfo, robotDepth, chop, chopLfo, chopDepth;
+let reverbWet, analyzer, frequencies, samples;
+const visual = $("visual");
+const visuals = [...$("vizModes").children];
+
+let visualMode = 0, visualEnergy = 0;
+let visualHue = 272, selectionPulse = 0, backgroundDirty = true;
+const effectHues = [272,310,216,181,145,88,16,336,48,249];
+const picker = $("picker");
+const pickerBounds = {x:.14,y:.14,width:.72,height:.62};
+const pickerColumns = 4;
+const pickerRows = 3;
+const pickerLabels = [...effects.map(effect => effect.name), "Play / pause", "Backdrop"];
+const pickerTiles = pickerLabels.map(label => {
+  const tile = document.createElement("span");
+  tile.className = "picker-tile";
+  tile.textContent = label;
+  picker.insertBefore(tile,$("pickerDot"));
+  return tile;
+});
+let pickerOpen = false, pickerTarget = -1, pickerCursor = null, pickerLockedUntil = 0;
+
+
+let buffer, source, sourceGain, peaks = [];
+let offset = 0, started = 0, rate = 1, loop = null, loopOrigin = 0, loopOwner = "";
+let loadTicket = 0, dragDepth = 0;
+
+let shakeActive = false, shakeSuppressFist = false;
+let shakePoseSince = null, shakeLoweredAt = null, lastShakeHand = -Infinity;
+
+function startShake() {
+  if (shakeActive) return;
+  shakeActive = true;
+  shakeSuppressFist = true;
+  document.body.dataset.shake = "active";
+  selectionPulse = 1;
+  backgroundDirty = true;
+}
+
+function stopShake() {
+  if (!shakeActive) return;
+  shakeActive = false;
+  delete document.body.dataset.shake;
+  selectionPulse = 0;
+  backgroundDirty = true;
+}
+
+function updateShakeGesture(hand,now) {
+  const [index,middle,ring,pinky] = hand.fingers;
+  const raised = middle && !index && !ring && !pinky && hand.size > .04;
+  if (raised) {
+    shakePoseSince ??= now;
+    shakeLoweredAt = null;
+    lastShakeHand = now;
+    if (now-shakePoseSince >= 170) startShake();
+    return true;
+  }
+  shakePoseSince = null;
+  if (!shakeActive) return false;
+  shakeLoweredAt ??= now;
+  if (now-shakeLoweredAt < 65) return true;
+  stopShake();
+  return false;
+}
+
+function announce(message) {
+  $("notice").hidden = !message;
+  $("notice").textContent = message;
+}
+function setupAudio() {
+  if (audio) {
+    if (audio.state !== "running") audio.resume().catch(() => {});
+    return;
+  }
+  audio = new AudioContext();
+  audio.resume().catch(() => {});
+  input = audio.createGain();
+  crushDry = audio.createGain();
+  crushWet = audio.createGain();
+  const crusher = audio.createWaveShaper();
+  crusher.curve = Float32Array.from({length:2049}, (_,i) =>
+    Math.round((2*i/2048-1)*8)/8
+  );
+  robot = audio.createGain();
+  robotLfo = audio.createOscillator();
+  robotDepth = audio.createGain();
+  robotLfo.connect(robotDepth).connect(robot.gain);
+  robotLfo.start();
+  chop = audio.createGain();
+  chopLfo = audio.createOscillator();
+  chopLfo.type = "square";
+  chopDepth = audio.createGain();
+  chopLfo.connect(chopDepth).connect(chop.gain);
+  chopLfo.start();
+  input.connect(crushDry).connect(robot);
+  input.connect(crusher).connect(crushWet).connect(robot);
+  filter = audio.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.Q.value = .05;
+  dry = audio.createGain();
+  delay = audio.createDelay(1);
+  delay.delayTime.value = .28;
+  feedback = audio.createGain();
+  feedback.gain.value = .38;
+  wet = audio.createGain();
+  pan = audio.createStereoPanner();
+  master = audio.createGain();
+  const limiter = audio.createDynamicsCompressor();
+  limiter.threshold.value = -4;
+  limiter.knee.value = 4;
+  limiter.ratio.value = 12;
+  filter.connect(dry).connect(pan);
+  filter.connect(delay).connect(wet).connect(pan);
+  delay.connect(feedback).connect(delay);
+  const reverb = audio.createConvolver();
+  const impulse = audio.createBuffer(2, Math.floor(audio.sampleRate*2.4), audio.sampleRate);
+  for (let channel=0; channel<impulse.numberOfChannels; channel++) {
+    const tail = impulse.getChannelData(channel);
+    for (let i=0; i<tail.length; i++) {
+      tail[i] = (Math.random()*2-1) * (1-i/tail.length)**3 * Math.min(1,i/128);
+    }
+  }
+  reverb.buffer = impulse;
+  reverbWet = audio.createGain();
+  filter.connect(reverb).connect(reverbWet).connect(pan);
+  robot.connect(chop).connect(filter);
+  analyzer = audio.createAnalyser();
+  analyzer.fftSize = 2048;
+  analyzer.smoothingTimeConstant = .76;
+  frequencies = new Uint8Array(analyzer.frequencyBinCount);
+  samples = new Uint8Array(analyzer.fftSize);
+  pan.connect(master).connect(limiter).connect(analyzer).connect(audio.destination);
+  applySound(true);
+}
+function position() {
+  if (!buffer || !source) return offset;
+  const current = offset + Math.max(0, audio.currentTime - started) * rate;
+  if (!loop || current < loop.end) return Math.min(buffer.duration, current);
+  const width = loop.end - loop.start;
+  return loop.start + ((current - loop.start) % width);
+}
+function releaseSource() {
+  if (!source) return;
+  const oldSource = source;
+  const oldGain = sourceGain;
+  source = null;
+  oldSource.onended = () => { oldSource.disconnect(); oldGain.disconnect(); };
+  oldGain.gain.cancelScheduledValues(audio.currentTime);
+  oldGain.gain.setTargetAtTime(0, audio.currentTime, .004);
+  oldSource.stop(audio.currentTime + .018);
+}
+function startAt(seconds) {
+  releaseSource();
+  offset = clamp(seconds, 0, Math.max(0, buffer.duration-.001));
+  started = audio.currentTime;
+  const node = audio.createBufferSource();
+  const gain = audio.createGain();
+  node.buffer = buffer;
+  node.playbackRate.value = rate;
+  if (loop) {
+    node.loop = true;
+    node.loopStart = loop.start;
+    node.loopEnd = loop.end;
+  }
+  gain.gain.setValueAtTime(0, started);
+  gain.gain.linearRampToValueAtTime(1, started + .009);
+  node.connect(gain).connect(input);
+  source = node;
+  sourceGain = gain;
+  node.onended = () => {
+    node.disconnect();
+    gain.disconnect();
+    if (source !== node) return;
+    source = null;
+    offset = 0;
+    updateTransport();
+  };
+  node.start(0, offset);
+  updateTransport();
+}
+function togglePlay() {
+  if (!buffer) return;
+  setupAudio();
+  if (source) {
+    offset = position();
+    releaseSource();
+    updateTransport();
+  } else {
+    startAt(offset);
+  }
+}
+function seekTo(seconds) {
+  if (!buffer) return;
+  const playing = Boolean(source);
+  clearLoop();
+  if (playing) startAt(seconds);
+  else offset = seconds >= buffer.duration ? 0 : seconds;
+}
+function updateTransport() {
+  const playing = Boolean(source);
+  $("play").textContent = playing ? "Ⅱ" : "▶";
+  $("play").setAttribute("aria-label", playing ? "Pause" : "Play");
+  $("play").title = playing ? "Pause" : "Play";
+}
+function applySound(immediate = false) {
+  const nextRate = speed(values[1]);
+  if (source && nextRate !== rate) {
+    offset = position();
+    started = audio.currentTime;
+    source.playbackRate.setValueAtTime(nextRate, started);
+  }
+  rate = nextRate;
+  if (!audio) return;
+  const smooth = (param, value) => {
+    if (immediate) param.value = value;
+    else {
+      param.cancelScheduledValues(audio.currentTime);
+      param.setTargetAtTime(value, audio.currentTime, .025);
+    }
+  };
+  smooth(filter.frequency, Math.min(cutoff(values[0]), audio.sampleRate*.47));
+  smooth(wet.gain, values[2]*.66);
+  smooth(dry.gain, 1-values[2]*.2);
+  smooth(pan.pan, values[3]*2-1);
+const crushAmount = values[6];
+  const robotAmount = Math.min(1,values[7]*5);
+  const chopAmount = Math.min(.5,values[8]*2);
+  smooth(crushDry.gain, 1-crushAmount);
+  smooth(crushWet.gain, crushAmount);
+  smooth(robot.gain, 1-robotAmount*.72);
+  smooth(robotDepth.gain, robotAmount*.8);
+  smooth(robotLfo.frequency, robotHz(values[7]));
+  smooth(chop.gain, 1-chopAmount);
+  smooth(chopDepth.gain, chopAmount);
+  smooth(chopLfo.frequency, chopHz(values[8]));
+  smooth(reverbWet.gain, values[9]*.9);
+
+  smooth(master.gain, values[5]);
+}
+function setLoop(owner) {
+  if (!buffer || buffer.duration < .04) return;
+  loopOwner = owner;
+  loopOrigin = position();
+  const width = Math.min(length(values[loopMode]), buffer.duration);
+  loop = {start:Math.min(loopOrigin, buffer.duration-width), end:0};
+  loop.end = loop.start + width;
+  if (source) startAt(loop.start);
+  else offset = loop.start;
+  renderEffects();
+}
+function resizeLoop() {
+  if (!loop) return;
+  const width = Math.min(length(values[loopMode]), buffer.duration);
+  const start = Math.min(loopOrigin, buffer.duration-width);
+  const end = start + width;
+  const current = position();
+  loop = {start, end};
+  if (!source) {
+    offset = clamp(current, start, end - .001);
+    return;
+  }
+  if (current < start || current >= end) startAt(start);
+  else {
+    offset = current;
+    started = audio.currentTime;
+    source.loopStart = start;
+    source.loopEnd = end;
+  }
+}
+function clearLoop() {
+  if (!loop) return;
+  offset = position();
+  if (source) {
+    started = audio.currentTime;
+    source.loop = false;
+  }
+  loop = null;
+  loopOwner = "";
+  renderEffects();
+}
+
+function buildPeaks(decoded) {
+  const samples = decoded.getChannelData(0);
+  const columns = 320;
+  return Array.from({length:columns}, (_, i) => {
+    const begin = Math.floor(i*samples.length/columns);
+    const end = Math.floor((i+1)*samples.length/columns);
+    const stride = Math.max(1, Math.floor((end-begin)/160));
+    let peak = 0;
+    for (let j=begin; j<end; j+=stride) peak = Math.max(peak, Math.abs(samples[j]));
+    return peak;
+  });
+}
+function installTrack(decoded, title, detail) {
+  releaseSource();
+  loop = null;
+  loopOwner = "";
+  buffer = decoded;
+  offset = 0;
+  peaks = buildPeaks(decoded);
+  $("title").textContent = title;
+  $("trackInfo").textContent = detail;
+  $("duration").textContent = clock(buffer.duration);
+  $("seek").max = buffer.duration;
+  for (const id of ["play","restart","seek","loopToggle"]) $(id).disabled = false;
+  updateTransport();
+  renderEffects();
+  announce("");
+}
+async function loadFile(file) {
+  if (!file) return;
+  const ticket = ++loadTicket;
+  announce("Decoding " + file.name + "…");
+  try {
+    setupAudio();
+    const decoded = await audio.decodeAudioData(await file.arrayBuffer());
+    if (ticket !== loadTicket) return;
+    const title = file.name.replace(/\.[^.]+$/, "") || file.name;
+    installTrack(decoded, title, "Local audio · " + clock(decoded.duration));
+  } catch (error) {
+    if (ticket === loadTicket) announce("This browser couldn’t decode the file. Try WAV or another supported audio format.");
+    console.error(error);
+  }
+}
+function demoBeat() {
+  ++loadTicket;
+  setupAudio();
+  const sampleRate = audio.sampleRate;
+  const beat = .5;
+  const seconds = 32;
+  const demo = audio.createBuffer(1, sampleRate*seconds, sampleRate);
+  const samples = demo.getChannelData(0);
+  const bass = [55,55,65.4,49,55,73.4,65.4,49];
+  const melody = [220,0,329.63,392,0,329.63,261.63,196,220,0,293.66,329.63,0,261.63,196,0];
+  let seed = 167;
+  for (let index=0; index<samples.length; index++) {
+    const t = index/sampleRate;
+    const tick = Math.floor(t/beat);
+    const b = t%beat;
+    const eighth = t%(beat/2);
+    const note = melody[Math.floor(t/(beat/2))%melody.length];
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    const noise = seed/2147483648-1;
+    const kick = .64*Math.sin(2*Math.PI*(47*b+2.9*(1-Math.exp(-39*b))))*Math.exp(-15*b);
+    const snare = tick%2 ? .22*noise*Math.exp(-20*b) : 0;
+    const hat = .09*noise*Math.exp(-54*eighth);
+    const f = bass[Math.floor(tick/2)%bass.length];
+    const bassline = .19*(Math.sin(2*Math.PI*f*b)+.22*Math.sin(4*Math.PI*f*b))*Math.exp(-3*b)*Math.min(1,b*110);
+    const keys = .12*Math.sin(2*Math.PI*note*eighth+.68*Math.sin(4*Math.PI*note*eighth))*Math.exp(-8*eighth)*Math.min(1,eighth*140);
+    samples[index] = (kick+snare+hat+bassline+keys)*Math.min(1,(seconds-t)*10);
+  }
+  installTrack(demo, "After Hours", "Demo beat · 120 BPM");
+  startAt(0);
+}
+function drawWave() {
+  const dpr = window.devicePixelRatio || 1;
+  const w = Math.round(wave.clientWidth*dpr);
+  const h = Math.round(wave.clientHeight*dpr);
+  if (!w || !h) return;
+  if (wave.width !== w || wave.height !== h) {
+    wave.width = w;
+    wave.height = h;
+  }
+  const ctx = wave.getContext("2d");
+  ctx.clearRect(0,0,w,h);
+  const progress = buffer ? position()/buffer.duration : 0;
+  ctx.fillStyle = "#272031";
+  ctx.fillRect(0,h/2,w,dpr);
+  if (loop && buffer) {
+    ctx.fillStyle = "#e2ff8822";
+    ctx.fillRect(w*loop.start/buffer.duration,0,w*(loop.end-loop.start)/buffer.duration,h);
+  }
+  const count = Math.min(260, Math.floor(w/(3.7*dpr)));
+  for (let i=0; i<count; i++) {
+    const x = i/count*w;
+    const peak = peaks.length ? peaks[Math.floor(i/count*peaks.length)] : .023;
+    const bar = Math.max(2*dpr,Math.min(h*.88,peak*h*.87));
+    ctx.fillStyle = buffer ? (i/count <= progress ? "#e2ff88" : "#af8bd1") : "#453851";
+    ctx.fillRect(x,(h-bar)/2,Math.max(dpr,w/count-1.5*dpr),bar);
+  }
+  if (buffer) {
+    ctx.fillStyle = "#fcf8ff";
+    ctx.fillRect(w*progress,0,dpr,h);
+  }
+}
+effects.forEach((effect, index) => {
+  const button = document.createElement("button");
+  button.className = "effect";
+  button.innerHTML = '<span class="fx-icon" aria-hidden="true"></span><span class="fx-text"><strong></strong><span class="small"></span></span><span class="fx-value"></span>';
+  button.querySelector(".fx-icon").textContent = effect.icon;
+  button.querySelector("strong").textContent = effect.name;
+  button.querySelector(".small").textContent = effect.hint;
+  button.addEventListener("click", () => selectEffect(index));
+  $("effects").append(button);
+});
+function renderEffects() {
+  for (const [index, button] of [...$("effects").children].entries()) {
+    button.setAttribute("aria-pressed", String(active === index));
+    const value = button.querySelector(".fx-value");
+    value.textContent = effects[index].read(values[index]);
+    value.classList.toggle("active-value", index === loopMode && !!loop);
+  }
+  $("amount").value = values[active];
+  $("amount").setAttribute("aria-label", effects[active].name + " amount");
+  $("amount").setAttribute("aria-valuetext", effects[active].read(values[active]));
+  $("loopToggle").hidden = active !== loopMode;
+  $("loopToggle").textContent = loop ? "Loop on" : "Loop off";
+  $("loopToggle").setAttribute("aria-pressed", String(!!loop));
+}
+function selectEffect(index) {
+  if (active !== index) {
+    selectionPulse = 1;
+    backgroundDirty = true;
+  }
+  if (loopOwner === "gesture") clearLoop();
+  pinchAnchor = null;
+  active = index;
+  renderEffects();
+}
+function changeValue(value) {
+  values[active] = clamp(value);
+  if (active === loopMode) resizeLoop();
+  applySound();
+  renderEffects();
+}
+$("upload").addEventListener("click", () => $("file").click());
+$("file").addEventListener("change", event => {
+  loadFile(event.target.files[0]);
+  event.target.value = "";
+});
+$("demo").addEventListener("click", demoBeat);
+$("play").addEventListener("click", togglePlay);
+$("restart").addEventListener("click", () => seekTo(0));
+$("seek").addEventListener("input", event => seekTo(Number(event.target.value)));
+$("amount").addEventListener("input", event => changeValue(Number(event.target.value)));
+$("loopToggle").disabled = true;
+$("loopToggle").addEventListener("click", () => loop ? clearLoop() : setLoop("manual"));
+$("reset").addEventListener("click", () => {
+  pinchAnchor = null;
+  clearLoop();
+  effects.forEach((effect, i) => { values[i] = effect.initial; });
+  applySound();
+  renderEffects();
+});
+const deck = $("deck");
+deck.addEventListener("dragenter", event => {
+  event.preventDefault();
+  ++dragDepth;
+  deck.classList.add("dragging");
+});
+deck.addEventListener("dragover", event => event.preventDefault());
+deck.addEventListener("dragleave", () => {
+  dragDepth = Math.max(0, dragDepth-1);
+  if (!dragDepth) deck.classList.remove("dragging");
+});
+deck.addEventListener("drop", event => {
+  event.preventDefault();
+  dragDepth = 0;
+  deck.classList.remove("dragging");
+  loadFile(event.dataTransfer.files[0]);
+});
+const visionURL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21";
+const modelURL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
+const connections = [[0,1,2,3,4],[0,5,6,7,8],[5,9,10,11,12],[9,13,14,15,16],[13,17,18,19,20],[17,0]];
+let stream, model, cameraOpen = false, cameraJob = 0, frameTime = -1, lastDetection = 0;
+let calibration = null, calibrating = null, pinchAnchor = null, pinched = false;
+
+let heldPose = "", heldSince = 0, holdFired = false;
+let lastControl = -Infinity, lastSelector = -Infinity;
+let controlWrist = .72;
+const dualMode = () => $("gestureMode").value === "dual";
+
+function describeCamera(status, hint, live = false) {
+  $("camStatus").textContent = status;
+  $("camStatus").dataset.live = String(live);
+  if (hint) $("camHint").textContent = hint;
+}
+function stopCamera(message = "Enable your camera when you’re ready to use gestures.") {
+  ++cameraJob;
+  cameraOpen = false;
+  if (stream) stream.getTracks().forEach(track => track.stop());
+  stream = null;
+  video.srcObject = null;
+  video.hidden = overlay.hidden = $("gesture").hidden = true;
+  $("placeholder").hidden = false;
+  $("camera").textContent = "Enable camera";
+  $("calibrate").disabled = true;
+  $("calibrate").textContent = "Calibrate";
+  calibrating = calibration = null;
+  resetPose();
+  describeCamera("Camera off", message);
+}
+async function openCamera() {
+  const job = ++cameraJob;
+  cameraOpen = true;
+  $("camera").textContent = "Cancel";
+  describeCamera("Starting camera", "Allow camera access when your browser asks.");
+  try {
+    setupAudio();
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error("Camera access requires a supported browser over HTTPS, localhost, or a local HTML file.");
+    }
+    const device = await navigator.mediaDevices.getUserMedia({
+      video:{width:{ideal:640},height:{ideal:480},facingMode:"user"},audio:false
+    });
+    if (job !== cameraJob) {
+      device.getTracks().forEach(track => track.stop());
+      return;
+    }
+    stream = device;
+    for (const track of stream.getVideoTracks()) {
+      track.addEventListener("ended", () => {
+        if (job === cameraJob) stopCamera("Camera disconnected. Re-enable it to resume gesture control.");
+      });
+    }
+    video.srcObject = stream;
+    await video.play();
+    if (job !== cameraJob) return;
+    video.hidden = false;
+    $("placeholder").hidden = true;
+    describeCamera("Loading tracker", "Downloading the hand tracking model for this browser.");
+    if (!model) {
+      const {FilesetResolver, HandLandmarker} = await import(visionURL + "/vision_bundle.mjs");
+      const files = await FilesetResolver.forVisionTasks(visionURL + "/wasm");
+      const tracker = await HandLandmarker.createFromOptions(files, {
+        baseOptions:{modelAssetPath:modelURL, delegate:"CPU"},
+        runningMode:"VIDEO",numHands:2,minHandDetectionConfidence:.55,minHandPresenceConfidence:.55
+      });
+      if (job !== cameraJob) {
+        tracker.close();
+        return;
+      }
+      model = tracker;
+    }
+    if (job !== cameraJob) return;
+    frameTime = -1;
+    overlay.hidden = false;
+    $("camera").textContent = "Stop camera";
+    $("calibrate").disabled = false;
+    beginCalibration();
+  } catch (error) {
+    if (job !== cameraJob) return;
+    let message = "Couldn’t start hand tracking. Check your internet connection and try again.";
+    if (error.name === "NotAllowedError") message = "Camera permission was denied. Allow access in your browser and try again.";
+    if (error.name === "NotFoundError") message = "No camera was found. Connect a camera and try again.";
+    if (error.name === "NotReadableError") message = "The camera is unavailable. Close any app using it and try again.";
+    if (!navigator.mediaDevices?.getUserMedia) message = error.message;
+    stopCamera(message);
+    console.error(error);
+  }
+}
+function beginCalibration() {
+  resetPose();
+  calibration = null;
+  calibrating = {step:"open", samples:[], open:0, scale:0, handedness:""};
+  $("calibrate").textContent = "Restart calibration";
+  describeCamera("Calibrating", "Show only your control hand (the one you’ll pinch with). Hold its palm open for about one second.", true);
+}
+function resetControl() {
+  pinchAnchor = null;
+  pinched = true;
+  if (loopOwner === "gesture") clearLoop();
+}
+function resetSelector() {
+  stopShake();
+  shakePoseSince = shakeLoweredAt = null;
+  shakeSuppressFist = false;
+  heldPose = "";
+  heldSince = 0;
+  holdFired = false;
+  closePicker();
+}
+function resetPose() {
+  resetControl();
+  resetSelector();
+}
+
+function showGesture(text) {
+  const label = $("gesture");
+  if (label.textContent !== text) label.textContent = text;
+  label.hidden = !text;
+}
+function handMetrics(points, category) {
+  const aspect = video.videoWidth/video.videoHeight;
+  const distance = (a,b) => Math.hypot((points[a].x-points[b].x)*aspect, points[a].y-points[b].y);
+  const size = distance(0,9);
+  const fingers = [5,9,13,17].map(base => {
+    const straightness = distance(base,base+3) /
+      Math.max(.001,distance(base,base+1)+distance(base+1,base+2)+distance(base+2,base+3));
+    return straightness > .8 && distance(0,base+3) > distance(0,base+1)*1.03;
+  });
+  return {
+    size,
+    handedness:category?.categoryName ?? "",
+    confidence:category?.score ?? 0,
+    wrist:1-points[0].x,
+    palmX:1-(points[0].x+points[5].x+points[9].x+points[17].x)/4,
+    palmY:(points[0].y+points[5].y+points[9].y+points[17].y)/4,
+    gap:distance(4,8)/Math.max(.001,size),
+    x:1-(points[4].x+points[8].x)/2,
+    y:1-(points[4].y+points[8].y)/2,
+    fingers
+  };
+}
+function captureCalibration(hand) {
+  const step = calibrating.step;
+  const valid = hand.size > .04 && (step === "open" ?
+    hand.fingers.every(Boolean) && hand.gap > .62 :
+    hand.fingers.slice(1).some(Boolean) && hand.gap < Math.min(.44,calibrating.open*.65));
+  if (!valid) {
+    calibrating.samples = [];
+    showGesture(step === "open" ? "Show open palm" : "Touch thumb to index");
+    return;
+  }
+  calibrating.samples.push(hand);
+  const target = step === "open" ? 17 : 13;
+  showGesture((step === "open" ? "Open palm" : "Pinch") + " · " +
+    Math.min(100,Math.round(calibrating.samples.length/target*100)) + "%");
+  if (calibrating.samples.length < target) return;
+  const mean = key => calibrating.samples.reduce((sum, sample) => sum + sample[key],0)/target;
+  if (step === "open") {
+    calibrating.open = mean("gap");
+    calibrating.scale = mean("size");
+    const left = calibrating.samples.filter(sample => sample.handedness === "Left").length;
+    const right = calibrating.samples.filter(sample => sample.handedness === "Right").length;
+    calibrating.handedness = left >= 9 ? "Left" : right >= 9 ? "Right" : "";
+    controlWrist = mean("wrist");
+    calibrating.step = "pinch";
+    calibrating.samples = [];
+    describeCamera("Calibrating", "Touch your thumb and index finger together. Keep your other fingers extended.", true);
+    return;
+  }
+  const closed = mean("gap");
+  const travel = calibrating.open - closed;
+  calibration = {
+    press:Math.min(.52,closed + travel*.23),
+    release:Math.min(.66,closed + travel*.38),
+    scale:calibrating.scale,
+    handedness:calibrating.handedness || hand.handedness
+  };
+  calibrating = null;
+  pinched = true;
+  pinchAnchor = null;
+  $("calibrate").textContent = "Recalibrate";
+  announce("");
+
+  const instruction = dualMode() ?
+    "Release your pinch. Open the palm of your selector hand to bring up the effect grid." :
+    "Release your pinch to start. Hold three fingers to open the effect grid.";
+  describeCamera("Gestures ready", instruction, true);
+}
+function closePicker() {
+  picker.hidden = true;
+  pickerOpen = false;
+  pickerCursor = null;
+  pickerTarget = -1;
+}
+function layoutPicker() {
+  const scale = Math.min(video.clientWidth/video.videoWidth,video.clientHeight/video.videoHeight);
+  const w = video.videoWidth*scale;
+  const h = video.videoHeight*scale;
+  picker.style.left = ((video.clientWidth-w)*.5 + w*pickerBounds.x) + "px";
+  picker.style.top = ((video.clientHeight-h)*.5 + h*pickerBounds.y) + "px";
+  picker.style.width = w*pickerBounds.width + "px";
+  picker.style.height = h*pickerBounds.height + "px";
+}
+function aimPicker(hand) {
+  const x = clamp((hand.palmX-pickerBounds.x)/pickerBounds.width);
+  const y = clamp((hand.palmY-pickerBounds.y)/pickerBounds.height);
+  if (!pickerCursor) pickerCursor = {x,y};
+  else {
+    pickerCursor.x += (x-pickerCursor.x)*.56;
+    pickerCursor.y += (y-pickerCursor.y)*.56;
+  }
+  const column = Math.min(pickerColumns-1, Math.floor(pickerCursor.x*pickerColumns));
+  const row = Math.min(pickerRows-1, Math.floor(pickerCursor.y*pickerRows));
+  pickerTarget = row*pickerColumns+column;
+  picker.style.setProperty("--picker-x",percent(pickerCursor.x));
+  picker.style.setProperty("--picker-y",percent(pickerCursor.y));
+  pickerTiles.forEach((tile,index) => {
+    tile.dataset.target = String(index === pickerTarget);
+    tile.dataset.active = String(index === active);
+  });
+  return pickerLabels[pickerTarget] + " · pinch to choose";
+}
+function commitPicker(now) {
+  const target = pickerTarget;
+  closePicker();
+  pickerLockedUntil = now+300;
+  selectionPulse = 1;
+  if (target < effects.length) {
+    selectEffect(target);
+    if (dualMode()) pinched = false;
+    else resetControl();
+    return "Selected · " + effects[active].name;
+  }
+  if (target === effects.length) {
+    togglePlay();
+    return buffer ? (source ? "Playing" : "Paused") : "Load a track to play";
+  }
+  selectVisual((visualMode+1)%visuals.length);
+  return "Background · " + visuals[visualMode].textContent;
+}
+function selectorGesture(hand, now) {
+  if (dualMode() && updateShakeGesture(hand,now)) {
+    heldPose = "";
+    holdFired = false;
+    if (pickerOpen) closePicker();
+    return shakeActive ? "Harlem Shake" : "…";
+  }
+  const [index,middle,ring,pinky] = hand.fingers;
+  const pinch = hand.gap < calibration.press && hand.fingers.slice(1).some(Boolean);
+  const fist = !index && !middle && !ring && !pinky;
+  if (shakeSuppressFist) {
+    if (fist) return "Open palm to pick an effect";
+    shakeSuppressFist = false;
+  }
+  const requestPicker = hand.gap > calibration.release &&
+    (dualMode() ? index && middle && (ring || pinky) : index && middle && ring && !pinky);
+  const pose = fist ? "fist" : requestPicker ? "picker" : "";
+  if (pose !== heldPose) {
+    heldPose = pose;
+    heldSince = now;
+    holdFired = false;
+  }
+  if (fist) {
+    closePicker();
+    if (!holdFired && now-heldSince >= 550) {
+      holdFired = true;
+      togglePlay();
+      selectionPulse = 1;
+    }
+    return holdFired ? (buffer ? (source ? "Playing" : "Paused") : "Load a track to play") : "Hold to play / pause";
+  }
+  if (pickerOpen) {
+    if (pinch && pickerTarget >= 0) return commitPicker(now);
+    return aimPicker(hand);
+  }
+  if (!holdFired && requestPicker && now >= pickerLockedUntil && now-heldSince >= (dualMode() ? 100 : 380)) {
+    holdFired = true;
+    pickerOpen = true;
+    layoutPicker();
+    picker.hidden = false;
+    if (!dualMode()) resetControl();
+    return aimPicker(hand);
+  }
+  return dualMode() ? "Open palm to pick an effect" : "";
+}
+
+function controlGesture(hand) {
+  const pinch = hand.fingers.some(Boolean) && hand.gap < (pinched ? calibration.release : calibration.press);
+  if (!pinch) {
+    if (loopOwner === "gesture") clearLoop();
+    pinchAnchor = null;
+    pinched = false;
+    return "Pinch to play " + effects[active].name;
+  }
+  if (!pinched) {
+    pinchAnchor = {x:hand.x, y:hand.y, value:values[active]};
+    if (active === loopMode && !loop) setLoop("gesture");
+  }
+  pinched = true;
+  if (pinchAnchor) {
+    gestureOrigin.x = clamp(hand.x);
+    gestureOrigin.y = clamp(1-hand.y);
+    gestureOrigin.last = performance.now();
+    const axis = effects[active].axis;
+    const range = clamp(calibration.scale*2.4,.17,.46);
+    const delta = hand[axis]-pinchAnchor[axis];
+    const value = clamp(pinchAnchor.value + (Math.abs(delta) > .007 ? delta/range : 0));
+    const reachedEdge = (value === 0 || value === 1) && values[active] !== value;
+    if (Math.abs(values[active]-value) > .007 || reachedEdge) changeValue(value);
+  }
+  return effects[active].name + " · " + effects[active].read(values[active]);
+}
+
+function assignHands(hands) {
+  if (hands.length === 0) return {};
+  const handedness = calibration.handedness;
+  if (!dualMode()) {
+    return {control:hands.find(hand => hand.handedness === handedness) ?? hands[0]};
+  }
+  if (hands.length === 1) {
+    const hand = hands[0];
+    const isControl = handedness && hand.handedness && hand.confidence >= .65 ?
+      hand.handedness === handedness : Math.abs(hand.wrist-controlWrist) < .3;
+    return isControl ? {control:hand} : {selector:hand};
+  }
+  const matching = hands.filter(hand => hand.handedness === handedness && hand.confidence >= .65);
+  const control = matching.length === 1 ? matching[0] :
+    (Math.abs(hands[0].wrist-controlWrist) <= Math.abs(hands[1].wrist-controlWrist) ? hands[0] : hands[1]);
+  return {control, selector:hands.find(hand => hand !== control)};
+}
+
+function playGestures(roles, now) {
+  const {control,selector} = roles;
+  if (control) {
+    lastControl = now;
+    controlWrist = control.wrist;
+  } else if (now-lastControl > 200) resetControl();
+
+  if (dualMode()) {
+    let selectorStatus = "Show your selector hand";
+    if (selector) {
+      lastSelector = now;
+      selectorStatus = selectorGesture(selector,now);
+    } else {
+      shakePoseSince = null;
+      if (now-lastSelector > 200) resetSelector();
+    }
+    const controlStatus = control ? controlGesture(control) : "Show your control hand";
+    showGesture(pickerOpen ? selectorStatus : "SELECT · " + selectorStatus + "\n" + "CONTROL · " + controlStatus);
+  } else {
+    if (!control) {
+      if (now-lastControl > 200) resetSelector();
+      showGesture("Bring your hand into view");
+      return;
+    }
+    const selection = selectorGesture(control,now);
+    showGesture(selection || controlGesture(control));
+  }
+}
+
+function paintHands(hands) {
+  const w = video.videoWidth;
+  const h = video.videoHeight;
+  if (overlay.width !== w || overlay.height !== h) {
+    overlay.width = w;
+    overlay.height = h;
+  }
+  const ctx = overlay.getContext("2d");
+  ctx.clearRect(0,0,w,h);
+  ctx.lineWidth = 2.4;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  for (const {points, color} of hands) {
+    ctx.strokeStyle = color;
+    for (const route of connections) {
+      ctx.beginPath();
+      route.forEach((index, i) => {
+        const {x,y} = points[index];
+        if (i) ctx.lineTo((1-x)*w,y*h);
+        else ctx.moveTo((1-x)*w,y*h);
+      });
+      ctx.stroke();
+    }
+    for (const [index,{x,y}] of points.entries()) {
+      ctx.beginPath();
+      ctx.arc((1-x)*w,y*h,index===4 || index===8 ? 5 : 2.8,0,Math.PI*2);
+      ctx.fillStyle = index===4 || index===8 ? "#fff" : color;
+      ctx.fill();
+    }
+  }
+}
+
+
+function selectVisual(index) {
+  visualMode = index;
+  visuals.forEach((button,i) => button.setAttribute("aria-pressed",String(i === visualMode)));
+  selectionPulse = 1;
+  backgroundDirty = true;
+}
+visuals.forEach((button,index) => button.addEventListener("click", () => selectVisual(index)));
+$("gestureMode").addEventListener("change", () => {
+  $("selectGuide").textContent = dualMode() ?
+    "Open your palm to show the effect grid. Move over a tile and pinch to choose it." :
+    "Hold three fingers to show the grid. Move over a tile and pinch to choose it.";
+  $("playGuide").textContent = dualMode() ?
+    "Hold a fist with your selector hand. Open it before doing it again." :
+    "Hold a fist to play or pause. Open it before doing it again.";
+  resetPose();
+  if ($("calibrate").disabled) return;
+  if (!calibration) beginCalibration();
+  else describeCamera("Gestures ready", dualMode() ?
+    "Open your selector palm to bring up the effect grid." :
+    "Hold three fingers to open the effect grid.", true);
+});
+
+function frequencyAt(fraction) {
+  if (!frequencies) return 0;
+  const index = Math.floor(2 * Math.min(350, frequencies.length/2) ** clamp(fraction));
+  return (frequencies[index] || 0)/255;
+}
+
+function tint(hue, light, alpha) {
+  return "hsl(" + hue + " 88% " + light + "% / " + alpha + ")";
+}
+
+function spectrum(ctx,w,h) {
+  const bands = 63;
+  const cell = w/bands;
+  const gradient = ctx.createLinearGradient(0,h,0,h*.36);
+  gradient.addColorStop(0,tint(visualHue-26,37,.05));
+  gradient.addColorStop(.5,tint(visualHue,48,.75));
+  gradient.addColorStop(1,tint(visualHue+32,79,.9));
+  ctx.fillStyle = gradient;
+  for (let i=0; i<bands; i++) {
+    const fraction = Math.abs(i/(bands-1)*2-1);
+    const level = frequencyAt(1-fraction*.94);
+    const height = h*(.06+.57*level**1.35+.018*Math.cos(i*.58));
+    const left = i*cell;
+    ctx.fillRect(left,h-height,Math.max(1,cell-3),height);
+    ctx.fillStyle = tint(visualHue+30,72,.25+level*.5);
+    ctx.fillRect(left,h-height,Math.max(1,cell-3),2);
+    ctx.fillStyle = gradient;
+  }
+}
+
+function scope(ctx,w,h,time) {
+  for (let line=0; line<6; line++) {
+    ctx.beginPath();
+    for (let i=0;i<=160;i++) {
+      const fraction = i/160;
+      const sample = samples?.[Math.floor(fraction*(samples.length-1))] ?? 128;
+      const shape = Math.sin(fraction*Math.PI*3+line*.35-time*.52);
+      const y = h*(.37+line*.052 + shape*(.12+visualEnergy*.05)) + (sample-128)/128*h*.28;
+      if (i === 0) ctx.moveTo(0,y);
+      else ctx.lineTo(fraction*w,y);
+    }
+    ctx.strokeStyle = tint(visualHue+line*9,69,.22+visualEnergy*.45);
+    ctx.lineWidth = line === 2 ? 2.1 : 1.1;
+    ctx.stroke();
+  }
+}
+
+function orbit(ctx,w,h,time) {
+  const radius = Math.min(w,h)*.38;
+  ctx.save();
+  ctx.translate(w*.5,h*.51);
+  for (let i=0;i<120;i++) {
+    const angle = i/120*Math.PI*2+time*.23;
+    const band = 1-Math.abs(i/60-1);
+    const level = frequencyAt(band);
+    const inside = radius*(1+visualEnergy*.15);
+    const outside = inside+11+level*radius*.52;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(angle)*inside,Math.sin(angle)*inside);
+    ctx.lineTo(Math.cos(angle)*outside,Math.sin(angle)*outside);
+    ctx.strokeStyle = tint(visualHue+level*44+i*.33,53+level*23,.29+level*.43);
+    ctx.lineWidth = i%9 === 0 ? 2.6 : 1.1;
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.arc(0,0,radius*.84*(1+visualEnergy*.22),0,Math.PI*2);
+  ctx.strokeStyle = tint(visualHue+28,75,.38);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function tunnel(ctx,w,h,time) {
+  ctx.save();
+  ctx.translate(w*.5,h*.5);
+  for (let i=0;i<19;i++) {
+    const depth = (i/19+time*.20)%1;
+    const size = .06 + depth**2*.95;
+    const level = frequencyAt(i/19*.85);
+    ctx.beginPath();
+    for (let j=0;j<6;j++) {
+      const theta = j*Math.PI/3+depth*.51+time*.045;
+      const pulse = size*(1+level*.19+visualEnergy*.10);
+      const x = Math.cos(theta)*pulse*w*.73;
+      const y = Math.sin(theta)*pulse*h*.82;
+      if (j === 0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = tint(visualHue+i*6+level*33,55+level*23,.13+depth*.46);
+    ctx.lineWidth = 1+level*1.8;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+const drawModes = [spectrum,scope,orbit,tunnel];
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const visualCtx = visual.getContext("2d");
+const gestureOrigin = {x:.5,y:.52,last:-Infinity};
+const glowOrigin = {x:.5,y:.52};
+let visualTime = 0, lastVisual = 0, bassEnvelope = 0, backgroundAtRest = false;
+function drawVisual(now) {
+  const w = visual.clientWidth;
+  const h = visual.clientHeight;
+  if (!w || !h || !visualCtx) return;
+  const dpr = Math.min(window.devicePixelRatio || 1,1.5);
+  if (visual.width !== Math.round(w*dpr) || visual.height !== Math.round(h*dpr)) {
+    visual.width = Math.round(w*dpr);
+    visual.height = Math.round(h*dpr);
+    backgroundDirty = true;
+  }
+  if (analyzer) {
+    analyzer.getByteFrequencyData(frequencies);
+    analyzer.getByteTimeDomainData(samples);
+  }
+  const bass = (frequencyAt(0)+frequencyAt(.11)+frequencyAt(.22))/3;
+  const energy = bass*.65 + frequencyAt(.46)*.35;
+  const currentGesture = now-gestureOrigin.last < 220;
+  const idle = !source && !shakeActive && energy < .012 && visualEnergy < .012 && selectionPulse < .008 && !currentGesture;
+  if (idle && backgroundAtRest && !backgroundDirty) return;
+  backgroundAtRest = idle;
+  backgroundDirty = false;
+  const dt = Math.min(.07,(now-lastVisual)/1000);
+  lastVisual = now;
+  const motion = !reduceMotion.matches;
+  bassEnvelope = idle ? 0 : bassEnvelope + (bass-bassEnvelope)*(bass > bassEnvelope ? .53 : .19);
+  visualEnergy = idle ? 0 : visualEnergy + (energy-visualEnergy)*(energy > visualEnergy ? .40 : .22);
+  selectionPulse *= .88;
+  const targetHue = shakeActive ? (motion ? 314 + Math.sin(visualTime*5.2)*61 : 314) : effectHues[active];
+  const hueDelta = (targetHue-visualHue+540)%360-180;
+  visualHue = idle ? targetHue : (visualHue+hueDelta*.21+360)%360;
+  if ((source || shakeActive) && motion) visualTime += dt*(.6+bassEnvelope*1.65)*(shakeActive ? 2.1 : 1);
+  glowOrigin.x += ((motion && currentGesture ? gestureOrigin.x : .5)-glowOrigin.x)*.13;
+  glowOrigin.y += ((motion && currentGesture ? gestureOrigin.y : .52)-glowOrigin.y)*.13;
+  document.body.style.setProperty("--accent-hue",visualHue.toFixed(1));
+  document.body.style.setProperty("--music",(motion ? bassEnvelope : visualEnergy*.22).toFixed(3));
+  document.body.style.setProperty("--pulse",(motion ? selectionPulse : 0).toFixed(3));
+  const ctx = visualCtx;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const x = w*glowOrigin.x;
+  const y = h*glowOrigin.y;
+  const glow = ctx.createRadialGradient(x,y,0,x,y,Math.max(w,h)*(.69+bassEnvelope*.17));
+  glow.addColorStop(0,tint(visualHue,11+visualEnergy*11+selectionPulse*5,1));
+  glow.addColorStop(.53,tint(visualHue-23,8+visualEnergy*5,1));
+  glow.addColorStop(1,"#100d18");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0,0,w,h);
+
+  ctx.strokeStyle = tint(visualHue+24,70,.06+bassEnvelope*.06);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x=20;x<w;x+=42) {ctx.moveTo(x,0);ctx.lineTo(x,h);}
+  for (let y=12;y<h;y+=42) {ctx.moveTo(0,y);ctx.lineTo(w,y);}
+  ctx.stroke();
+
+  drawModes[shakeActive && motion ? 3 : visualMode](ctx,w,h,visualTime);
+  if (motion && selectionPulse > .025) {
+    const diameter = Math.min(w,h)*(.16+.71*(1-selectionPulse));
+    ctx.beginPath();
+    ctx.arc(x,y,diameter,0,Math.PI*2);
+    ctx.strokeStyle = tint(visualHue+30,84,selectionPulse*.56);
+    ctx.lineWidth = 2+selectionPulse*3;
+    ctx.stroke();
+  }
+}
+
+
+function trackHand(now) {
+  if (!stream || !model || overlay.hidden || video.readyState < 2 ||
+      video.currentTime === frameTime || now-lastDetection < 42) return;
+  lastDetection = now;
+  frameTime = video.currentTime;
+  try {
+    const result = model.detectForVideo(video,now);
+    const labels = result.handedness ?? result.handednesses ?? [];
+    const hands = result.landmarks.map((points, index) => ({
+      ...handMetrics(points, labels[index]?.[0]), points
+    }));
+    if (calibrating) {
+      paintHands(hands.map(hand => ({points:hand.points,color:"#e2ff88"})));
+      if (hands.length === 1) captureCalibration(hands[0]);
+      else {
+        calibrating.samples = [];
+        showGesture(hands.length ? "Show only your control hand" : "Bring your hand into view");
+      }
+    } else if (calibration) {
+      const roles = assignHands(hands);
+      const display = [];
+      if (roles.control) display.push({points:roles.control.points,color:"#e2ff88"});
+      if (roles.selector) display.push({points:roles.selector.points,color:"#e5baff"});
+      paintHands(display);
+      playGestures(roles,now);
+    }
+
+  } catch (error) {
+    stopCamera("Hand tracking stopped. Enable your camera to retry.");
+    model.close();
+    model = null;
+    console.error(error);
+  }
+}
+$("camera").addEventListener("click", () => cameraOpen ? stopCamera() : openCamera());
+$("calibrate").addEventListener("click", beginCalibration);
+window.addEventListener("resize", () => {
+  backgroundDirty = true;
+  if (pickerOpen) layoutPicker();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && cameraOpen) resetSelector();
+});
+window.addEventListener("pagehide", () => { if (cameraOpen) stopCamera(); });
+renderEffects();
+let deckPaint = 0;
+function tick(now) {
+  requestAnimationFrame(tick);
+  trackHand(now);
+  if (shakeActive && now-lastShakeHand > 260 && now-lastSelector > 200) resetSelector();
+  if (now-deckPaint < 35) return;
+  deckPaint = now;
+  $("seek").value = position();
+  $("elapsed").textContent = clock(position());
+  drawWave();
+  drawVisual(now);
+}
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
