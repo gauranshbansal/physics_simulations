@@ -10,8 +10,8 @@ globalThis.createWelcomePortrait = function createWelcomePortrait() {
   relief.width = relief.height = size;
   const surface = relief.getContext('2d', { willReadFrequently: true });
   const frame = surface.createImageData(size, size);
-  const firstAppearance = 2200;
-  const interval = 16000;
+  const firstAppearance = 2000;
+  const interval = 8000;
   const duration = 3900;
   const bandHeight = 8;
   const bandOffsets = new Float32Array(size / bandHeight);
